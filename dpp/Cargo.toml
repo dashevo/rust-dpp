@@ -22,4 +22,4 @@ chrono = { version="0.4", features=["wasmbind", "serde"]}
 env_logger = { version="0.9"}
 log = { version="0.4"}
 getrandom= { version="0.2", features=["js"]}
-
+wasm-bindgen = { version = "0.2.76", features = ["serde-serialize"] }

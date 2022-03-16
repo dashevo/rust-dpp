@@ -3,18 +3,22 @@ use anyhow::anyhow;
 use dashcore::PublicKey;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Value;
 use std::{collections::HashMap, hash::Hash};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type KeyID = i64;
 
-#[repr(u8)]
+#[wasm_bindgen]
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum KeyType {
     ECDSA_SECP256K1 = 0,
     BLS12_381 = 1,
     ECDSA_HASH160 = 2,
 }
 
+#[wasm_bindgen]
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum Purpose {
@@ -26,6 +30,7 @@ pub enum Purpose {
     DECRYPTION = 2,
 }
 
+#[wasm_bindgen]
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum SecurityLevel {
@@ -94,73 +99,6 @@ impl std::convert::Into<JsonIdentityPublicKey> for &IdentityPublicKey {
 }
 
 impl IdentityPublicKey {
-    /// Get key ID
-    pub fn get_id(&self) -> KeyID {
-        self.id
-    }
-
-    /// Set key ID
-    pub fn set_id(mut self, id: KeyID) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Get key type
-    pub fn get_type(&self) -> KeyType {
-        self.key_type
-    }
-
-    /// Set key type
-    pub fn set_type(mut self, key_type: KeyType) -> Self {
-        self.key_type = key_type;
-        self
-    }
-
-    /// Get raw public key
-    pub fn get_data(&self) -> &[u8] {
-        &self.data
-    }
-
-    /// Set raw public key
-    pub fn set_data(mut self, data: Vec<u8>) -> Self {
-        self.data = data;
-        self
-    }
-
-    /// Get the purpose value
-    pub fn get_purpose(&self) -> Purpose {
-        self.purpose
-    }
-
-    /// Set the purpose value
-    pub fn set_purpose(mut self, purpose: Purpose) -> Self {
-        self.purpose = purpose;
-        self
-    }
-
-    /// Get the raw security level value. A uint8 number
-    pub fn get_security_level(&self) -> SecurityLevel {
-        self.security_level
-    }
-
-    /// Set the raw security level
-    //? maybe we should replace the enum with impl TryInto<SecurityLevel> or Into<SecurityLevel>
-    pub fn set_security_level(mut self, security_level: SecurityLevel) -> Self {
-        self.security_level = security_level;
-        self
-    }
-
-    /// Get readOnly flag
-    pub fn get_readonly(&self) -> bool {
-        self.read_only
-    }
-
-    /// Set readOnly flag
-    pub fn set_readonly(mut self, ro: bool) -> Self {
-        self.read_only = ro;
-        self
-    }
-
     /// Get the original public key hash
     pub fn hash(&self) -> Result<Vec<u8>, ProtocolError> {
         if self.data.len() == 0 {
@@ -174,6 +112,22 @@ impl IdentityPublicKey {
         let original_key = PublicKey::from_slice(&self.data)
             .map_err(|e| anyhow!("unable to create pub key - {}", e))?;
         Ok(original_key.pubkey_hash().to_vec())
+    }
+
+    pub fn to_object(&self) -> Result<Value, ProtocolError> {
+        let data_json = serde_json::to_value(&self.data)?;
+        let mut object_json = serde_json::to_value(&self)?;
+        if let Value::Object(ref mut o) = object_json {
+            o.insert(String::from("data"), data_json);
+        } else {
+            return Err(anyhow!("identity public key is not an object").into());
+        }
+        Ok(object_json)
+    }
+
+    pub fn to_json(&self) -> Result<Value, ProtocolError> {
+        serde_json::to_value(&self)
+            .map_err(|e| ProtocolError::EncodingError(format!("corrupted data - {}", e)))
     }
 }
 
