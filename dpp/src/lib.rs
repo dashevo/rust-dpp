@@ -7,5 +7,7 @@ pub mod util;
 
 pub mod errors;
 
+pub mod mocks;
+
 #[cfg(test)]
 mod tests;
