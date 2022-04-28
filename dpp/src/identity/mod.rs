@@ -4,6 +4,7 @@ pub use identity::*;
 mod identity_facade;
 mod identity_public_key;
 pub mod validation;
+mod state_transition;
 
 pub use identity_facade::*;
 pub use identity_public_key::*;

@@ -1,7 +1,4 @@
-use crate::consensus::basic::identity::{
-    DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
-    InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
-};
+use crate::consensus::basic::identity::{DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError, InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError, MissingMasterPublicKeyError};
 use crate::errors::consensus::basic::{
     IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
@@ -25,6 +22,8 @@ pub enum ConsensusError {
     InvalidIdentityPublicKeySecurityLevelError(InvalidIdentityPublicKeySecurityLevelError),
     #[error("{0}")]
     DuplicatedIdentityPublicKeyError(DuplicatedIdentityPublicKeyError),
+    #[error("{0}")]
+    MissingMasterPublicKeyError(MissingMasterPublicKeyError)
 }
 
 impl ConsensusError {
@@ -45,6 +44,7 @@ impl ConsensusError {
             ConsensusError::DuplicatedIdentityPublicKeyError(_) => 1029,
             ConsensusError::DuplicatedIdentityPublicKeyIdError(_) => 1030,
             ConsensusError::InvalidIdentityPublicKeyDataError(_) => 1040,
+            ConsensusError::MissingMasterPublicKeyError(_) => 1046,
             ConsensusError::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
         }
     }
@@ -95,5 +95,11 @@ impl From<InvalidIdentityPublicKeySecurityLevelError> for ConsensusError {
 impl From<DuplicatedIdentityPublicKeyError> for ConsensusError {
     fn from(error: DuplicatedIdentityPublicKeyError) -> Self {
         Self::DuplicatedIdentityPublicKeyError(error)
+    }
+}
+
+impl From<MissingMasterPublicKeyError> for ConsensusError {
+    fn from(error: MissingMasterPublicKeyError) -> Self {
+        Self::MissingMasterPublicKeyError(error)
     }
 }

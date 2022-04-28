@@ -28,7 +28,7 @@ pub enum Purpose {
 }
 
 #[repr(u8)]
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize_repr, Deserialize_repr)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize_repr, Deserialize_repr)]
 pub enum SecurityLevel {
     MASTER = 0,
     CRITICAL = 1,
