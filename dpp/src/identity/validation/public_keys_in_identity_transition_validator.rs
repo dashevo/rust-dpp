@@ -12,13 +12,7 @@ use bls_signatures::{PublicKey as BlsPublicKey, Serialize};
 use dashcore::PublicKey;
 use serde_json::Value;
 use std::collections::HashMap;
-
-pub trait TPublicKeysValidator {
-    fn validate_keys(
-        &self,
-        raw_public_keys: &[Value],
-    ) -> Result<ValidationResult, NonConsensusError>;
-}
+use crate::identity::validation::TPublicKeysValidator;
 
 #[derive(Eq, Hash, PartialEq)]
 struct PurposeKey {
