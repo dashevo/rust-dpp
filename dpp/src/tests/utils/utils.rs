@@ -2,6 +2,7 @@ use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
 use std::num::ParseIntError;
+use crate::InvalidVectorSizeError;
 
 pub fn generate_random_identifier() -> [u8; 32] {
     let mut buffer = [0u8; 32];
@@ -73,6 +74,51 @@ pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
         .step_by(2)
         .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
         .collect()
+}
+
+pub enum DecodeError {
+    ParseIntError(ParseIntError),
+    InvalidVectorSizeError(InvalidVectorSizeError)
+}
+
+impl From<InvalidVectorSizeError> for DecodeError {
+    fn from(err: InvalidVectorSizeError) -> Self {
+        Self::InvalidVectorSizeError(err)
+    }
+}
+
+impl From<ParseIntError> for DecodeError {
+    fn from(err: ParseIntError) -> Self {
+        Self::ParseIntError(err)
+    }
+}
+
+pub fn decode_hex_bls_sig(s: &str) -> Result<[u8; 96], DecodeError> {
+    let sig_vec = decode_hex(s)?;
+    Ok(vec_to_array::<[u8; 96]>(&sig_vec, 96)?)
+}
+
+pub fn decode_hex_sha256(s: &str) -> Result<[u8; 32], DecodeError> {
+    let sig_vec = decode_hex(s)?;
+    Ok(vec_to_array::<[u8; 32]>(&sig_vec, 32)?)
+}
+
+pub fn vec_to_array<T: Default + Iterator>(vec: &[u8], size: usize) -> Result<T, InvalidVectorSizeError> {
+    if vec.len() != size {
+        return Err(InvalidVectorSizeError::new(size, vec.len()));
+    }
+    let mut v: T = T::default();
+    if v.len() != size {
+        return Err(InvalidVectorSizeError::new(size, v.len()));
+    }
+    for i in 0..size {
+        if let Some(n) = vec.get(i) {
+            v[i] = *n;
+        } else {
+            return Err(InvalidVectorSizeError::new(size, vec.len()));
+        }
+    }
+    Ok(v)
 }
 
 // fn byte_to_hex(byte: &u8) -> String {

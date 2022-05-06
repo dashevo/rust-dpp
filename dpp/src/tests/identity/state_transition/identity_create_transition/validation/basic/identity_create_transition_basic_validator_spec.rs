@@ -112,9 +112,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error.instance_path(),"");
             assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty)
-                .to
-                .equal("protocolVersion");
+            assert_eq!(error.getParams().missingProperty).to.equal("protocolVersion");
         }
 
         #[test]
@@ -148,10 +146,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error, protocol_version_error);
 
-            assert_eq!(validateProtocolVersionMock)
-                .to
-                .be
-                .calledOnceWith(rawStateTransition.protocolVersion);
+            assert_eq!(validateProtocolVersionMock).to.be.calledOnceWith(rawStateTransition.protocolVersion);
         }
     }
 
@@ -201,9 +196,7 @@ mod validate_identity_create_transition_basic_factory {
             let [error] = result.errors();
 
             assert_eq!(error.instance_path(),"");
-            assert_eq!(error.getParams().missingProperty)
-                .to
-                .equal("assetLockProof");
+            assert_eq!(error.getParams().missingProperty).to.equal("assetLockProof");
             assert_eq!(error.keyword(),"required");
         }
 
@@ -348,10 +341,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error, public_keys_error);
 
-            assert_eq!(validatePublicKeysInIdentityCreateTransition)
-                .to
-                .be
-                .calledOnceWithExactly(rawStateTransition.publicKeys);
+            assert_eq!(validatePublicKeysInIdentityCreateTransition).to.be.calledOnceWithExactly(rawStateTransition.publicKeys);
         }
     }
 
@@ -368,9 +358,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error.instancePath,"");
             assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty)
-                .to
-                .equal("signature");
+            assert_eq!(error.getParams().missingProperty).to.equal("signature");
         }
 
         #[test]
@@ -424,9 +412,6 @@ mod validate_identity_create_transition_basic_factory {
 
         assert_eq!(result.isValid()).to.be.true_();
 
-        assert_eq!(validatePublicKeysMock)
-            .to
-            .be
-            .calledOnceWithExactly(rawStateTransition.publicKeys);
+        assert_eq!(validatePublicKeysMock).to.be.calledOnceWithExactly(rawStateTransition.publicKeys);
     }
 }
