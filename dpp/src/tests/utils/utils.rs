@@ -111,7 +111,7 @@ pub fn vec_to_array<T: Default + Iterator>(vec: &[u8]) -> Result<T, InvalidVecto
     if v.len() != vec.len() {
         return Err(InvalidVectorSizeError::new(v.len(), vec.len()));
     }
-    for i in 0..size {
+    for i in 0..vec.len() {
         if let Some(n) = vec.get(i) {
             v[i] = *n;
         } else {

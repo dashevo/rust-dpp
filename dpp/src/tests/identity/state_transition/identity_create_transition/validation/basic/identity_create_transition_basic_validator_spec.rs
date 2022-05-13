@@ -18,7 +18,7 @@
 // let ValidationResult = require("../../../../../../../lib/validation/ValidationResult");
 // let InstantAssetLockProof = require("../../../../../../../lib/identity/stateTransition/assetLockProof/instant/InstantAssetLockProof");
 // let ChainAssetLockProof = require("../../../../../../../lib/identity/stateTransition/assetLockProof/chain/ChainAssetLockProof");
-// let SomeConsensusError = require("../../../../../../../lib/test/mocks/SomeConsensusError");
+// let TestConsensusError = require("../../../../../../../lib/test/mocks/TestConsensusError");
 // let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
 
 use std::sync::Arc;
@@ -98,6 +98,7 @@ mod validate_identity_create_transition_basic_factory {
     // });
 
     mod protocol_version {
+        use crate::consensus::ConsensusError::TestConsensusError;
         use crate::validation::ValidationResult;
 
         #[test]
@@ -112,7 +113,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error.instance_path(),"");
             assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty).to.equal("protocolVersion");
+            assert_eq!(error.getParams().missingProperty,"protocolVersion");
         }
 
         #[test]
@@ -133,20 +134,20 @@ mod validate_identity_create_transition_basic_factory {
         pub fn should_be_valid() {
             rawStateTransition.protocolVersion = -1;
 
-            let protocol_version_error = SomeConsensusError::new("test");
+            let protocol_version_error = TestConsensusError::new("test");
             let protocol_version_result = ValidationResult::new(Some(vec![protocol_version_error]));
 
             validateProtocolVersionMock.returns(protocol_version_result);
 
             let result = validateIdentityCreateTransitionBasic(rawStateTransition);
 
-            expectValidationError(result, SomeConsensusError);
+            expectValidationError(result, TestConsensusError);
 
             let [error] = result.errors();
 
             assert_eq!(error, protocol_version_error);
 
-            assert_eq!(validateProtocolVersionMock).to.be.calledOnceWith(rawStateTransition.protocolVersion);
+            assert_eq!(validateProtocolVersionMock,rawStateTransition.protocolVersion);
         }
     }
 
@@ -196,7 +197,7 @@ mod validate_identity_create_transition_basic_factory {
             let [error] = result.errors();
 
             assert_eq!(error.instance_path(),"");
-            assert_eq!(error.getParams().missingProperty).to.equal("assetLockProof");
+            assert_eq!(error.getParams().missingProperty,"assetLockProof");
             assert_eq!(error.keyword(),"required");
         }
 
@@ -216,7 +217,7 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_be_valid() {
-            let asset_lock_error = SomeConsensusError::new("test");
+            let asset_lock_error = TestConsensusError::new("test");
             let asset_lock_result = ValidationResult::new(Some(vec![asset_lock_error]));
 
             proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
@@ -230,10 +231,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error, asset_lock_error);
 
-            assert_eq!(proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_])
-                .to
-                .be
-                .calledOnceWithExactly(rawStateTransition.assetLockProof);
+            assert_eq!(proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_],rawStateTransition.assetLockProof);
         }
     }
 
@@ -251,9 +249,7 @@ mod validate_identity_create_transition_basic_factory {
             let [error] = result.errors();
 
             assert_eq!(error.instance_path(),"");
-            assert_eq!(error.getParams().missingProperty)
-                .to
-                .equal("publicKeys");
+            assert_eq!(error.getParams().missingProperty,"publicKeys");
             assert_eq!(error.keyword(),"required");
         }
 
@@ -307,7 +303,7 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_be_valid() {
-            let public_keys_error = SomeConsensusError::new("test");
+            let public_keys_error = TestConsensusError::new("test");
             let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
 
             validatePublicKeysMock.returns(public_keys_result);
@@ -320,15 +316,12 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error, public_keys_error);
 
-            assert_eq!(validatePublicKeysMock)
-                .to
-                .be
-                .calledOnceWithExactly(rawStateTransition.publicKeys);
+            assert_eq!(validatePublicKeysMock,rawStateTransition.publicKeys);
         }
 
         #[test]
         pub fn should_have_at_least_1_master_key() {
-            let public_keys_error = SomeConsensusError::new("test");
+            let public_keys_error = TestConsensusError::new("test");
             let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
 
             validatePublicKeysInIdentityCreateTransition.returns(public_keys_result);
@@ -341,7 +334,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error, public_keys_error);
 
-            assert_eq!(validatePublicKeysInIdentityCreateTransition).to.be.calledOnceWithExactly(rawStateTransition.publicKeys);
+            assert_eq!(validatePublicKeysInIdentityCreateTransition,rawStateTransition.publicKeys);
         }
     }
 
@@ -358,7 +351,7 @@ mod validate_identity_create_transition_basic_factory {
 
             assert_eq!(error.instancePath,"");
             assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty).to.equal("signature");
+            assert_eq!(error.getParams().missingProperty,"signature");
         }
 
         #[test]
@@ -410,8 +403,8 @@ mod validate_identity_create_transition_basic_factory {
     pub fn should_return_valid_result() {
         let result = validateIdentityCreateTransitionBasic(rawStateTransition);
 
-        assert_eq!(result.isValid()).to.be.true_();
+        assert!(result.isValid());
 
-        assert_eq!(validatePublicKeysMock).to.be.calledOnceWithExactly(rawStateTransition.publicKeys);
+        assert_eq!(validatePublicKeysMock,rawStateTransition.publicKeys);
     }
 }

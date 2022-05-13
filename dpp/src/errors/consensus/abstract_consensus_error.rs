@@ -5,6 +5,9 @@ use crate::errors::consensus::basic::{
 use jsonschema::ValidationError;
 use thiserror::Error;
 
+#[cfg(test)]
+use crate::errors::consensus::basic::TestConsensusError;
+
 #[derive(Error, Debug)]
 #[error("{0}")]
 pub enum ConsensusError {
@@ -23,7 +26,9 @@ pub enum ConsensusError {
     #[error("{0}")]
     DuplicatedIdentityPublicKeyError(DuplicatedIdentityPublicKeyError),
     #[error("{0}")]
-    MissingMasterPublicKeyError(MissingMasterPublicKeyError)
+    MissingMasterPublicKeyError(MissingMasterPublicKeyError),
+    #[cfg(test)]
+    TestConsensusError(TestConsensusError)
 }
 
 impl ConsensusError {
@@ -46,6 +51,10 @@ impl ConsensusError {
             ConsensusError::InvalidIdentityPublicKeyDataError(_) => 1040,
             ConsensusError::MissingMasterPublicKeyError(_) => 1046,
             ConsensusError::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
+
+            // Custom error for tests
+            #[cfg(test)]
+            ConsensusError::TestConsensusError(_) => 1000,
         }
     }
 }
@@ -101,5 +110,12 @@ impl From<DuplicatedIdentityPublicKeyError> for ConsensusError {
 impl From<MissingMasterPublicKeyError> for ConsensusError {
     fn from(error: MissingMasterPublicKeyError) -> Self {
         Self::MissingMasterPublicKeyError(error)
+    }
+}
+
+#[cfg(test)]
+impl From<TestConsensusError> for ConsensusError {
+    fn from(error: TestConsensusError) -> Self {
+        Self::TestConsensusError(error)
     }
 }

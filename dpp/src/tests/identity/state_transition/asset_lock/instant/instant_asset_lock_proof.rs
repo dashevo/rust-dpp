@@ -1,5 +1,4 @@
-use dashcore::Transaction;
-use crate::tests::fixtures::InstantLock;
+use dashcore::{InstantLock, Transaction};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Serialize, Deserialize)]
