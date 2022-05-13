@@ -1,59 +1,19 @@
 use std::hash::Hash;
+use std::io;
 use std::str::FromStr;
 use crate::util::string_encoding::{decode, Encoding};
 use serde_json::json;
-use dashcore::{Transaction, PrivateKey, secp256k1::SecretKey, Network, Address, TxIn, OutPoint, Txid, TxOut, Script};
+use dashcore::{Transaction, PrivateKey, secp256k1::SecretKey, Network, Address, TxIn, OutPoint, Txid, TxOut, Script, InstantLock};
+use dashcore::consensus::{Decodable, encode};
+use dashcore::consensus::encode::MAX_VEC_SIZE;
 use dashcore::secp256k1::Secp256k1;
 use rand::thread_rng;
-use crate::tests::utils::{decode_hex, decode_hex_bls_sig, decode_hex_sha256};
+use crate::tests::utils::{decode_hex, decode_hex_bls_sig, decode_hex_sha256, hex_to_array};
 
 //3bufpwQjL5qsvuP4fmCKgXJrKG852DDMYfi9J6XKqPAT
 //[198, 23, 40, 120, 58, 93, 0, 165, 27, 49, 4, 117, 107, 204,  67, 46, 164, 216, 230, 135, 201, 92, 31, 155, 62, 131, 211, 177, 139, 175, 163, 237]
 
-// const info = {};
-// info.version = br.readUInt8();
-// const inputsCount = br.readVarintNum();
-// info.inputs = [];
-// for (let i = 0; i < inputsCount; i += 1) {
-// const outpointHash = br.readReverse(SHA256_HASH_SIZE).toString('hex');
-// const outpointIndex = br.readInt32LE();
-// const outpoint = { outpointHash, outpointIndex };
-// info.inputs.push(outpoint);
-// }
-// info.txid = br.readReverse(SHA256_HASH_SIZE).toString('hex');
-// info.cyclehash = br.readReverse(SHA256_HASH_SIZE).toString('hex');
-// info.signature = br.read(BLS_SIGNATURE_SIZE).toString('hex');
-// return info;
-
-// v18 IS lock
-pub struct InstantLock {
-    pub version: u8,
-    pub inputs: Vec<OutPoint>,
-    pub txid: Txid,
-    pub cyclehash: [u8; 32],
-    pub signature: [u8; 96],
-}
-
-// const info = {};
-// const inputsCount = br.readVarintNum();
-// info.inputs = [];
-// for (let i = 0; i < inputsCount; i += 1) {
-// const outpointHash = br.readReverse(SHA256_HASH_SIZE).toString('hex');
-// const outpointIndex = br.readInt32LE();
-// const outpoint = { outpointHash, outpointIndex };
-// info.inputs.push(outpoint);
-// }
-// info.txid = br.readReverse(SHA256_HASH_SIZE).toString('hex');
-// info.signature = br.read(BLS_SIGNATURE_SIZE).toString('hex');
-// return info;
-
-pub struct InstantLockV17 {
-    pub inputs: Vec<OutPoint>,
-    pub txid: Txid,
-    pub signature: [u8; 96],
-}
-
-pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -> serde_json::Value {
+pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -> InstantLock {
     let mut rng = thread_rng();
     let secp = Secp256k1::new();
 
@@ -127,32 +87,7 @@ pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -
             OutPoint { txid: Txid::from_str("6e200d059fb567ba19e92f5c2dcd3dde522fd4e0a50af223752db16158dabb1d").unwrap(), vout: 0 }
         ],
         txid: transaction.txid(),
-        cyclehash: decode_hex_sha256("7c30826123d0f29fe4c4a8895d7ba4eb469b1fafa6ad7b23896a1a591766a536").unwrap(),
-        signature: decode_hex_bls_sig("8967c46529a967b3822e1ba8a173066296d02593f0f59b3a78a30a7eef9c8a120847729e62e4a32954339286b79fe7590221331cd28d576887a263f45b595d499272f656c3f5176987c976239cac16f972d796ad82931d532102a4f95eec7d80").unwrap();
-    };
-
-    json!({
-        "protocolVersion": 1,
-        "id": [198, 23, 40, 120, 58, 93, 0, 165, 27, 49, 4, 117, 107, 204,  67, 46, 164, 216, 230, 135, 201, 92, 31, 155, 62, 131, 211, 177, 139, 175, 163, 237],
-        "publicKeys": [
-            {
-                "id": 0,
-                "type": 0,
-                "purpose": 0,
-                "securityLevel": 0,
-                "data": decode("AuryIuMtRrl/VviQuyLD1l4nmxi9ogPzC9LT7tdpo0di", Encoding::Base64).unwrap(),
-                "readOnly": false
-            },
-            {
-                "id": 1,
-                "type": 0,
-                "purpose": 1,
-                "securityLevel": 3,
-                "data": decode("A8AK95PYMVX5VQKzOhcVQRCUbc9pyg3RiL7jttEMDU+L", Encoding::Base64).unwrap(),
-                "readOnly": false
-            }
-        ],
-        "balance": 10,
-        "revision": 0
-    })
+        cyclehash: hex_to_array::<[u8; 32]>("7c30826123d0f29fe4c4a8895d7ba4eb469b1fafa6ad7b23896a1a591766a536").unwrap(),
+        signature: hex_to_array::<[u8; 96]>("8967c46529a967b3822e1ba8a173066296d02593f0f59b3a78a30a7eef9c8a120847729e62e4a32954339286b79fe7590221331cd28d576887a263f45b595d499272f656c3f5176987c976239cac16f972d796ad82931d532102a4f95eec7d80").unwrap();
+    }
 }

@@ -94,28 +94,28 @@ impl From<ParseIntError> for DecodeError {
 }
 
 pub fn decode_hex_bls_sig(s: &str) -> Result<[u8; 96], DecodeError> {
-    let sig_vec = decode_hex(s)?;
-    Ok(vec_to_array::<[u8; 96]>(&sig_vec, 96)?)
+    Ok(hex_to_array::<[u8; 96]>(s)?)
 }
 
 pub fn decode_hex_sha256(s: &str) -> Result<[u8; 32], DecodeError> {
-    let sig_vec = decode_hex(s)?;
-    Ok(vec_to_array::<[u8; 32]>(&sig_vec, 32)?)
+    Ok(hex_to_array::<[u8; 32]>(s)?)
 }
 
-pub fn vec_to_array<T: Default + Iterator>(vec: &[u8], size: usize) -> Result<T, InvalidVectorSizeError> {
-    if vec.len() != size {
-        return Err(InvalidVectorSizeError::new(size, vec.len()));
-    }
+pub fn hex_to_array<T: Default + Iterator>(s: &str) -> Result<T, DecodeError> {
+    let vec = decode_hex(s)?;
+    Ok(vec_to_array::<T>(&vec)?)
+}
+
+pub fn vec_to_array<T: Default + Iterator>(vec: &[u8]) -> Result<T, InvalidVectorSizeError> {
     let mut v: T = T::default();
-    if v.len() != size {
-        return Err(InvalidVectorSizeError::new(size, v.len()));
+    if v.len() != vec.len() {
+        return Err(InvalidVectorSizeError::new(v.len(), vec.len()));
     }
     for i in 0..size {
         if let Some(n) = vec.get(i) {
             v[i] = *n;
         } else {
-            return Err(InvalidVectorSizeError::new(size, vec.len()));
+            return Err(InvalidVectorSizeError::new(v.len(), vec.len()));
         }
     }
     Ok(v)
