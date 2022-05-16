@@ -1,1 +1,0 @@
-mod instant_asset_lock_proof;

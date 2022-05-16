@@ -7,9 +7,8 @@ use crate::{
     metadata::Metadata,
     util::{hash, serializer},
 };
+use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
 
-// TODO implement!
-type InstantAssetLockProof = String;
 // TODO implement!
 type ChainAssetLockProof = String;
 

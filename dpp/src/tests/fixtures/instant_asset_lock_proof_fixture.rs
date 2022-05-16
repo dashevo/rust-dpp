@@ -8,12 +8,14 @@ use dashcore::consensus::{Decodable, encode};
 use dashcore::consensus::encode::MAX_VEC_SIZE;
 use dashcore::secp256k1::Secp256k1;
 use rand::thread_rng;
+use crate::identity::AssetLockProof;
+use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
 use crate::tests::utils::{decode_hex, decode_hex_bls_sig, decode_hex_sha256, hex_to_array};
 
 //3bufpwQjL5qsvuP4fmCKgXJrKG852DDMYfi9J6XKqPAT
 //[198, 23, 40, 120, 58, 93, 0, 165, 27, 49, 4, 117, 107, 204,  67, 46, 164, 216, 230, 135, 201, 92, 31, 155, 62, 131, 211, 177, 139, 175, 163, 237]
 
-pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -> InstantLock {
+pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -> AssetLockProof {
     let mut rng = thread_rng();
     let secp = Secp256k1::new();
 
@@ -81,7 +83,7 @@ pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -
     //     signature: '8967c46529a967b3822e1ba8a173066296d02593f0f59b3a78a30a7eef9c8a120847729e62e4a32954339286b79fe7590221331cd28d576887a263f45b595d499272f656c3f5176987c976239cac16f972d796ad82931d532102a4f95eec7d80',
     // });
 
-    InstantLock {
+    let instant_lock = InstantLock {
         version: 1,
         inputs: vec![
             OutPoint { txid: Txid::from_str("6e200d059fb567ba19e92f5c2dcd3dde522fd4e0a50af223752db16158dabb1d").unwrap(), vout: 0 }
@@ -89,5 +91,13 @@ pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -
         txid: transaction.txid(),
         cyclehash: hex_to_array::<[u8; 32]>("7c30826123d0f29fe4c4a8895d7ba4eb469b1fafa6ad7b23896a1a591766a536").unwrap(),
         signature: hex_to_array::<[u8; 96]>("8967c46529a967b3822e1ba8a173066296d02593f0f59b3a78a30a7eef9c8a120847729e62e4a32954339286b79fe7590221331cd28d576887a263f45b595d499272f656c3f5176987c976239cac16f972d796ad82931d532102a4f95eec7d80").unwrap(),
-    }
+    };
+
+    let is_lock_proof = InstantAssetLockProof::new(
+        instant_lock,
+        transaction,
+        0
+    );
+
+    AssetLockProof::Instant(is_lock_proof)
 }

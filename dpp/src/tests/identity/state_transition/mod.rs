@@ -1,2 +1,2 @@
 mod identity_create_transition;
-mod asset_lock;
+pub mod asset_lock;

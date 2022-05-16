@@ -98,6 +98,7 @@ mod validate_identity_create_transition_basic_factory {
     // });
 
     mod protocol_version {
+        use crate::consensus::ConsensusError;
         use crate::consensus::ConsensusError::TestConsensusError;
         use crate::validation::ValidationResult;
 
@@ -134,7 +135,7 @@ mod validate_identity_create_transition_basic_factory {
         pub fn should_be_valid() {
             rawStateTransition.protocolVersion = -1;
 
-            let protocol_version_error = TestConsensusError::new("test");
+            let protocol_version_error = ConsensusError::from(TestConsensusError::new("test"));
             let protocol_version_result = ValidationResult::new(Some(vec![protocol_version_error]));
 
             validateProtocolVersionMock.returns(protocol_version_result);
@@ -184,6 +185,8 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod asset_lock_proof {
+        use crate::consensus::basic::TestConsensusError;
+        use crate::consensus::ConsensusError;
         use crate::validation::ValidationResult;
 
         #[test]
@@ -217,7 +220,7 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_be_valid() {
-            let asset_lock_error = TestConsensusError::new("test");
+            let asset_lock_error = ConsensusError::from(TestConsensusError::new("test"));
             let asset_lock_result = ValidationResult::new(Some(vec![asset_lock_error]));
 
             proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
@@ -236,6 +239,8 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod public_keys {
+        use crate::consensus::basic::TestConsensusError;
+        use crate::consensus::ConsensusError;
         use crate::validation::ValidationResult;
 
         #[test]
@@ -303,7 +308,7 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_be_valid() {
-            let public_keys_error = TestConsensusError::new("test");
+            let public_keys_error = ConsensusError::from(TestConsensusError::new("test"));
             let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
 
             validatePublicKeysMock.returns(public_keys_result);
@@ -321,7 +326,7 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_have_at_least_1_master_key() {
-            let public_keys_error = TestConsensusError::new("test");
+            let public_keys_error = ConsensusError::from(TestConsensusError::new("test"));
             let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
 
             validatePublicKeysInIdentityCreateTransition.returns(public_keys_result);
