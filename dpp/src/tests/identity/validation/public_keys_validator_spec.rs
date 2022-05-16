@@ -26,13 +26,13 @@ pub mod id {
     use crate::errors::consensus::ConsensusError;
     use crate::identity::validation::TPublicKeysValidator;
     use crate::tests::identity::validation::public_keys_validator_spec::setup_test;
-    use crate::tests::utils::{serde_remove_ref, serde_set_ref};
+    use crate::tests::utils::{serde_remove_ref, serde_set_ref, SerdeTestExtension};
     use jsonschema::error::ValidationErrorKind;
 
     #[test]
     pub fn should_be_present() {
         let (mut raw_public_keys, validator) = setup_test();
-        serde_remove_ref(raw_public_keys.get_mut(1).unwrap(), "id");
+        raw_public_keys.get_mut(1).unwrap().remove_key("id");
 
         let result = validator.validate_keys(&raw_public_keys).unwrap();
         let errors = assert_consensus_errors!(&result, ConsensusError::JsonSchemaError, 1);

@@ -1,7 +1,8 @@
 use std::sync::Arc;
+use serde_json::Value;
 use crate::DashPlatformProtocolInitError;
 use crate::identity::validation::TPublicKeysValidator;
-use crate::validation::JsonSchemaValidator;
+use crate::validation::{JsonSchemaValidator, ValidationResult};
 use crate::version::ProtocolVersionValidator;
 
 pub struct IdentityCreateTransitionBasicValidator<TPublicKeyValidator, S> {
@@ -30,5 +31,9 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator> IdentityCreateTransitionB
         };
 
         Ok(identity_validator)
+    }
+
+    pub fn validate(&self, identity_create_transition: &Value) -> ValidationResult {
+        ValidationResult::default()
     }
 }

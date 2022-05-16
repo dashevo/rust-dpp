@@ -76,6 +76,30 @@ pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
         .collect()
 }
 
+pub trait SerdeTestExtension {
+    fn remove_key(&mut self, key: impl Into<String>);
+    fn set_key_value<T, S>(&mut self, key: T, value: S) where
+        T: Into<String>,
+        S: Into<serde_json::Value>,
+        serde_json::Value: From<S>,;
+}
+
+impl SerdeTestExtension for serde_json::Value {
+    fn remove_key(&mut self, key: impl Into<String>) {
+        self
+            .as_object_mut()
+            .expect("Expected value to be an JSON object")
+            .remove(&key.into());
+    }
+
+    fn set_key_value<T, S>(&mut self, key: T, value: S) where T: Into<String>, S: Into<Value>, Value: From<S> {
+        let map = self
+            .as_object_mut()
+            .expect("Expected value to be an JSON object");
+        map.insert(key.into(), serde_json::Value::from(value));
+    }
+}
+
 pub enum DecodeError {
     ParseIntError(ParseIntError),
     InvalidVectorSizeError(InvalidVectorSizeError)

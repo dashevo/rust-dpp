@@ -6,8 +6,8 @@
 //
 // let getIdentityCreateTransitionFixture = require("../../../../../../../lib/test/fixtures/getIdentityCreateTransitionFixture");
 //
-// let validateIdentityCreateTransitionBasicFactory = require(
-//     "../../../../../../../lib/identity/stateTransition/IdentityCreateTransition/validation/basic/validateIdentityCreateTransitionBasicFactory",
+// let validator.validateFactory = require(
+//     "../../../../../../../lib/identity/stateTransition/IdentityCreateTransition/validation/basic/validator.validateFactory",
 // );
 //
 // let {
@@ -21,29 +21,44 @@
 // let TestConsensusError = require("../../../../../../../lib/test/mocks/TestConsensusError");
 // let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
 
-use std::sync::Arc;
-use serde_json::Value;
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
-use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator};
+use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator, TPublicKeysValidator};
 use crate::version::ProtocolVersionValidator;
+use serde_json::Value;
+use std::sync::Arc;
 
-fn setup_test() -> (Value, IdentityCreateTransitionBasicValidator<PublicKeysValidator, PublicKeysInIdentityCreateTransitionValidator>) {
+fn setup_test(public_keys_validator_mock: Option<impl TPublicKeysValidator>, public_keys_transition_validator_mock: Option<impl TPublicKeysValidator>) -> (
+    Value,
+    IdentityCreateTransitionBasicValidator<
+        PublicKeysValidator,
+        PublicKeysInIdentityCreateTransitionValidator,
+    >,
+) {
     let protocol_version_validator = ProtocolVersionValidator::default();
-    let public_keys_validator = PublicKeysValidator::new().unwrap();
-    let other_public_keys_validator = PublicKeysInIdentityCreateTransitionValidator::default();
+    let public_keys_validator = match public_keys_validator_mock {
+        None => { PublicKeysValidator::new().unwrap() }
+        Some(validator) => { validator }
+    };
+    let other_public_keys_validator = match public_keys_transition_validator_mock {
+        None => { PublicKeysInIdentityCreateTransitionValidator::default() }
+        Some(validator) => { validator }
+    };
     (
-        crate::tests::fixtures::identity_fixture_json(),
+        // TODO: should it really be None?
+        crate::tests::fixtures::identity_create_transition_fixture_json(None),
         IdentityCreateTransitionBasicValidator::new(
             Arc::new(protocol_version_validator),
             Arc::new(public_keys_validator),
-            Arc::new(other_public_keys_validator)
+            Arc::new(other_public_keys_validator),
         )
-            .unwrap(),
+        .unwrap(),
     )
 }
 
 mod validate_identity_create_transition_basic_factory {
-    // let validateIdentityCreateTransitionBasic;
+    use std::option::Option::None;
+    use super::setup_test;
+    // let validator.validate;
     // let rawStateTransition;
     // let stateTransition;
     // let validatePublicKeysMock;
@@ -80,7 +95,7 @@ mod validate_identity_create_transition_basic_factory {
     //
     // validateProtocolVersionMock = this.sinonSandbox.stub().returns(new ValidationResult());
     //
-    // validateIdentityCreateTransitionBasic = validateIdentityCreateTransitionBasicFactory(
+    // validator.validate = validator.validateFactory(
     // jsonSchemaValidator,
     // validatePublicKeysMock,
     // validatePublicKeysInIdentityCreateTransition,
@@ -98,318 +113,372 @@ mod validate_identity_create_transition_basic_factory {
     // });
 
     mod protocol_version {
+        use std::option::Option::None;
+        use crate::assert_consensus_errors;
+        use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
-        use crate::consensus::ConsensusError::TestConsensusError;
+        use crate::tests::identity::state_transition::identity_create_transition::validation::basic::identity_create_transition_basic_validator_spec::setup_test;
+        use crate::tests::utils::{SerdeTestExtension};
         use crate::validation::ValidationResult;
 
         #[test]
         pub fn should_be_present() {
-            delete_rawStateTransition.protocolVersion;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.remove_key("protocolVersion");
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instance_path(),"");
-            assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty,"protocolVersion");
+            assert_eq!(error.instance_path(), "");
+            assert_eq!(error.keyword(), "required");
+            assert_eq!(error.getParams().missingProperty, "protocolVersion");
         }
 
         #[test]
         pub fn should_be_an_integer() {
-            rawStateTransition.protocolVersion = "1";
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("protocolVersion", "1");
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instance_path(),"/protocolVersion");
-            assert_eq!(error.keyword(),"type");
+            assert_eq!(error.instance_path(), "/protocolVersion");
+            assert_eq!(error.keyword(), "type");
         }
 
         #[test]
         pub fn should_be_valid() {
-            rawStateTransition.protocolVersion = -1;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("protocolVersion", -1);
 
             let protocol_version_error = ConsensusError::from(TestConsensusError::new("test"));
             let protocol_version_result = ValidationResult::new(Some(vec![protocol_version_error]));
 
             validateProtocolVersionMock.returns(protocol_version_result);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectValidationError(result, TestConsensusError);
+            assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
             assert_eq!(error, protocol_version_error);
 
-            assert_eq!(validateProtocolVersionMock,rawStateTransition.protocolVersion);
+            assert_eq!(
+                validateProtocolVersionMock,
+                raw_state_transition.protocolVersion
+            );
         }
     }
 
     mod type_a {
+        use std::option::Option::None;
+        use super::super::setup_test;
+        use crate::assert_consensus_errors;
+        use crate::consensus::ConsensusError;
+        use crate::tests::utils::SerdeTestExtension;
+
         #[test]
         pub fn should_be_present() {
-            delete_rawStateTransition.type_;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.remove_key("type");
+            let result = validator.validate(&raw_state_transition);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            expectJsonSchemaError(result);
+            let error = result.errors().first().unwrap();
 
-            let [error] = result.errors();
-
-            assert_eq!(error.instance_path(),"");
-            assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty,"type");
+            assert_eq!(error.instance_path(), "");
+            assert_eq!(error.keyword(), "required");
+            assert_eq!(error.getParams().missingProperty, "type");
         }
 
         #[test]
         pub fn should_be_equal_to_2() {
-            rawStateTransition.type_ = 666;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("type", 666);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instance_path(),"/type");
-            assert_eq!(error.keyword(),"let");
-            assert_eq!(error.getParams().allowedValue,2);
+            assert_eq!(error.instance_path(), "/type");
+            assert_eq!(error.keyword(), "let");
+            assert_eq!(error.getParams().allowedValue, 2);
         }
     }
 
     mod asset_lock_proof {
+        use std::option::Option::None;
+        use super::super::setup_test;
+        use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
+        use crate::tests::utils::SerdeTestExtension;
         use crate::validation::ValidationResult;
 
         #[test]
         pub fn should_be_present() {
-            delete_rawStateTransition.assetLockProof;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.remove_key("assetLockProof");
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instance_path(),"");
-            assert_eq!(error.getParams().missingProperty,"assetLockProof");
-            assert_eq!(error.keyword(),"required");
+            assert_eq!(error.instance_path(), "");
+            assert_eq!(error.getParams().missingProperty, "assetLockProof");
+            assert_eq!(error.keyword(), "required");
         }
 
         #[test]
         pub fn should_be_an_object() {
-            rawStateTransition.assetLockProof = 1;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("assetLockProof", 1);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result, 1);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instance_path(),"/assetLockProof");
-            assert_eq!(error.keyword(),"type");
+            assert_eq!(error.instance_path(), "/assetLockProof");
+            assert_eq!(error.keyword(), "type");
         }
 
         #[test]
         pub fn should_be_valid() {
+            let (mut raw_state_transition, validator) = setup_test(None, None);
             let asset_lock_error = ConsensusError::from(TestConsensusError::new("test"));
             let asset_lock_result = ValidationResult::new(Some(vec![asset_lock_error]));
 
             proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
                 .resolves(asset_lock_result);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectValidationError(result);
+            assert_eq!(result.errors().len(), 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
             assert_eq!(error, asset_lock_error);
 
-            assert_eq!(proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_],rawStateTransition.assetLockProof);
+            assert_eq!(
+                proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_],
+                raw_state_transition.assetLockProof
+            );
         }
     }
 
     mod public_keys {
+        use std::option::Option::None;
+        use super::super::setup_test;
+        use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
+        use crate::tests::fixtures::PublicKeysValidatorMock;
+        use crate::tests::utils::SerdeTestExtension;
         use crate::validation::ValidationResult;
 
         #[test]
         pub fn should_be_present() {
-            rawStateTransition.publicKeys = undefined;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.remove_key("publicKeys");
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instance_path(),"");
-            assert_eq!(error.getParams().missingProperty,"publicKeys");
-            assert_eq!(error.keyword(),"required");
+            assert_eq!(error.instance_path(), "");
+            assert_eq!(error.getParams().missingProperty, "publicKeys");
+            assert_eq!(error.keyword(), "required");
         }
 
         #[test]
         pub fn should_not_be_empty() {
-            rawStateTransition.publicKeys = [];
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("publicKeys", vec![]);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.keyword(),"minItems");
-            assert_eq!(error.instance_path(),"/publicKeys");
+            assert_eq!(error.keyword(), "minItems");
+            assert_eq!(error.instance_path(), "/publicKeys");
         }
 
         #[test]
         pub fn should_not_have_more_than_10_items() {
-            let [key] = rawStateTransition.publicKeys;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let [key] = raw_state_transition.publicKeys;
 
             // for (let i = 0; i < 10; i++) {
-            //     rawStateTransition.publicKeys.push(key);
+            //     raw_state_transition.publicKeys.push(key);
             // }
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.keyword(),"maxItems");
-            assert_eq!(error.instance_path(),"/publicKeys");
+            assert_eq!(error.keyword(), "maxItems");
+            assert_eq!(error.instance_path(), "/publicKeys");
         }
 
         #[test]
         pub fn should_be_unique() {
-            rawStateTransition
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition
                 .publicKeys
-                .push(rawStateTransition.publicKeys[0]);
+                .push(raw_state_transition.publicKeys[0]);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.keyword(),"uniqueItems");
-            assert_eq!(error.instance_path(),"/publicKeys");
+            assert_eq!(error.keyword(), "uniqueItems");
+            assert_eq!(error.instance_path(), "/publicKeys");
         }
 
         #[test]
         pub fn should_be_valid() {
+            let mut pk_validator_mock = PublicKeysValidatorMock::new();
             let public_keys_error = ConsensusError::from(TestConsensusError::new("test"));
             let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
+            pk_validator_mock.returns(Ok(public_keys_result));
 
-            validatePublicKeysMock.returns(public_keys_result);
+            let (mut raw_state_transition, validator) = setup_test(pk_validator_mock, None);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectValidationError(result);
+            assert_eq!(result.errors().len(), 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
             assert_eq!(error, public_keys_error);
 
-            assert_eq!(validatePublicKeysMock,rawStateTransition.publicKeys);
+            assert_eq!(validatePublicKeysMock, raw_state_transition.publicKeys);
         }
 
         #[test]
         pub fn should_have_at_least_1_master_key() {
+            let (mut raw_state_transition, validator) = setup_test(None, None);
             let public_keys_error = ConsensusError::from(TestConsensusError::new("test"));
             let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
 
             validatePublicKeysInIdentityCreateTransition.returns(public_keys_result);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectValidationError(result);
+            assert_eq!(result.errors().len(), 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
             assert_eq!(error, public_keys_error);
 
-            assert_eq!(validatePublicKeysInIdentityCreateTransition,rawStateTransition.publicKeys);
+            assert_eq!(
+                validatePublicKeysInIdentityCreateTransition,
+                raw_state_transition.publicKeys
+            );
         }
     }
 
     mod signature {
+        use std::option::Option::None;
+        use super::super::setup_test;
+        use crate::assert_consensus_errors;
+        use crate::consensus::ConsensusError;
+        use crate::tests::utils::SerdeTestExtension;
+
         #[test]
         pub fn should_be_present() {
-            delete_rawStateTransition.signature;
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.remove_key("signature");
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instancePath,"");
-            assert_eq!(error.keyword(),"required");
-            assert_eq!(error.getParams().missingProperty,"signature");
+            assert_eq!(error.instancePath, "");
+            assert_eq!(error.keyword(), "required");
+            assert_eq!(error.getParams().missingProperty, "signature");
         }
 
         #[test]
         pub fn should_be_a_byte_array() {
-            rawStateTransition.signature = vec![65; "string"];
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("signature", vec![65; "string"]);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result, 2);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
 
             let [error, byteArrayError] = result.errors();
 
-            assert_eq!(error.instancePath,"/signature/0");
-            assert_eq!(error.keyword(),"type");
+            assert_eq!(error.instancePath, "/signature/0");
+            assert_eq!(error.keyword(), "type");
 
-            assert_eq!(byteArrayError.keyword(),"byteArray");
+            assert_eq!(byteArrayError.keyword(), "byteArray");
         }
 
         #[test]
         pub fn should_be_not_shorter_than_65_bytes() {
-            rawStateTransition.signature = vec![64; 0];
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("signature", vec![64; 0]);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instancePath,"/signature");
-            assert_eq!(error.keyword(),"minItems");
+            assert_eq!(error.instancePath, "/signature");
+            assert_eq!(error.keyword(), "minItems");
         }
 
         #[test]
         pub fn should_be_not_longer_than_65_bytes() {
-            rawStateTransition.signature = vec![66; 0];
+            let (mut raw_state_transition, validator) = setup_test(None, None);
+            raw_state_transition.set_key_value("signature", vec![66; 0]);
 
-            let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+            let result = validator.validate(&raw_state_transition);
 
-            expectJsonSchemaError(result);
+            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let [error] = result.errors();
+            let error = result.errors().first().unwrap();
 
-            assert_eq!(error.instancePath,"/signature");
-            assert_eq!(error.keyword(),"maxItems");
+            assert_eq!(error.instancePath, "/signature");
+            assert_eq!(error.keyword(), "maxItems");
         }
     }
 
     #[test]
     pub fn should_return_valid_result() {
-        let result = validateIdentityCreateTransitionBasic(rawStateTransition);
+        let (mut raw_state_transition, validator) = setup_test(None, None);
+        let result = validator.validate(&raw_state_transition);
 
         assert!(result.isValid());
 
-        assert_eq!(validatePublicKeysMock,rawStateTransition.publicKeys);
+        assert_eq!(validatePublicKeysMock, raw_state_transition.publicKeys);
     }
 }
