@@ -1,9 +1,9 @@
+use crate::InvalidVectorSizeError;
 use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
-use std::num::ParseIntError;
 use sha2::digest::typenum::Len;
-use crate::InvalidVectorSizeError;
+use std::num::ParseIntError;
 
 pub fn generate_random_identifier() -> [u8; 32] {
     let mut buffer = [0u8; 32];
@@ -79,7 +79,8 @@ pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
 
 pub trait SerdeTestExtension {
     fn remove_key(&mut self, key: impl Into<String>);
-    fn set_key_value<T, S>(&mut self, key: T, value: S) where
+    fn set_key_value<T, S>(&mut self, key: T, value: S)
+    where
         T: Into<String>,
         S: Into<serde_json::Value>,
         serde_json::Value: From<S>;
@@ -89,13 +90,17 @@ pub trait SerdeTestExtension {
 
 impl SerdeTestExtension for serde_json::Value {
     fn remove_key(&mut self, key: impl Into<String>) {
-        self
-            .as_object_mut()
+        self.as_object_mut()
             .expect("Expected value to be an JSON object")
             .remove(&key.into());
     }
 
-    fn set_key_value<T, S>(&mut self, key: T, value: S) where T: Into<String>, S: Into<Value>, Value: From<S> {
+    fn set_key_value<T, S>(&mut self, key: T, value: S)
+    where
+        T: Into<String>,
+        S: Into<Value>,
+        Value: From<S>,
+    {
         let map = self
             .as_object_mut()
             .expect("Expected value to be an JSON object");
@@ -103,18 +108,24 @@ impl SerdeTestExtension for serde_json::Value {
     }
 
     fn get_value(&self, key: impl Into<String>) -> &Value {
-        self.as_object().expect("Expected key to exist").get(&key.into()).expect("Expected key to exist")
+        self.as_object()
+            .expect("Expected key to exist")
+            .get(&key.into())
+            .expect("Expected key to exist")
     }
 
     fn get_value_mut(&mut self, key: impl Into<String>) -> &mut Value {
-        self.as_object_mut().expect("Expected key to exist").get_mut(&key.into()).expect("Expected key to exist")
+        self.as_object_mut()
+            .expect("Expected key to exist")
+            .get_mut(&key.into())
+            .expect("Expected key to exist")
     }
 }
 
 #[derive(Debug)]
 pub enum DecodeError {
     ParseIntError(ParseIntError),
-    InvalidVectorSizeError(InvalidVectorSizeError)
+    InvalidVectorSizeError(InvalidVectorSizeError),
 }
 
 impl From<InvalidVectorSizeError> for DecodeError {

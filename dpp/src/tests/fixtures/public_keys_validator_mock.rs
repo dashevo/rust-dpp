@@ -1,10 +1,10 @@
+use crate::identity::validation::{PublicKeysValidator, TPublicKeysValidator};
+use crate::validation::ValidationResult;
+use crate::NonConsensusError;
+use serde_json::Value;
 use std::borrow::Borrow;
 use std::ops::Deref;
 use std::sync::Mutex;
-use serde_json::Value;
-use crate::identity::validation::{PublicKeysValidator, TPublicKeysValidator};
-use crate::NonConsensusError;
-use crate::validation::ValidationResult;
 
 #[cfg(test)]
 pub struct PublicKeysValidatorMock {
@@ -16,7 +16,7 @@ impl PublicKeysValidatorMock {
     pub fn new() -> Self {
         Self {
             returns: Mutex::new(Ok(ValidationResult::default())),
-            called_with: Mutex::new(vec![])
+            called_with: Mutex::new(vec![]),
         }
     }
 
@@ -30,7 +30,10 @@ impl PublicKeysValidatorMock {
 }
 
 impl TPublicKeysValidator for PublicKeysValidatorMock {
-    fn validate_keys(&self, raw_public_keys: &[Value]) -> Result<ValidationResult, NonConsensusError> {
+    fn validate_keys(
+        &self,
+        raw_public_keys: &[Value],
+    ) -> Result<ValidationResult, NonConsensusError> {
         *self.called_with.lock().unwrap() = Vec::from(raw_public_keys);
         self.returns.lock().unwrap().clone()
     }

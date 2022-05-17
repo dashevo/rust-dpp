@@ -21,9 +21,9 @@ impl Default for InstantAssetLockProof {
                 version: 0,
                 lock_time: 0,
                 input: vec![],
-                output: vec![]
+                output: vec![],
             },
-            output_index: 0
+            output_index: 0,
         }
     }
 }
@@ -32,7 +32,10 @@ impl InstantAssetLockProof {
     pub fn new(instant_lock: InstantLock, transaction: Transaction, output_index: u32) -> Self {
         Self {
             // TODO: change the type to a const
-            instant_lock, transaction, output_index, asset_lock_type: 0
+            instant_lock,
+            transaction,
+            output_index,
+            asset_lock_type: 0,
         }
     }
 
@@ -51,7 +54,7 @@ impl InstantAssetLockProof {
     pub fn output_index(&self) -> u32 {
         self.output_index
     }
- }
+}
 
 pub struct RawInstantLock {
     lock_type: u8,

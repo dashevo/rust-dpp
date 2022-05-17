@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 use super::{IdentityPublicKey, KeyID};
+use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
 use crate::{
     errors::ProtocolError,
     identifier::Identifier,
     metadata::Metadata,
     util::{hash, serializer},
 };
-use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
 
 // TODO implement!
 type ChainAssetLockProof = String;

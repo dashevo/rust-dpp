@@ -3,6 +3,7 @@ use crate::errors::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
     InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
 };
+use crate::identity::validation::TPublicKeysValidator;
 use crate::identity::{
     IdentityPublicKey, KeyType, Purpose, SecurityLevel, ALLOWED_SECURITY_LEVELS,
 };
@@ -12,7 +13,6 @@ use bls_signatures::{PublicKey as BlsPublicKey, Serialize};
 use dashcore::PublicKey;
 use serde_json::Value;
 use std::collections::HashMap;
-use crate::identity::validation::TPublicKeysValidator;
 
 #[derive(Eq, Hash, PartialEq)]
 struct PurposeKey {

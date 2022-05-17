@@ -1,4 +1,8 @@
-use crate::consensus::basic::identity::{DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError, InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError, MissingMasterPublicKeyError};
+use crate::consensus::basic::identity::{
+    DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
+    InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
+    MissingMasterPublicKeyError,
+};
 use crate::errors::consensus::basic::{
     IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
@@ -29,7 +33,7 @@ pub enum ConsensusError {
     #[error("{0}")]
     MissingMasterPublicKeyError(MissingMasterPublicKeyError),
     #[cfg(test)]
-    TestConsensusError(TestConsensusError)
+    TestConsensusError(TestConsensusError),
 }
 
 impl ConsensusError {
