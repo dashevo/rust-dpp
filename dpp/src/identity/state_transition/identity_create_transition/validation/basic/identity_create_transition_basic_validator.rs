@@ -5,10 +5,10 @@ use crate::identity::validation::TPublicKeysValidator;
 use crate::validation::{JsonSchemaValidator, ValidationResult};
 use crate::version::ProtocolVersionValidator;
 
-pub struct IdentityCreateTransitionBasicValidator<TPublicKeyValidator, S> {
+pub struct IdentityCreateTransitionBasicValidator<T, S> {
     protocol_version_validator: Arc<ProtocolVersionValidator>,
     json_schema_validator: JsonSchemaValidator,
-    public_keys_validator: Arc<TPublicKeyValidator>,
+    public_keys_validator: Arc<T>,
     public_keys_in_identity_transition_validator: Arc<S>,
     proof_validator: Arc<u64>
 }

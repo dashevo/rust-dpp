@@ -1,7 +1,7 @@
 use dashcore::{InstantLock, Transaction};
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstantAssetLockProof {
     #[serde(rename = "type")]
@@ -17,7 +17,12 @@ impl Default for InstantAssetLockProof {
             // TODO: change to a const
             asset_lock_type: 0,
             instant_lock: InstantLock::default(),
-            transaction: Transaction::default(),
+            transaction: Transaction {
+                version: 0,
+                lock_time: 0,
+                input: vec![],
+                output: vec![]
+            },
             output_index: 0
         }
     }

@@ -9,6 +9,7 @@ use thiserror::Error;
 use crate::errors::consensus::basic::TestConsensusError;
 
 #[derive(Error, Debug)]
+#[cfg_attr(test, derive(Clone))]
 #[error("{0}")]
 pub enum ConsensusError {
     #[error("{0}")]

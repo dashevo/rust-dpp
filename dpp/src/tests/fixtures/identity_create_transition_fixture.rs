@@ -1,4 +1,6 @@
+use std::str::FromStr;
 use dashcore::PrivateKey;
+use serde::Serialize;
 use crate::util::string_encoding::{decode, Encoding};
 use serde_json::{json, Value};
 use crate::identity::{KeyType, Purpose, SecurityLevel};
@@ -10,7 +12,9 @@ use crate::version;
 
 pub fn identity_create_transition_fixture_json(one_time_private_key: Option<PrivateKey>) -> serde_json::Value {
     let asset_lock_proof = instant_asset_lock_proof_json(one_time_private_key);
-    let asset_lock_proof_json: Value = asset_lock_proof.into();
+    //serde_json::ser::Serializer::new(());
+    let asset_lock_string = serde_json::ser::to_string(&asset_lock_proof).unwrap();
+    let asset_lock_proof_json = Value::from_str(&asset_lock_string).unwrap();
 
     json!({
         "protocolVersion": version::LATEST_VERSION,

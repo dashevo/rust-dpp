@@ -1,7 +1,7 @@
 use crate::PublicKeyValidationError;
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, PartialEq, Eq)]
 #[error("Invalid identity public key {public_key_id:?} data: {message:?}")]
 pub struct InvalidIdentityPublicKeyDataError {
     public_key_id: u64,

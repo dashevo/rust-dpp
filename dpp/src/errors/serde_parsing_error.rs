@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone, Eq, PartialEq)]
 #[error("Serde parsing error: {message:?}")]
 pub struct SerdeParsingError {
     message: String,

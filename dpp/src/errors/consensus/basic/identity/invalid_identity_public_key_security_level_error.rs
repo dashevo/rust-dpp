@@ -1,7 +1,7 @@
 use crate::identity::{Purpose, SecurityLevel};
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, PartialEq, Eq)]
 #[error("Invalid identity public key {public_key_id:?} security level: purpose {purpose:?} allows only for {allowed_security_levels:?} security levels, but got {security_level:?}")]
 pub struct InvalidIdentityPublicKeySecurityLevelError {
     public_key_id: u64,

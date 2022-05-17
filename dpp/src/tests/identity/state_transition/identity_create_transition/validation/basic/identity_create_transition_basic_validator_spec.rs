@@ -22,42 +22,52 @@
 // let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
 
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
-use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator, TPublicKeysValidator};
+use crate::identity::validation::{
+    PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator, TPublicKeysValidator,
+};
 use crate::version::ProtocolVersionValidator;
 use serde_json::Value;
 use std::sync::Arc;
 
-fn setup_test(public_keys_validator_mock: Option<impl TPublicKeysValidator>, public_keys_transition_validator_mock: Option<impl TPublicKeysValidator>) -> (
+fn setup_test(
+    public_keys_validator: Arc<impl TPublicKeysValidator>,
+    public_keys_transition_validator: Arc<impl TPublicKeysValidator>,
+) -> (
     Value,
-    IdentityCreateTransitionBasicValidator<
-        PublicKeysValidator,
-        PublicKeysInIdentityCreateTransitionValidator,
-    >,
+    IdentityCreateTransitionBasicValidator<impl TPublicKeysValidator, impl TPublicKeysValidator>,
 ) {
     let protocol_version_validator = ProtocolVersionValidator::default();
-    let public_keys_validator = match public_keys_validator_mock {
-        None => { PublicKeysValidator::new().unwrap() }
-        Some(validator) => { validator }
-    };
-    let other_public_keys_validator = match public_keys_transition_validator_mock {
-        None => { PublicKeysInIdentityCreateTransitionValidator::default() }
-        Some(validator) => { validator }
-    };
+    // let public_keys_validator = match public_keys_validator_mock {
+    //     None => { Arc::new(PublicKeysValidator::new().unwrap()) }
+    //     Some(validator) => {validator }
+    // };
+    // let other_public_keys_validator = match public_keys_transition_validator_mock {
+    //     None => { Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()) }
+    //     Some(validator) => { validator }
+    // };
+
     (
         // TODO: should it really be None?
         crate::tests::fixtures::identity_create_transition_fixture_json(None),
         IdentityCreateTransitionBasicValidator::new(
             Arc::new(protocol_version_validator),
-            Arc::new(public_keys_validator),
-            Arc::new(other_public_keys_validator),
+            public_keys_validator,
+            public_keys_transition_validator,
         )
         .unwrap(),
     )
 }
 
 mod validate_identity_create_transition_basic_factory {
-    use std::option::Option::None;
     use super::setup_test;
+    use crate::identity::validation::{
+        PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
+    };
+    use crate::tests::fixtures::PublicKeysValidatorMock;
+    use crate::tests::utils::SerdeTestExtension;
+    use crate::validation::ValidationResult;
+    use std::option::Option::None;
+    use std::sync::Arc;
     // let validator.validate;
     // let rawStateTransition;
     // let stateTransition;
@@ -114,371 +124,497 @@ mod validate_identity_create_transition_basic_factory {
 
     mod protocol_version {
         use std::option::Option::None;
+        use std::sync::Arc;
+        use jsonschema::error::ValidationErrorKind;
         use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
+        use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator};
         use crate::tests::identity::state_transition::identity_create_transition::validation::basic::identity_create_transition_basic_validator_spec::setup_test;
         use crate::tests::utils::{SerdeTestExtension};
         use crate::validation::ValidationResult;
 
         #[test]
         pub fn should_be_present() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.remove_key("protocolVersion");
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "");
-            assert_eq!(error.keyword(), "required");
-            assert_eq!(error.getParams().missingProperty, "protocolVersion");
+            assert_eq!(error.instance_path().to_string(), "");
+            assert_eq!(error.keyword().unwrap(), "required");
+            match error.kind() {
+                ValidationErrorKind::Required { property } => {
+                    assert_eq!(property.to_string(), "\"protocolVersion\"");
+                }
+                _ => panic!("Expected to be missing property"),
+            }
         }
 
         #[test]
         pub fn should_be_an_integer() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.set_key_value("protocolVersion", "1");
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "/protocolVersion");
-            assert_eq!(error.keyword(), "type");
+            assert_eq!(error.instance_path().to_string(), "/protocolVersion");
+            assert_eq!(error.keyword().unwrap(), "type");
         }
 
         #[test]
         pub fn should_be_valid() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.set_key_value("protocolVersion", -1);
 
-            let protocol_version_error = ConsensusError::from(TestConsensusError::new("test"));
-            let protocol_version_result = ValidationResult::new(Some(vec![protocol_version_error]));
-
-            validateProtocolVersionMock.returns(protocol_version_result);
+            let protocol_version_error = TestConsensusError::new("test");
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error, protocol_version_error);
-
-            assert_eq!(
-                validateProtocolVersionMock,
-                raw_state_transition.protocolVersion
-            );
+            assert_eq!(error, &&protocol_version_error);
         }
     }
 
     mod type_a {
-        use std::option::Option::None;
         use super::super::setup_test;
         use crate::assert_consensus_errors;
         use crate::consensus::ConsensusError;
+        use crate::identity::validation::{
+            PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
+        };
         use crate::tests::utils::SerdeTestExtension;
+        use std::option::Option::None;
+        use std::sync::Arc;
+        use jsonschema::error::ValidationErrorKind;
 
         #[test]
         pub fn should_be_present() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.remove_key("type");
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "");
-            assert_eq!(error.keyword(), "required");
-            assert_eq!(error.getParams().missingProperty, "type");
+            assert_eq!(error.instance_path().to_string(), "");
+            assert_eq!(error.keyword().unwrap(), "required");
+
+            match error.kind() {
+                ValidationErrorKind::Required { property } => {
+                    assert_eq!(property.to_string(), "\"type\"");
+                }
+                _ => panic!("Expected to be missing property"),
+            }
         }
 
         #[test]
         pub fn should_be_equal_to_2() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.set_key_value("type", 666);
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "/type");
-            assert_eq!(error.keyword(), "let");
-            assert_eq!(error.getParams().allowedValue, 2);
+            assert_eq!(error.instance_path().to_string(), "/type");
+            assert_eq!(error.keyword().unwrap(), "let");
+
+            match error.kind() {
+                ValidationErrorKind::Required { property } => {
+                    assert_eq!(property.to_string(), "\"protocolVersion\"");
+                }
+                _ => panic!("Expected to be missing property"),
+            }
+            //assert_eq!(error.getParams().allowedValue, 2);
         }
     }
 
     mod asset_lock_proof {
-        use std::option::Option::None;
         use super::super::setup_test;
         use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
+        use crate::identity::validation::{
+            PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
+        };
         use crate::tests::utils::SerdeTestExtension;
         use crate::validation::ValidationResult;
+        use std::option::Option::None;
+        use std::sync::Arc;
+        use jsonschema::error::ValidationErrorKind;
 
         #[test]
         pub fn should_be_present() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.remove_key("assetLockProof");
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "");
-            assert_eq!(error.getParams().missingProperty, "assetLockProof");
-            assert_eq!(error.keyword(), "required");
+            assert_eq!(error.instance_path().to_string(), "");
+            assert_eq!(error.keyword().unwrap(), "required");
+
+            match error.kind() {
+                ValidationErrorKind::Required { property } => {
+                    assert_eq!(property.to_string(), "\"assetLockProof\"");
+                }
+                _ => panic!("Expected to be missing property"),
+            }
         }
 
         #[test]
         pub fn should_be_an_object() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.set_key_value("assetLockProof", 1);
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "/assetLockProof");
-            assert_eq!(error.keyword(), "type");
+            assert_eq!(error.instance_path().to_string(), "/assetLockProof");
+            assert_eq!(error.keyword().unwrap(), "type");
         }
 
         #[test]
         pub fn should_be_valid() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
-            let asset_lock_error = ConsensusError::from(TestConsensusError::new("test"));
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
+            let err = TestConsensusError::new("test");
+            let asset_lock_error = ConsensusError::from(err.clone());
             let asset_lock_result = ValidationResult::new(Some(vec![asset_lock_error]));
 
-            proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
-                .resolves(asset_lock_result);
+            // TODO: what to do about that?
+            // proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
+            //     .resolves(asset_lock_result);
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_eq!(result.errors().len(), 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error, asset_lock_error);
+            assert_eq!(error, &&err);
 
-            assert_eq!(
-                proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_],
-                raw_state_transition.assetLockProof
-            );
+            // assert_eq!(
+            //     proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_],
+            //     raw_state_transition.assetLockProof
+            // );
         }
     }
 
     mod public_keys {
-        use std::option::Option::None;
         use super::super::setup_test;
         use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
+        use crate::identity::validation::{
+            PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
+        };
         use crate::tests::fixtures::PublicKeysValidatorMock;
         use crate::tests::utils::SerdeTestExtension;
         use crate::validation::ValidationResult;
+        use std::option::Option::None;
+        use std::sync::Arc;
+        use serde_json::Value;
+        use jsonschema::error::ValidationErrorKind;
 
         #[test]
         pub fn should_be_present() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.remove_key("publicKeys");
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instance_path(), "");
-            assert_eq!(error.getParams().missingProperty, "publicKeys");
-            assert_eq!(error.keyword(), "required");
+            assert_eq!(error.instance_path().to_string(), "");
+            assert_eq!(error.keyword().unwrap(), "required");
+
+            match error.kind() {
+                ValidationErrorKind::Required { property } => {
+                    assert_eq!(property.to_string(), "\"publicKeys\"");
+                }
+                _ => panic!("Expected to be missing property"),
+            }
         }
 
         #[test]
         pub fn should_not_be_empty() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
-            raw_state_transition.set_key_value("publicKeys", vec![]);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
+            raw_state_transition.set_key_value("publicKeys", Vec::<Value>::new());
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.keyword(), "minItems");
-            assert_eq!(error.instance_path(), "/publicKeys");
+            assert_eq!(error.keyword().unwrap(), "minItems");
+            assert_eq!(error.instance_path().to_string(), "/publicKeys");
         }
 
         #[test]
         pub fn should_not_have_more_than_10_items() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
-            let [key] = raw_state_transition.publicKeys;
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
 
+            let mut public_keys = raw_state_transition.get_value_mut("publicKeys").as_array_mut().unwrap();
+            let key = public_keys.first().unwrap().clone();
+
+            for _ in 0..10 {
+                public_keys.push(key.clone());
+            }
             // for (let i = 0; i < 10; i++) {
             //     raw_state_transition.publicKeys.push(key);
             // }
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.keyword(), "maxItems");
-            assert_eq!(error.instance_path(), "/publicKeys");
+            assert_eq!(error.keyword().unwrap(), "maxItems");
+            assert_eq!(error.instance_path().to_string(), "/publicKeys");
         }
 
         #[test]
         pub fn should_be_unique() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
-            raw_state_transition
-                .publicKeys
-                .push(raw_state_transition.publicKeys[0]);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
+
+            let mut public_keys = raw_state_transition.get_value_mut("publicKeys").as_array_mut().unwrap();
+            let key = public_keys.first().unwrap().clone();
+            public_keys.push(key.clone());
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.keyword(), "uniqueItems");
-            assert_eq!(error.instance_path(), "/publicKeys");
+            assert_eq!(error.keyword().unwrap(), "uniqueItems");
+            assert_eq!(error.instance_path().to_string(), "/publicKeys");
         }
 
         #[test]
         pub fn should_be_valid() {
-            let mut pk_validator_mock = PublicKeysValidatorMock::new();
-            let public_keys_error = ConsensusError::from(TestConsensusError::new("test"));
-            let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
+            let mut pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
+            let pk_error = TestConsensusError::new("test");
+            let consensus_error = ConsensusError::from(pk_error.clone());
+            let public_keys_result = ValidationResult::new(Some(vec![consensus_error]));
             pk_validator_mock.returns(Ok(public_keys_result));
 
-            let (mut raw_state_transition, validator) = setup_test(pk_validator_mock, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                pk_validator_mock.clone(),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_eq!(result.errors().len(), 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error, public_keys_error);
+            assert_eq!(error, &&pk_error);
 
-            assert_eq!(validatePublicKeysMock, raw_state_transition.publicKeys);
+            assert_eq!(
+                &pk_validator_mock.called_with(),
+                raw_state_transition.get_value("publicKeys").as_array().unwrap()
+            );
         }
 
         #[test]
         pub fn should_have_at_least_1_master_key() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
-            let public_keys_error = ConsensusError::from(TestConsensusError::new("test"));
-            let public_keys_result = ValidationResult::new(Some(vec![public_keys_error]));
+            let mut pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
+            let pk_error = TestConsensusError::new("test");
+            let consensus_error = ConsensusError::from(pk_error.clone());
+            let public_keys_result = ValidationResult::new(Some(vec![consensus_error]));
+            pk_validator_mock.returns(Ok(public_keys_result));
 
-            validatePublicKeysInIdentityCreateTransition.returns(public_keys_result);
+            let (mut raw_state_transition, validator) =
+                setup_test(Arc::new(PublicKeysValidator::new().unwrap()), pk_validator_mock.clone());
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_eq!(result.errors().len(), 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
+            let error = errors.first().unwrap();
 
-            let error = result.errors().first().unwrap();
-
-            assert_eq!(error, public_keys_error);
+            assert_eq!(error, &&pk_error);
 
             assert_eq!(
-                validatePublicKeysInIdentityCreateTransition,
-                raw_state_transition.publicKeys
+                &pk_validator_mock.called_with(),
+                raw_state_transition.get_value("publicKeys").as_array().unwrap()
             );
         }
     }
 
     mod signature {
-        use std::option::Option::None;
         use super::super::setup_test;
         use crate::assert_consensus_errors;
         use crate::consensus::ConsensusError;
+        use crate::identity::validation::{
+            PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
+        };
         use crate::tests::utils::SerdeTestExtension;
+        use std::option::Option::None;
+        use std::sync::Arc;
+        use jsonschema::error::ValidationErrorKind;
 
         #[test]
         pub fn should_be_present() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.remove_key("signature");
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instancePath, "");
-            assert_eq!(error.keyword(), "required");
-            assert_eq!(error.getParams().missingProperty, "signature");
+            assert_eq!(error.instance_path().to_string(), "");
+            assert_eq!(error.keyword().unwrap(), "required");
+
+            match error.kind() {
+                ValidationErrorKind::Required { property } => {
+                    assert_eq!(property.to_string(), "\"signature\"");
+                }
+                _ => panic!("Expected to be missing property"),
+            }
         }
 
         #[test]
         pub fn should_be_a_byte_array() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
-            raw_state_transition.set_key_value("signature", vec![65; "string"]);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
+            raw_state_transition.set_key_value("signature", vec!["string"; 65]);
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
 
-            let [error, byteArrayError] = result.errors();
+            let error = errors.first().unwrap();
+            let byte_array_error = errors.get(1).unwrap();
 
-            assert_eq!(error.instancePath, "/signature/0");
-            assert_eq!(error.keyword(), "type");
+            assert_eq!(error.instance_path().to_string(), "/signature/0");
+            assert_eq!(error.keyword().unwrap(), "type");
 
-            assert_eq!(byteArrayError.keyword(), "byteArray");
+            assert_eq!(byte_array_error.keyword().unwrap(), "byteArray");
         }
 
         #[test]
         pub fn should_be_not_shorter_than_65_bytes() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.set_key_value("signature", vec![64; 0]);
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instancePath, "/signature");
-            assert_eq!(error.keyword(), "minItems");
+            assert_eq!(error.instance_path().to_string(), "/signature");
+            assert_eq!(error.keyword().unwrap(), "minItems");
         }
 
         #[test]
         pub fn should_be_not_longer_than_65_bytes() {
-            let (mut raw_state_transition, validator) = setup_test(None, None);
+            let (mut raw_state_transition, validator) = setup_test(
+                Arc::new(PublicKeysValidator::new().unwrap()),
+                Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            );
             raw_state_transition.set_key_value("signature", vec![66; 0]);
 
             let result = validator.validate(&raw_state_transition);
 
-            assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
-            let error = result.errors().first().unwrap();
+            let error = errors.first().unwrap();
 
-            assert_eq!(error.instancePath, "/signature");
-            assert_eq!(error.keyword(), "maxItems");
+            assert_eq!(error.instance_path().to_string(), "/signature");
+            assert_eq!(error.keyword().unwrap(), "maxItems");
         }
     }
 
     #[test]
     pub fn should_return_valid_result() {
-        let (mut raw_state_transition, validator) = setup_test(None, None);
+        let mut pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
+        let public_keys_result = ValidationResult::default();
+        pk_validator_mock.returns(Ok(public_keys_result));
+
+        let (mut raw_state_transition, validator) = setup_test(
+            pk_validator_mock.clone(),
+            Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+        );
         let result = validator.validate(&raw_state_transition);
 
-        assert!(result.isValid());
-
-        assert_eq!(validatePublicKeysMock, raw_state_transition.publicKeys);
+        assert!(result.is_valid());
+        assert_eq!(
+            &pk_validator_mock.called_with(),
+            raw_state_transition.get_value("publicKeys").as_array().unwrap()
+        );
     }
 }

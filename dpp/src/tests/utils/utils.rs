@@ -2,6 +2,7 @@ use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
 use std::num::ParseIntError;
+use sha2::digest::typenum::Len;
 use crate::InvalidVectorSizeError;
 
 pub fn generate_random_identifier() -> [u8; 32] {
@@ -81,7 +82,9 @@ pub trait SerdeTestExtension {
     fn set_key_value<T, S>(&mut self, key: T, value: S) where
         T: Into<String>,
         S: Into<serde_json::Value>,
-        serde_json::Value: From<S>,;
+        serde_json::Value: From<S>;
+    fn get_value(&self, key: impl Into<String>) -> &Value;
+    fn get_value_mut(&mut self, key: impl Into<String>) -> &mut Value;
 }
 
 impl SerdeTestExtension for serde_json::Value {
@@ -98,8 +101,17 @@ impl SerdeTestExtension for serde_json::Value {
             .expect("Expected value to be an JSON object");
         map.insert(key.into(), serde_json::Value::from(value));
     }
+
+    fn get_value(&self, key: impl Into<String>) -> &Value {
+        self.as_object().expect("Expected key to exist").get(&key.into()).expect("Expected key to exist")
+    }
+
+    fn get_value_mut(&mut self, key: impl Into<String>) -> &mut Value {
+        self.as_object_mut().expect("Expected key to exist").get_mut(&key.into()).expect("Expected key to exist")
+    }
 }
 
+#[derive(Debug)]
 pub enum DecodeError {
     ParseIntError(ParseIntError),
     InvalidVectorSizeError(InvalidVectorSizeError)
@@ -118,20 +130,21 @@ impl From<ParseIntError> for DecodeError {
 }
 
 pub fn decode_hex_bls_sig(s: &str) -> Result<[u8; 96], DecodeError> {
-    Ok(hex_to_array::<[u8; 96]>(s)?)
+    Ok(hex_to_array::<96>(s)?)
 }
 
 pub fn decode_hex_sha256(s: &str) -> Result<[u8; 32], DecodeError> {
-    Ok(hex_to_array::<[u8; 32]>(s)?)
+    Ok(hex_to_array::<32>(s)?)
 }
 
-pub fn hex_to_array<T: Default + Iterator>(s: &str) -> Result<T, DecodeError> {
+pub fn hex_to_array<const N: usize>(s: &str) -> Result<[u8; N], DecodeError> {
     let vec = decode_hex(s)?;
-    Ok(vec_to_array::<T>(&vec)?)
+    Ok(vec_to_array::<N>(&vec)?)
 }
 
-pub fn vec_to_array<T: Default + Iterator>(vec: &[u8]) -> Result<T, InvalidVectorSizeError> {
-    let mut v: T = T::default();
+pub fn vec_to_array<const N: usize>(vec: &[u8]) -> Result<[u8; N], InvalidVectorSizeError> {
+    let mut v: [u8; N] = [0; N];
+    // let mut v: T = T::default();
     if v.len() != vec.len() {
         return Err(InvalidVectorSizeError::new(v.len(), vec.len()));
     }
