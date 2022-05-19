@@ -37,15 +37,6 @@ fn setup_test(
     IdentityCreateTransitionBasicValidator<impl TPublicKeysValidator, impl TPublicKeysValidator>,
 ) {
     let protocol_version_validator = ProtocolVersionValidator::default();
-    // let public_keys_validator = match public_keys_validator_mock {
-    //     None => { Arc::new(PublicKeysValidator::new().unwrap()) }
-    //     Some(validator) => {validator }
-    // };
-    // let other_public_keys_validator = match public_keys_transition_validator_mock {
-    //     None => { Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()) }
-    //     Some(validator) => { validator }
-    // };
-
     (
         // TODO: should it really be None?
         crate::tests::fixtures::identity_create_transition_fixture_json(None),
@@ -126,7 +117,7 @@ mod validate_identity_create_transition_basic_factory {
         use std::option::Option::None;
         use std::sync::Arc;
         use jsonschema::error::ValidationErrorKind;
-        use crate::assert_consensus_errors;
+        use crate::{assert_consensus_errors, NonConsensusError};
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator};
@@ -142,7 +133,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.remove_key("protocolVersion");
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -166,7 +157,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("protocolVersion", "1");
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -184,15 +175,17 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("protocolVersion", -1);
 
-            let protocol_version_error = TestConsensusError::new("test");
-
             let result = validator.validate(&raw_state_transition);
 
-            let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
-
-            let error = errors.first().unwrap();
-
-            assert_eq!(error, &&protocol_version_error);
+            match result {
+                Ok(_) => { panic!("Expected error"); }
+                Err(e) => { match e {
+                    NonConsensusError::SerdeParsingError(e) => {
+                        assert_eq!(e.message(), "Expected protocolVersion to be a uint");
+                    }
+                    _ => { panic!("Expected version parsing error"); }
+                } }
+            }
         }
     }
 
@@ -215,7 +208,7 @@ mod validate_identity_create_transition_basic_factory {
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
             raw_state_transition.remove_key("type");
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -240,22 +233,22 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("type", 666);
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
             let error = errors.first().unwrap();
 
             assert_eq!(error.instance_path().to_string(), "/type");
-            assert_eq!(error.keyword().unwrap(), "let");
+            assert_eq!(error.keyword().unwrap(), "const");
 
+            println!("{:?}", error.kind());
             match error.kind() {
-                ValidationErrorKind::Required { property } => {
-                    assert_eq!(property.to_string(), "\"protocolVersion\"");
+                ValidationErrorKind::Constant { expected_value } => {
+                    assert_eq!(expected_value.as_u64().unwrap(), 2u64);
                 }
-                _ => panic!("Expected to be missing property"),
+                _ => panic!("Expected to have a constant value"),
             }
-            //assert_eq!(error.getParams().allowedValue, 2);
         }
     }
 
@@ -281,7 +274,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.remove_key("assetLockProof");
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -306,7 +299,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("assetLockProof", 1);
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -330,7 +323,7 @@ mod validate_identity_create_transition_basic_factory {
             // proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
             //     .resolves(asset_lock_result);
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
 
@@ -369,7 +362,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.remove_key("publicKeys");
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -394,7 +387,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("publicKeys", Vec::<Value>::new());
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -424,7 +417,7 @@ mod validate_identity_create_transition_basic_factory {
             //     raw_state_transition.publicKeys.push(key);
             // }
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -448,7 +441,7 @@ mod validate_identity_create_transition_basic_factory {
             let key = public_keys.first().unwrap().clone();
             public_keys.push(key.clone());
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -471,7 +464,7 @@ mod validate_identity_create_transition_basic_factory {
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
 
@@ -501,7 +494,7 @@ mod validate_identity_create_transition_basic_factory {
                 pk_validator_mock.clone(),
             );
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::TestConsensusError, 1);
             let error = errors.first().unwrap();
@@ -538,7 +531,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.remove_key("signature");
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -563,7 +556,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("signature", vec!["string"; 65]);
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
 
@@ -584,7 +577,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("signature", vec![64; 0]);
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -602,7 +595,7 @@ mod validate_identity_create_transition_basic_factory {
             );
             raw_state_transition.set_key_value("signature", vec![66; 0]);
 
-            let result = validator.validate(&raw_state_transition);
+            let result = validator.validate(&raw_state_transition).unwrap();
 
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
@@ -623,7 +616,7 @@ mod validate_identity_create_transition_basic_factory {
             pk_validator_mock.clone(),
             Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
         );
-        let result = validator.validate(&raw_state_transition);
+        let result = validator.validate(&raw_state_transition).unwrap();
 
         assert!(result.is_valid());
         assert_eq!(

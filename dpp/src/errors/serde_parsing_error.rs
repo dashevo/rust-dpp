@@ -12,4 +12,8 @@ impl SerdeParsingError {
             message: message.into(),
         }
     }
+
+    pub fn message(&self) -> &str {
+        &self.message
+    }
 }

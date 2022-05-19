@@ -4,6 +4,7 @@ use crate::version::ProtocolVersionValidator;
 use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 use serde_json::{Map, Value};
 use std::sync::Arc;
+use crate::util::protocol_data::{get_protocol_version, get_raw_public_keys};
 
 pub struct IdentityValidator<TPublicKeyValidator> {
     protocol_version_validator: Arc<ProtocolVersionValidator>,
@@ -54,22 +55,4 @@ impl<T: TPublicKeysValidator> IdentityValidator<T> {
 
         Ok(validation_result)
     }
-}
-
-fn get_protocol_version(identity_map: &Map<String, Value>) -> Result<u64, SerdeParsingError> {
-    identity_map
-        .get("protocolVersion")
-        .ok_or_else(|| SerdeParsingError::new("Expected identity to have protocolVersion"))?
-        .as_u64()
-        .ok_or_else(|| SerdeParsingError::new("Expected protocolVersion to be a uint"))
-}
-
-fn get_raw_public_keys(
-    identity_map: &Map<String, Value>,
-) -> Result<&Vec<Value>, SerdeParsingError> {
-    identity_map
-        .get("publicKeys")
-        .ok_or_else(|| SerdeParsingError::new("Expected identity.publicKeys to exist"))?
-        .as_array()
-        .ok_or_else(|| SerdeParsingError::new("Expected identity.publicKeys to be an array"))
 }

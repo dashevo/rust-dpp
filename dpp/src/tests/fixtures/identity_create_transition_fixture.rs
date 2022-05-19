@@ -32,6 +32,7 @@ pub fn identity_create_transition_fixture_json(
                 "securityLevel": SecurityLevel::MASTER,
                 "readOnly": false,
             },
-        ]
+        ],
+        "signature": vec![0_u8; 65]
     })
 }
