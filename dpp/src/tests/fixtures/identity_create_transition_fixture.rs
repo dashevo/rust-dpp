@@ -14,7 +14,6 @@ pub fn identity_create_transition_fixture_json(
     one_time_private_key: Option<PrivateKey>,
 ) -> serde_json::Value {
     let asset_lock_proof = instant_asset_lock_proof_json(one_time_private_key);
-    //serde_json::ser::Serializer::new(());
     let asset_lock_string = serde_json::ser::to_string(&asset_lock_proof).unwrap();
     let asset_lock_proof_json = Value::from_str(&asset_lock_string).unwrap();
 

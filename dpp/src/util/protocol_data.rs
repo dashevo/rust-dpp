@@ -1,7 +1,9 @@
-use serde_json::{Map, Value};
 use crate::SerdeParsingError;
+use serde_json::{Map, Value};
 
-pub fn get_protocol_version(protocol_structure_json: &Map<String, Value>) -> Result<u64, SerdeParsingError> {
+pub fn get_protocol_version(
+    protocol_structure_json: &Map<String, Value>,
+) -> Result<u64, SerdeParsingError> {
     protocol_structure_json
         .get("protocolVersion")
         .ok_or_else(|| SerdeParsingError::new("Expected identity to have protocolVersion"))?

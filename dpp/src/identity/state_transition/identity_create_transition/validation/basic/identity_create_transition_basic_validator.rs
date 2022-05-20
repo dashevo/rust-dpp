@@ -5,12 +5,14 @@ use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError}
 use serde_json::Value;
 use std::sync::Arc;
 
-use lazy_static::lazy_static;
 use crate::util::protocol_data::{get_protocol_version, get_raw_public_keys};
+use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref INDENTITY_CREATE_TRANSITION_SCHEMA: Value =
-        serde_json::from_str(include_str!("../../../../../schema/identity/stateTransition/identityCreate.json")).unwrap();
+    static ref INDENTITY_CREATE_TRANSITION_SCHEMA: Value = serde_json::from_str(include_str!(
+        "../../../../../schema/identity/stateTransition/identityCreate.json"
+    ))
+    .unwrap();
 }
 
 pub struct IdentityCreateTransitionBasicValidator<T, S> {
@@ -43,8 +45,13 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
         Ok(identity_validator)
     }
 
-    pub fn validate(&self, identity_create_transition_json: &Value) -> Result<ValidationResult, NonConsensusError> {
-        let mut result = self.json_schema_validator.validate(identity_create_transition_json)?;
+    pub fn validate(
+        &self,
+        identity_create_transition_json: &Value,
+    ) -> Result<ValidationResult, NonConsensusError> {
+        let mut result = self
+            .json_schema_validator
+            .validate(identity_create_transition_json)?;
 
         let identity_transition_map = identity_create_transition_json
             .as_object()
@@ -54,7 +61,10 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
             return Ok(result);
         }
 
-        result.merge(self.protocol_version_validator.validate(get_protocol_version(identity_transition_map)?)?);
+        result.merge(
+            self.protocol_version_validator
+                .validate(get_protocol_version(identity_transition_map)?)?,
+        );
 
         if !result.is_valid() {
             return Ok(result);
@@ -62,12 +72,11 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
 
         let public_keys = get_raw_public_keys(identity_transition_map)?;
 
-        result.merge(
-            self.public_keys_validator.validate_keys(public_keys)?,
-        );
+        result.merge(self.public_keys_validator.validate_keys(public_keys)?);
 
         result.merge(
-            self.public_keys_in_identity_transition_validator.validate_keys(public_keys)?,
+            self.public_keys_in_identity_transition_validator
+                .validate_keys(public_keys)?,
         );
 
         if !result.is_valid() {

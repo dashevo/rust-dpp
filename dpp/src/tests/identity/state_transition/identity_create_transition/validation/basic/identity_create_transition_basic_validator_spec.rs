@@ -178,13 +178,17 @@ mod validate_identity_create_transition_basic_factory {
             let result = validator.validate(&raw_state_transition);
 
             match result {
-                Ok(_) => { panic!("Expected error"); }
-                Err(e) => { match e {
+                Ok(_) => {
+                    panic!("Expected error");
+                }
+                Err(e) => match e {
                     NonConsensusError::SerdeParsingError(e) => {
                         assert_eq!(e.message(), "Expected protocolVersion to be a uint");
                     }
-                    _ => { panic!("Expected version parsing error"); }
-                } }
+                    _ => {
+                        panic!("Expected version parsing error");
+                    }
+                },
             }
         }
     }
