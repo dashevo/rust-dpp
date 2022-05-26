@@ -1,11 +1,13 @@
+use crate::codes::ErrorWithCode;
 use crate::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
     InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
     MissingMasterPublicKeyError,
 };
 use crate::errors::consensus::basic::{
-    IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
+    BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
+use crate::errors::StateError;
 use jsonschema::ValidationError;
 use thiserror::Error;
 
@@ -34,6 +36,18 @@ pub enum ConsensusError {
     MissingMasterPublicKeyError(MissingMasterPublicKeyError),
     #[cfg(test)]
     TestConsensusError(TestConsensusError),
+
+    #[error(transparent)]
+    StateError(Box<StateError>),
+
+    #[error(transparent)]
+    BasicError(Box<BasicError>),
+
+    #[error("Parsing of serialized object failed due to: {parsing_error}")]
+    SerializedObjectParsingError { parsing_error: anyhow::Error },
+
+    #[error("Can't read protocol version from serialized object: {parsing_error}")]
+    ProtocolVersionParsingError { parsing_error: anyhow::Error },
 }
 
 impl ConsensusError {
@@ -46,6 +60,10 @@ impl ConsensusError {
 
     pub fn code(&self) -> u32 {
         match self {
+            // Decoding
+            ConsensusError::ProtocolVersionParsingError { .. } => 1000,
+            ConsensusError::SerializedObjectParsingError { .. } => 1001,
+
             ConsensusError::JsonSchemaError(_) => 1005,
             ConsensusError::UnsupportedProtocolVersionError(_) => 1002,
             ConsensusError::IncompatibleProtocolVersionError(_) => 1003,
@@ -56,6 +74,9 @@ impl ConsensusError {
             ConsensusError::InvalidIdentityPublicKeyDataError(_) => 1040,
             ConsensusError::MissingMasterPublicKeyError(_) => 1046,
             ConsensusError::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
+
+            ConsensusError::StateError(e) => e.get_code(),
+            ConsensusError::BasicError(e) => e.get_code(),
 
             // Custom error for tests
             #[cfg(test)]
@@ -122,5 +143,17 @@ impl From<MissingMasterPublicKeyError> for ConsensusError {
 impl From<TestConsensusError> for ConsensusError {
     fn from(error: TestConsensusError) -> Self {
         Self::TestConsensusError(error)
+    }
+}
+
+impl From<StateError> for ConsensusError {
+    fn from(se: StateError) -> Self {
+        ConsensusError::StateError(Box::new(se))
+    }
+}
+
+impl From<BasicError> for ConsensusError {
+    fn from(se: BasicError) -> Self {
+        ConsensusError::BasicError(Box::new(se))
     }
 }
