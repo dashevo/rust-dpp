@@ -15,11 +15,11 @@ pub struct AssetLockTransactionResultData {
     transaction: Transaction,
 }
 
-pub struct AssetLockTransactionFactoryValidator<SR> {
+pub struct AssetLockTransactionValidator<SR> {
     state_repository: SR,
 }
 
-impl<SR> AssetLockTransactionFactoryValidator<SR> {
+impl<SR> AssetLockTransactionValidator<SR> {
     pub fn new(state_repository: SR) -> Self {
         Self { state_repository }
     }

@@ -27,7 +27,7 @@ impl<TData> ValidationResult<TData> {
         self.errors.append(&mut errors)
     }
 
-    pub fn merge(&mut self, mut other: ValidationResult<TData>) {
+    pub fn merge<TOtherData>(&mut self, mut other: ValidationResult<TOtherData>) {
         self.errors.append(other.errors_mut());
     }
 

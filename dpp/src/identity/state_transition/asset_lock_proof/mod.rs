@@ -1,5 +1,5 @@
-mod asset_lock_transaction_factory_validator;
+mod asset_lock_transaction_validator;
 mod instant;
 
-pub use asset_lock_transaction_factory_validator::*;
+pub use asset_lock_transaction_validator::*;
 pub use instant::*;

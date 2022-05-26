@@ -46,7 +46,7 @@ impl JsonSchemaValidator {
         Ok(json_schema_validator)
     }
 
-    pub fn validate(&self, object: &Value) -> Result<ValidationResult, NonConsensusError> {
+    pub fn validate(&self, object: &Value) -> Result<ValidationResult<()>, NonConsensusError> {
         // TODO: create better error messages
         let res = self
             .schema
