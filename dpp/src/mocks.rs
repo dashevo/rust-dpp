@@ -28,7 +28,7 @@ impl<SR> DashPlatformProtocol<SR> {
 #[derive(Debug, Clone, Default)]
 pub struct ValidateDataContract {}
 impl ValidateDataContract {
-    pub async fn validate_data_contract(&self, _raw_data_contract: &JsonValue) -> ValidationResult {
+    pub async fn validate_data_contract(&self, _raw_data_contract: &JsonValue) -> ValidationResult<()> {
         ValidationResult::default()
     }
 }

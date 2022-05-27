@@ -2,7 +2,6 @@ use crate::InvalidVectorSizeError;
 use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
-use sha2::digest::typenum::Len;
 use std::num::ParseIntError;
 
 use crate::prelude::Identifier;

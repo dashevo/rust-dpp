@@ -1,8 +1,11 @@
 use crate::codes::ErrorWithCode;
 use crate::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
+    IdentityAssetLockTransactionOutPointAlreadyExistsError,
+    IdentityAssetLockTransactionOutputNotFoundError, InvalidAssetLockTransactionOutputReturnSize,
+    InvalidIdentityAssetLockTransactionError, InvalidIdentityAssetLockTransactionOutputError,
     InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
-    MissingMasterPublicKeyError,
+    InvalidInstantAssetLockProofError, MissingMasterPublicKeyError,
 };
 use crate::errors::consensus::basic::{
     BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
@@ -15,8 +18,7 @@ use thiserror::Error;
 use crate::errors::consensus::basic::TestConsensusError;
 
 #[derive(Error, Debug)]
-#[cfg_attr(test, derive(Clone))]
-#[error("{0}")]
+//#[cfg_attr(test, derive(Clone))]
 pub enum ConsensusError {
     #[error("{0}")]
     JsonSchemaError(JsonSchemaError),
@@ -34,8 +36,22 @@ pub enum ConsensusError {
     DuplicatedIdentityPublicKeyError(DuplicatedIdentityPublicKeyError),
     #[error("{0}")]
     MissingMasterPublicKeyError(MissingMasterPublicKeyError),
-    #[cfg(test)]
-    TestConsensusError(TestConsensusError),
+    #[error("{0}")]
+    IdentityAssetLockTransactionOutPointAlreadyExistsError(
+        IdentityAssetLockTransactionOutPointAlreadyExistsError,
+    ),
+    #[error("{0}")]
+    InvalidIdentityAssetLockTransactionOutputError(InvalidIdentityAssetLockTransactionOutputError),
+    #[error("{0}")]
+    InvalidAssetLockTransactionOutputReturnSize(InvalidAssetLockTransactionOutputReturnSize),
+    #[error("{0}")]
+    IdentityAssetLockTransactionOutputNotFoundError(
+        IdentityAssetLockTransactionOutputNotFoundError,
+    ),
+    #[error("{0}")]
+    InvalidIdentityAssetLockTransactionError(InvalidIdentityAssetLockTransactionError),
+    #[error("{0}")]
+    InvalidInstantAssetLockProofError(InvalidInstantAssetLockProofError),
 
     #[error(transparent)]
     StateError(Box<StateError>),
@@ -48,6 +64,10 @@ pub enum ConsensusError {
 
     #[error("Can't read protocol version from serialized object: {parsing_error}")]
     ProtocolVersionParsingError { parsing_error: anyhow::Error },
+
+    #[cfg(test)]
+    #[cfg_attr(test, error("{0}"))]
+    TestConsensusError(TestConsensusError),
 }
 
 impl ConsensusError {
@@ -71,7 +91,13 @@ impl ConsensusError {
             // Identity
             ConsensusError::DuplicatedIdentityPublicKeyError(_) => 1029,
             ConsensusError::DuplicatedIdentityPublicKeyIdError(_) => 1030,
+            ConsensusError::IdentityAssetLockTransactionOutPointAlreadyExistsError(_) => 1033,
+            ConsensusError::IdentityAssetLockTransactionOutputNotFoundError(_) => 1034,
+            ConsensusError::InvalidAssetLockTransactionOutputReturnSize(_) => 1037,
+            ConsensusError::InvalidIdentityAssetLockTransactionError(_) => 1038,
+            ConsensusError::InvalidIdentityAssetLockTransactionOutputError(_) => 1039,
             ConsensusError::InvalidIdentityPublicKeyDataError(_) => 1040,
+            ConsensusError::InvalidInstantAssetLockProofError(_) => 1041,
             ConsensusError::MissingMasterPublicKeyError(_) => 1046,
             ConsensusError::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
 
@@ -155,5 +181,41 @@ impl From<StateError> for ConsensusError {
 impl From<BasicError> for ConsensusError {
     fn from(se: BasicError) -> Self {
         ConsensusError::BasicError(Box::new(se))
+    }
+}
+
+impl From<IdentityAssetLockTransactionOutPointAlreadyExistsError> for ConsensusError {
+    fn from(err: IdentityAssetLockTransactionOutPointAlreadyExistsError) -> Self {
+        Self::IdentityAssetLockTransactionOutPointAlreadyExistsError(err)
+    }
+}
+
+impl From<InvalidIdentityAssetLockTransactionOutputError> for ConsensusError {
+    fn from(err: InvalidIdentityAssetLockTransactionOutputError) -> Self {
+        Self::InvalidIdentityAssetLockTransactionOutputError(err)
+    }
+}
+
+impl From<InvalidAssetLockTransactionOutputReturnSize> for ConsensusError {
+    fn from(err: InvalidAssetLockTransactionOutputReturnSize) -> Self {
+        Self::InvalidAssetLockTransactionOutputReturnSize(err)
+    }
+}
+
+impl From<IdentityAssetLockTransactionOutputNotFoundError> for ConsensusError {
+    fn from(err: IdentityAssetLockTransactionOutputNotFoundError) -> Self {
+        Self::IdentityAssetLockTransactionOutputNotFoundError(err)
+    }
+}
+
+impl From<InvalidIdentityAssetLockTransactionError> for ConsensusError {
+    fn from(err: InvalidIdentityAssetLockTransactionError) -> Self {
+        Self::InvalidIdentityAssetLockTransactionError(err)
+    }
+}
+
+impl From<InvalidInstantAssetLockProofError> for ConsensusError {
+    fn from(err: InvalidInstantAssetLockProofError) -> Self {
+        Self::InvalidInstantAssetLockProofError(err)
     }
 }

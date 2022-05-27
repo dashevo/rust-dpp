@@ -21,11 +21,21 @@ impl ErrorWithCode for ConsensusError {
             // Identity
             Self::DuplicatedIdentityPublicKeyError(_) => 1029,
             Self::DuplicatedIdentityPublicKeyIdError(_) => 1030,
+            Self::IdentityAssetLockTransactionOutPointAlreadyExistsError(_) => 1033,
+            Self::IdentityAssetLockTransactionOutputNotFoundError(_) => 1034,
+            Self::InvalidAssetLockTransactionOutputReturnSize(_) => 1037,
+            Self::InvalidIdentityAssetLockTransactionError(_) => 1038,
+            Self::InvalidIdentityAssetLockTransactionOutputError(_) => 1039,
             Self::InvalidIdentityPublicKeyDataError(_) => 1040,
+            Self::InvalidInstantAssetLockProofError(_) => 1041,
+            Self::MissingMasterPublicKeyError(_) => 1046,
             Self::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
 
             Self::StateError(e) => e.get_code(),
             Self::BasicError(e) => e.get_code(),
+
+            #[cfg(test)]
+            ConsensusError::TestConsensusError(_) => 1000
         }
     }
 }

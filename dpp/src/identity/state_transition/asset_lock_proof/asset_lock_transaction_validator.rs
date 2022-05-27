@@ -1,30 +1,52 @@
 use crate::consensus::basic::identity::{
+    IdentityAssetLockTransactionOutPointAlreadyExistsError,
     IdentityAssetLockTransactionOutputNotFoundError, InvalidAssetLockTransactionOutputReturnSize,
     InvalidIdentityAssetLockTransactionError, InvalidIdentityAssetLockTransactionOutputError,
 };
+use crate::state_repository::StateRepositoryLike;
 use crate::tests::utils::vec_to_array;
 use crate::validation::ValidationResult;
 use crate::NonConsensusError;
-use dashcore::consensus::encode::Error;
-use dashcore::consensus::{Decodable, Encodable};
-use dashcore::psbt::serialize::Deserialize;
+use dashcore::consensus;
+use dashcore::consensus::Decodable;
 use dashcore::{OutPoint, Transaction};
 
+#[derive(Clone, Debug)]
 pub struct AssetLockTransactionResultData {
     public_key_hash: [u8; 20],
     transaction: Transaction,
 }
 
-pub struct AssetLockTransactionValidator<SR> {
+impl Default for AssetLockTransactionResultData {
+    fn default() -> Self {
+        Self {
+            public_key_hash: Default::default(),
+            transaction: Transaction {
+                version: 0,
+                lock_time: 0,
+                input: vec![],
+                output: vec![],
+            },
+        }
+    }
+}
+
+pub struct AssetLockTransactionValidator<SR>
+where
+    SR: StateRepositoryLike,
+{
     state_repository: SR,
 }
 
-impl<SR> AssetLockTransactionValidator<SR> {
+impl<SR> AssetLockTransactionValidator<SR>
+where
+    SR: StateRepositoryLike,
+{
     pub fn new(state_repository: SR) -> Self {
         Self { state_repository }
     }
 
-    pub fn validate(
+    pub async fn validate(
         &self,
         raw_tx: &[u8],
         output_index: usize,
@@ -44,7 +66,7 @@ impl<SR> AssetLockTransactionValidator<SR> {
                     }
 
                     // Slicing from 1 bytes, which is OP_RETURN, to the end of the script
-                    let public_key_hash = output.script_pubkey.as_bytes()[1..];
+                    let public_key_hash = &output.script_pubkey.as_bytes()[1..];
                     // 20 bytes is the size of ripemd160, which should be stored after the OP_RETURN
                     if public_key_hash.len() != 20 {
                         result.add_error(InvalidAssetLockTransactionOutputReturnSize::new(
@@ -53,12 +75,17 @@ impl<SR> AssetLockTransactionValidator<SR> {
                         return Ok(result);
                     }
 
-                    let out_point_buf =
-                        OutPoint::new(transaction.txid(), output_index as u32).consensus_encode();
+                    let out_point = OutPoint::new(transaction.txid(), output_index as u32);
+                    let out_point_buf = consensus::serialize(&out_point);
 
                     let is_out_point_used = self
                         .state_repository
-                        .is_asset_lock_transaction_out_point_already_used(out_point_buf);
+                        .is_asset_lock_transaction_out_point_already_used(&out_point_buf)
+                        .await
+                        .map_err(|err| NonConsensusError::StateRepositoryFetchError(
+                            err.to_string(),
+                        ))?;
+
                     if is_out_point_used {
                         result.add_error(
                             IdentityAssetLockTransactionOutPointAlreadyExistsError::new(
@@ -84,7 +111,7 @@ impl<SR> AssetLockTransactionValidator<SR> {
             }
             Err(err) => {
                 let mut error = InvalidIdentityAssetLockTransactionError::new(err.to_string());
-                err.set_validation_error(err);
+                error.set_validation_error(err);
 
                 result.add_error(error);
                 return Ok(result);

@@ -1,9 +1,8 @@
 use crate::identity::{KeyType, Purpose, SecurityLevel};
-use crate::tests::fixtures::{identity_create_transition_fixture, instant_asset_lock_proof_json};
+use crate::tests::fixtures::{instant_asset_lock_proof_json};
 use crate::util::string_encoding::{decode, Encoding};
 use crate::version;
 use dashcore::PrivateKey;
-use serde::Serialize;
 use serde_json::{json, Value};
 use std::str::FromStr;
 

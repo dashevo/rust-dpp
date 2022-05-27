@@ -1,11 +1,12 @@
 use dashcore;
+use dashcore::consensus::encode::Error;
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone, PartialEq, Eq)]
+#[derive(Error, Debug)]
 #[error("Invalid asset lock transaction: ${message}")]
 pub struct InvalidIdentityAssetLockTransactionError {
     message: String,
-    validation_error: Option<dashcore::Error>,
+    validation_error: Option<dashcore::consensus::encode::Error>,
 }
 
 impl InvalidIdentityAssetLockTransactionError {
@@ -16,11 +17,11 @@ impl InvalidIdentityAssetLockTransactionError {
         }
     }
 
-    pub fn set_validation_error(&mut self, error: dashcore::Error) {
+    pub fn set_validation_error(&mut self, error: dashcore::consensus::encode::Error) {
         self.validation_error = Some(error);
     }
 
-    pub fn validation_error(&self) -> Option<&dashcore::Error> {
+    pub fn validation_error(&self) -> Option<&Error> {
         self.validation_error.as_ref()
     }
 }

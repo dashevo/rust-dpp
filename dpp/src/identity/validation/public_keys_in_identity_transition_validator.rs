@@ -1,16 +1,10 @@
 use crate::consensus::basic::identity::MissingMasterPublicKeyError;
-use crate::errors::consensus::basic::identity::{
-    DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
-    InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
-};
 use crate::identity::validation::TPublicKeysValidator;
 use crate::identity::{
-    IdentityPublicKey, KeyType, Purpose, SecurityLevel, ALLOWED_SECURITY_LEVELS,
+    IdentityPublicKey, Purpose, SecurityLevel,
 };
-use crate::validation::{JsonSchemaValidator, ValidationResult};
-use crate::{DashPlatformProtocolInitError, NonConsensusError, PublicKeyValidationError};
-use bls_signatures::{PublicKey as BlsPublicKey, Serialize};
-use dashcore::PublicKey;
+use crate::validation::{ValidationResult};
+use crate::{DashPlatformProtocolInitError, NonConsensusError};
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -27,7 +21,7 @@ impl TPublicKeysValidator for PublicKeysInIdentityCreateTransitionValidator {
     fn validate_keys(
         &self,
         raw_public_keys: &[Value],
-    ) -> Result<ValidationResult, NonConsensusError> {
+    ) -> Result<ValidationResult<()>, NonConsensusError> {
         let mut result = ValidationResult::default();
 
         let mut key_purposes_and_levels_count: HashMap<PurposeKey, usize> = HashMap::new();

@@ -48,7 +48,7 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
     pub fn validate(
         &self,
         identity_create_transition_json: &Value,
-    ) -> Result<ValidationResult, NonConsensusError> {
+    ) -> Result<ValidationResult<()>, NonConsensusError> {
         let mut result = self
             .json_schema_validator
             .validate(identity_create_transition_json)?;

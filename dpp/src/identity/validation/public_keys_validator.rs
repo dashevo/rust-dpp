@@ -134,7 +134,7 @@ impl PublicKeysValidator {
     pub fn validate_public_key_structure(
         &self,
         public_key: &Value,
-    ) -> Result<ValidationResult, NonConsensusError> {
+    ) -> Result<ValidationResult<()>, NonConsensusError> {
         self.public_key_schema_validator.validate(public_key)
     }
 }

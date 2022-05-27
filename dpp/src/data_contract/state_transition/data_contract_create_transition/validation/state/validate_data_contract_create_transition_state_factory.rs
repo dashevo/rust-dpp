@@ -26,7 +26,7 @@ where
     pub async fn validate_data_contract_create_transition_state(
         &self,
         state_transition: mocks::StateTransition,
-    ) -> ValidationResult {
+    ) -> ValidationResult<()> {
         let mut result = ValidationResult::default();
 
         // Data contract shouldn't exist

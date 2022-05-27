@@ -23,7 +23,7 @@
 
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
 use crate::identity::validation::{
-    PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator, TPublicKeysValidator,
+    TPublicKeysValidator,
 };
 use crate::version::ProtocolVersionValidator;
 use serde_json::Value;
@@ -52,12 +52,11 @@ fn setup_test(
 mod validate_identity_create_transition_basic_factory {
     use super::setup_test;
     use crate::identity::validation::{
-        PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
+        PublicKeysInIdentityCreateTransitionValidator,
     };
     use crate::tests::fixtures::PublicKeysValidatorMock;
     use crate::tests::utils::SerdeTestExtension;
     use crate::validation::ValidationResult;
-    use std::option::Option::None;
     use std::sync::Arc;
     // let validator.validate;
     // let rawStateTransition;
@@ -114,16 +113,15 @@ mod validate_identity_create_transition_basic_factory {
     // });
 
     mod protocol_version {
-        use std::option::Option::None;
         use std::sync::Arc;
         use jsonschema::error::ValidationErrorKind;
         use crate::{assert_consensus_errors, NonConsensusError};
-        use crate::consensus::basic::TestConsensusError;
+
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator};
         use crate::tests::identity::state_transition::identity_create_transition::validation::basic::identity_create_transition_basic_validator_spec::setup_test;
         use crate::tests::utils::{SerdeTestExtension};
-        use crate::validation::ValidationResult;
+
 
         #[test]
         pub fn should_be_present() {
@@ -202,7 +200,6 @@ mod validate_identity_create_transition_basic_factory {
         };
         use crate::tests::utils::SerdeTestExtension;
         use jsonschema::error::ValidationErrorKind;
-        use std::option::Option::None;
         use std::sync::Arc;
 
         #[test]
@@ -265,9 +262,7 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
-        use crate::validation::ValidationResult;
         use jsonschema::error::ValidationErrorKind;
-        use std::option::Option::None;
         use std::sync::Arc;
 
         #[test]
@@ -315,13 +310,13 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_be_valid() {
-            let (mut raw_state_transition, validator) = setup_test(
+            let (raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
             let err = TestConsensusError::new("test");
-            let asset_lock_error = ConsensusError::from(err.clone());
-            let asset_lock_result = ValidationResult::new(Some(vec![asset_lock_error]));
+            //let asset_lock_error = ConsensusError::from(err.clone());
+            //let asset_lock_result = ValidationResult::<()>::new(Some(vec![asset_lock_error]));
 
             // TODO: what to do about that?
             // proofValidationFunctionsByTypeMock[InstantAssetLockProof.type_]
@@ -355,7 +350,6 @@ mod validate_identity_create_transition_basic_factory {
         use crate::validation::ValidationResult;
         use jsonschema::error::ValidationErrorKind;
         use serde_json::Value;
-        use std::option::Option::None;
         use std::sync::Arc;
 
         #[test]
@@ -408,7 +402,7 @@ mod validate_identity_create_transition_basic_factory {
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
 
-            let mut public_keys = raw_state_transition
+            let public_keys = raw_state_transition
                 .get_value_mut("publicKeys")
                 .as_array_mut()
                 .unwrap();
@@ -438,7 +432,7 @@ mod validate_identity_create_transition_basic_factory {
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
 
-            let mut public_keys = raw_state_transition
+            let public_keys = raw_state_transition
                 .get_value_mut("publicKeys")
                 .as_array_mut()
                 .unwrap();
@@ -457,13 +451,13 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_be_valid() {
-            let mut pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
+            let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
             let pk_error = TestConsensusError::new("test");
             let consensus_error = ConsensusError::from(pk_error.clone());
             let public_keys_result = ValidationResult::new(Some(vec![consensus_error]));
             pk_validator_mock.returns(Ok(public_keys_result));
 
-            let (mut raw_state_transition, validator) = setup_test(
+            let (raw_state_transition, validator) = setup_test(
                 pk_validator_mock.clone(),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
@@ -487,13 +481,13 @@ mod validate_identity_create_transition_basic_factory {
 
         #[test]
         pub fn should_have_at_least_1_master_key() {
-            let mut pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
+            let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
             let pk_error = TestConsensusError::new("test");
             let consensus_error = ConsensusError::from(pk_error.clone());
             let public_keys_result = ValidationResult::new(Some(vec![consensus_error]));
             pk_validator_mock.returns(Ok(public_keys_result));
 
-            let (mut raw_state_transition, validator) = setup_test(
+            let (raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 pk_validator_mock.clone(),
             );
@@ -524,7 +518,6 @@ mod validate_identity_create_transition_basic_factory {
         };
         use crate::tests::utils::SerdeTestExtension;
         use jsonschema::error::ValidationErrorKind;
-        use std::option::Option::None;
         use std::sync::Arc;
 
         #[test]
@@ -612,11 +605,11 @@ mod validate_identity_create_transition_basic_factory {
 
     #[test]
     pub fn should_return_valid_result() {
-        let mut pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
+        let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
         let public_keys_result = ValidationResult::default();
         pk_validator_mock.returns(Ok(public_keys_result));
 
-        let (mut raw_state_transition, validator) = setup_test(
+        let (raw_state_transition, validator) = setup_test(
             pk_validator_mock.clone(),
             Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
         );

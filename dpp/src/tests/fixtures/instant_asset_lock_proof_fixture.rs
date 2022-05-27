@@ -1,18 +1,12 @@
 use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
 use crate::identity::AssetLockProof;
-use crate::tests::utils::{decode_hex, decode_hex_bls_sig, decode_hex_sha256, hex_to_array};
-use crate::util::string_encoding::{decode, Encoding};
-use dashcore::consensus::encode::MAX_VEC_SIZE;
-use dashcore::consensus::{encode, Decodable};
+use crate::tests::utils::{hex_to_array};
 use dashcore::secp256k1::Secp256k1;
 use dashcore::{
-    secp256k1::SecretKey, Address, InstantLock, Network, OutPoint, PrivateKey, Script, Transaction,
+    secp256k1::SecretKey, InstantLock, Network, OutPoint, PrivateKey, Script, Transaction,
     TxIn, TxOut, Txid,
 };
 use rand::thread_rng;
-use serde_json::json;
-use std::hash::Hash;
-use std::io;
 use std::str::FromStr;
 
 //3bufpwQjL5qsvuP4fmCKgXJrKG852DDMYfi9J6XKqPAT
@@ -26,7 +20,7 @@ pub fn instant_asset_lock_proof_json(one_time_private_key: Option<PrivateKey>) -
     let private_key = PrivateKey::from_str(private_key_hex).unwrap();
     let public_key = private_key.public_key(&secp);
     let public_key_hash = public_key.pubkey_hash();
-    let from_address = Address::p2pkh(&public_key, Network::Testnet);
+    //let from_address = Address::p2pkh(&public_key, Network::Testnet);
     let secret_key = SecretKey::new(&mut rng);
     let one_time_private_key =
         one_time_private_key.unwrap_or_else(|| PrivateKey::new(secret_key, Network::Testnet));
