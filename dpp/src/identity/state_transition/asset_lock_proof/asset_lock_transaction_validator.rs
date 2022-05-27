@@ -6,9 +6,8 @@ use crate::consensus::basic::identity::{
 use crate::state_repository::StateRepositoryLike;
 use crate::tests::utils::vec_to_array;
 use crate::validation::ValidationResult;
-use crate::NonConsensusError;
+use crate::{NonConsensusError};
 use dashcore::consensus;
-use dashcore::consensus::Decodable;
 use dashcore::{OutPoint, Transaction};
 
 #[derive(Clone, Debug)]
@@ -46,6 +45,7 @@ where
         Self { state_repository }
     }
 
+    /// raw_tx should be a js uint array
     pub async fn validate(
         &self,
         raw_tx: &[u8],
@@ -53,7 +53,7 @@ where
     ) -> Result<ValidationResult<AssetLockTransactionResultData>, NonConsensusError> {
         let mut result = ValidationResult::default();
 
-        match Transaction::consensus_decode(raw_tx) {
+        match consensus::deserialize::<Transaction>(raw_tx) {
             Ok(transaction) => {
                 let output = transaction.output.get(output_index);
 

@@ -21,6 +21,7 @@ impl ErrorWithCode for ConsensusError {
             // Identity
             Self::DuplicatedIdentityPublicKeyError(_) => 1029,
             Self::DuplicatedIdentityPublicKeyIdError(_) => 1030,
+            Self::IdentityAssetLockProofLockedTransactionMismatchError(_) => 1031,
             Self::IdentityAssetLockTransactionOutPointAlreadyExistsError(_) => 1033,
             Self::IdentityAssetLockTransactionOutputNotFoundError(_) => 1034,
             Self::InvalidAssetLockTransactionOutputReturnSize(_) => 1037,
@@ -28,6 +29,7 @@ impl ErrorWithCode for ConsensusError {
             Self::InvalidIdentityAssetLockTransactionOutputError(_) => 1039,
             Self::InvalidIdentityPublicKeyDataError(_) => 1040,
             Self::InvalidInstantAssetLockProofError(_) => 1041,
+            Self::InvalidInstantAssetLockProofSignatureError(_) => 1042,
             Self::MissingMasterPublicKeyError(_) => 1046,
             Self::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
 

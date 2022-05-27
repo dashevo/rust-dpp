@@ -1,5 +1,4 @@
-use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
-use crate::identity::AssetLockProof;
+use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, InstantAssetLockProof};
 use crate::tests::utils::hex_to_array;
 use dashcore::secp256k1::Secp256k1;
 use dashcore::{

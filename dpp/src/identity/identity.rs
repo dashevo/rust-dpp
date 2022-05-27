@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::{IdentityPublicKey, KeyID};
-use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, InstantAssetLockProof};
+use crate::identity::state_transition::asset_lock_proof::{AssetLockProof};
 use crate::{
     errors::ProtocolError,
     identifier::Identifier,

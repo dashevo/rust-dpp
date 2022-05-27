@@ -6,6 +6,8 @@ pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;
 pub use instant::*;
 
+use serde::{Serialize, Deserialize};
+
 // TODO implement!
 type ChainAssetLockProof = String;
 

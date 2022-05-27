@@ -1,11 +1,13 @@
 use crate::codes::ErrorWithCode;
 use crate::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
+    IdentityAssetLockProofLockedTransactionMismatchError,
     IdentityAssetLockTransactionOutPointAlreadyExistsError,
     IdentityAssetLockTransactionOutputNotFoundError, InvalidAssetLockTransactionOutputReturnSize,
     InvalidIdentityAssetLockTransactionError, InvalidIdentityAssetLockTransactionOutputError,
     InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
-    InvalidInstantAssetLockProofError, MissingMasterPublicKeyError,
+    InvalidInstantAssetLockProofError, InvalidInstantAssetLockProofSignatureError,
+    MissingMasterPublicKeyError,
 };
 use crate::errors::consensus::basic::{
     BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
@@ -52,6 +54,12 @@ pub enum ConsensusError {
     InvalidIdentityAssetLockTransactionError(InvalidIdentityAssetLockTransactionError),
     #[error("{0}")]
     InvalidInstantAssetLockProofError(InvalidInstantAssetLockProofError),
+    #[error("{0}")]
+    InvalidInstantAssetLockProofSignatureError(InvalidInstantAssetLockProofSignatureError),
+    #[error("{0}")]
+    IdentityAssetLockProofLockedTransactionMismatchError(
+        IdentityAssetLockProofLockedTransactionMismatchError,
+    ),
 
     #[error(transparent)]
     StateError(Box<StateError>),
@@ -91,6 +99,7 @@ impl ConsensusError {
             // Identity
             ConsensusError::DuplicatedIdentityPublicKeyError(_) => 1029,
             ConsensusError::DuplicatedIdentityPublicKeyIdError(_) => 1030,
+            ConsensusError::IdentityAssetLockProofLockedTransactionMismatchError(_) => 1031,
             ConsensusError::IdentityAssetLockTransactionOutPointAlreadyExistsError(_) => 1033,
             ConsensusError::IdentityAssetLockTransactionOutputNotFoundError(_) => 1034,
             ConsensusError::InvalidAssetLockTransactionOutputReturnSize(_) => 1037,
@@ -98,6 +107,7 @@ impl ConsensusError {
             ConsensusError::InvalidIdentityAssetLockTransactionOutputError(_) => 1039,
             ConsensusError::InvalidIdentityPublicKeyDataError(_) => 1040,
             ConsensusError::InvalidInstantAssetLockProofError(_) => 1041,
+            ConsensusError::InvalidInstantAssetLockProofSignatureError(_) => 1042,
             ConsensusError::MissingMasterPublicKeyError(_) => 1046,
             ConsensusError::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
 
@@ -217,5 +227,17 @@ impl From<InvalidIdentityAssetLockTransactionError> for ConsensusError {
 impl From<InvalidInstantAssetLockProofError> for ConsensusError {
     fn from(err: InvalidInstantAssetLockProofError) -> Self {
         Self::InvalidInstantAssetLockProofError(err)
+    }
+}
+
+impl From<InvalidInstantAssetLockProofSignatureError> for ConsensusError {
+    fn from(err: InvalidInstantAssetLockProofSignatureError) -> Self {
+        Self::InvalidInstantAssetLockProofSignatureError(err)
+    }
+}
+
+impl From<IdentityAssetLockProofLockedTransactionMismatchError> for ConsensusError {
+    fn from(err: IdentityAssetLockProofLockedTransactionMismatchError) -> Self {
+        Self::IdentityAssetLockProofLockedTransactionMismatchError(err)
     }
 }

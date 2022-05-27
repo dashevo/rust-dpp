@@ -1,6 +1,4 @@
-use crate::consensus::basic::identity::{
-    InvalidInstantAssetLockProofError, InvalidInstantAssetLockProofSignatureError,
-};
+use crate::consensus::basic::identity::{IdentityAssetLockProofLockedTransactionMismatchError, InvalidInstantAssetLockProofError, InvalidInstantAssetLockProofSignatureError};
 use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionValidator;
 use crate::state_repository::StateRepositoryLike;
 use crate::validation::{JsonSchemaValidator, ValidationResult};
@@ -9,6 +7,7 @@ use dashcore::consensus;
 use dashcore::InstantLock;
 use lazy_static::lazy_static;
 use serde_json::Value;
+use crate::util::json_value::JsonValueExt;
 
 lazy_static! {
     static ref INSTANT_ASSET_LOCK_PROOF_SCHEMA: Value = serde_json::from_str(include_str!(
@@ -46,7 +45,7 @@ where
         })
     }
 
-    pub fn validate(
+    pub async fn validate(
         &self,
         raw_asset_lock_proof: &Value,
     ) -> Result<ValidationResult<PublicKeyHash>, NonConsensusError> {
@@ -137,12 +136,10 @@ where
         // return result;
         // }
 
-        let tx_value = raw_asset_lock_proof
-            .as_object()
-            .ok_or_else(|| SerdeParsingError::new("Expected asset lock to be an object"))?
-            .get("transaction")
-            .ok_or_else(|| {
-                SerdeParsingError::new("Expect asset lock to have a 'transaction field'")
+        let tx_json_uint_array = raw_asset_lock_proof
+            .get_bytes("transaction")
+            .map_err(|err| {
+                SerdeParsingError::new(err.to_string())
             })?;
 
         let output_index = raw_asset_lock_proof
@@ -158,10 +155,11 @@ where
         // TODO: get transaction bytes and pass them as the first argument
         let validate_asset_lock_transaction_result = self
             .asset_lock_transaction_validator
-            .validate(tx_value, output_index as usize)
+            .validate(&tx_json_uint_array, output_index as usize)
             .await?;
 
-        let validation_result_data = validate_asset_lock_transaction_result.data();
+        // TODO: remove unwrap
+        let validation_result_data = validate_asset_lock_transaction_result.data().unwrap().clone();
         result.merge(validate_asset_lock_transaction_result);
 
         if !result.is_valid() {
@@ -179,9 +177,8 @@ where
         // return result;
         // }
 
-        let kek = validation_result_data.ok_or_else(|| {})?;
-        let public_key_hash = kek.public_key_hash;
-        let transaction = &kek.transaction;
+        let public_key_hash = validation_result_data.public_key_hash;
+        let transaction = &validation_result_data.transaction;
 
         // /**
         //  * @typedef {Transaction} transaction
@@ -192,7 +189,7 @@ where
 
         if instant_lock.txid != transaction.txid() {
             result.add_error(IdentityAssetLockProofLockedTransactionMismatchError::new(
-                public_key_hash,
+                instant_lock.txid,
                 transaction.txid(),
             ));
 
