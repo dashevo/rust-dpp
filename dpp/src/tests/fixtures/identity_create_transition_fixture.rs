@@ -1,5 +1,5 @@
 use crate::identity::{KeyType, Purpose, SecurityLevel};
-use crate::tests::fixtures::{instant_asset_lock_proof_json};
+use crate::tests::fixtures::instant_asset_lock_proof_json;
 use crate::util::string_encoding::{decode, Encoding};
 use crate::version;
 use dashcore::PrivateKey;

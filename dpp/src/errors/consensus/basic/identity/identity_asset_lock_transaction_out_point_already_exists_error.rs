@@ -10,12 +10,17 @@ pub struct IdentityAssetLockTransactionOutPointAlreadyExistsError {
 
 impl IdentityAssetLockTransactionOutPointAlreadyExistsError {
     pub fn new(transaction_id: Txid, output_index: usize) -> Self {
-        Self { transaction_id, output_index }
+        Self {
+            transaction_id,
+            output_index,
+        }
     }
 
     pub fn output_index(&self) -> usize {
         self.output_index
     }
 
-    pub fn transaction_id(&self) -> Txid { self.transaction_id }
+    pub fn transaction_id(&self) -> Txid {
+        self.transaction_id
+    }
 }

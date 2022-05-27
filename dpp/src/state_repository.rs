@@ -5,6 +5,7 @@ use crate::mocks;
 use crate::prelude::*;
 
 use anyhow::Result as AnyResult;
+use dashcore::InstantLock;
 
 #[cfg(test)]
 use mockall::{automock, predicate::*};
@@ -78,7 +79,7 @@ pub trait StateRepositoryLike: Send + Sync {
         T: for<'de> serde::de::Deserialize<'de> + 'static;
 
     /// Verify Instant Lock
-    async fn verify_instant_lock(&self, instant_lock: &mocks::InstantLock) -> AnyResult<bool>;
+    async fn verify_instant_lock(&self, instant_lock: &InstantLock) -> AnyResult<bool>;
 
     /// Check if AssetLock Transaction outPoint exists in spent list
     async fn is_asset_lock_transaction_out_point_already_used(

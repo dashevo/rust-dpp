@@ -1,9 +1,7 @@
 use crate::consensus::basic::identity::MissingMasterPublicKeyError;
 use crate::identity::validation::TPublicKeysValidator;
-use crate::identity::{
-    IdentityPublicKey, Purpose, SecurityLevel,
-};
-use crate::validation::{ValidationResult};
+use crate::identity::{IdentityPublicKey, Purpose, SecurityLevel};
+use crate::validation::ValidationResult;
 use crate::{DashPlatformProtocolInitError, NonConsensusError};
 use serde_json::Value;
 use std::collections::HashMap;

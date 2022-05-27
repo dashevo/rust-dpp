@@ -1,10 +1,10 @@
 use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
 use crate::identity::AssetLockProof;
-use crate::tests::utils::{hex_to_array};
+use crate::tests::utils::hex_to_array;
 use dashcore::secp256k1::Secp256k1;
 use dashcore::{
-    secp256k1::SecretKey, InstantLock, Network, OutPoint, PrivateKey, Script, Transaction,
-    TxIn, TxOut, Txid,
+    secp256k1::SecretKey, InstantLock, Network, OutPoint, PrivateKey, Script, Transaction, TxIn,
+    TxOut, Txid,
 };
 use rand::thread_rng;
 use std::str::FromStr;

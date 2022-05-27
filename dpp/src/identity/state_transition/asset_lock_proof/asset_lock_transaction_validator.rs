@@ -13,8 +13,8 @@ use dashcore::{OutPoint, Transaction};
 
 #[derive(Clone, Debug)]
 pub struct AssetLockTransactionResultData {
-    public_key_hash: [u8; 20],
-    transaction: Transaction,
+    pub public_key_hash: [u8; 20],
+    pub transaction: Transaction,
 }
 
 impl Default for AssetLockTransactionResultData {
@@ -82,9 +82,9 @@ where
                         .state_repository
                         .is_asset_lock_transaction_out_point_already_used(&out_point_buf)
                         .await
-                        .map_err(|err| NonConsensusError::StateRepositoryFetchError(
-                            err.to_string(),
-                        ))?;
+                        .map_err(|err| {
+                            NonConsensusError::StateRepositoryFetchError(err.to_string())
+                        })?;
 
                     if is_out_point_used {
                         result.add_error(

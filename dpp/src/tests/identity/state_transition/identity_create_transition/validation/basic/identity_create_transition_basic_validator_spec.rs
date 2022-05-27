@@ -22,9 +22,7 @@
 // let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
 
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
-use crate::identity::validation::{
-    TPublicKeysValidator,
-};
+use crate::identity::validation::TPublicKeysValidator;
 use crate::version::ProtocolVersionValidator;
 use serde_json::Value;
 use std::sync::Arc;
@@ -51,9 +49,7 @@ fn setup_test(
 
 mod validate_identity_create_transition_basic_factory {
     use super::setup_test;
-    use crate::identity::validation::{
-        PublicKeysInIdentityCreateTransitionValidator,
-    };
+    use crate::identity::validation::PublicKeysInIdentityCreateTransitionValidator;
     use crate::tests::fixtures::PublicKeysValidatorMock;
     use crate::tests::utils::SerdeTestExtension;
     use crate::validation::ValidationResult;
@@ -113,15 +109,14 @@ mod validate_identity_create_transition_basic_factory {
     // });
 
     mod protocol_version {
-        use std::sync::Arc;
-        use jsonschema::error::ValidationErrorKind;
         use crate::{assert_consensus_errors, NonConsensusError};
+        use jsonschema::error::ValidationErrorKind;
+        use std::sync::Arc;
 
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator};
         use crate::tests::identity::state_transition::identity_create_transition::validation::basic::identity_create_transition_basic_validator_spec::setup_test;
         use crate::tests::utils::{SerdeTestExtension};
-
 
         #[test]
         pub fn should_be_present() {

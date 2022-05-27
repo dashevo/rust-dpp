@@ -35,7 +35,7 @@ impl ErrorWithCode for ConsensusError {
             Self::BasicError(e) => e.get_code(),
 
             #[cfg(test)]
-            ConsensusError::TestConsensusError(_) => 1000
+            ConsensusError::TestConsensusError(_) => 1000,
         }
     }
 }

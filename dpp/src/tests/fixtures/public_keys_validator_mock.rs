@@ -1,4 +1,4 @@
-use crate::identity::validation::{TPublicKeysValidator};
+use crate::identity::validation::TPublicKeysValidator;
 use crate::validation::ValidationResult;
 use crate::NonConsensusError;
 use serde_json::Value;
@@ -7,7 +7,8 @@ use std::sync::Mutex;
 #[cfg(test)]
 pub struct PublicKeysValidatorMock {
     returns: Mutex<Result<ValidationResult<()>, NonConsensusError>>,
-    returns_fn: Mutex<Option<Box<dyn Fn() -> Result<ValidationResult<()>, NonConsensusError> + 'static>>>,
+    returns_fn:
+        Mutex<Option<Box<dyn Fn() -> Result<ValidationResult<()>, NonConsensusError> + 'static>>>,
     called_with: Mutex<Vec<Value>>,
 }
 
@@ -24,7 +25,10 @@ impl PublicKeysValidatorMock {
         *self.returns.lock().unwrap() = result;
     }
 
-    pub fn returns_fun(&mut self, func: impl Fn() -> Result<ValidationResult<()>, NonConsensusError> + 'static) {
+    pub fn returns_fun(
+        &mut self,
+        func: impl Fn() -> Result<ValidationResult<()>, NonConsensusError> + 'static,
+    ) {
         *self.returns_fn.lock().unwrap() = Some(Box::new(func))
     }
 

@@ -1,22 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 use super::{IdentityPublicKey, KeyID};
-use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProof;
+use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, InstantAssetLockProof};
 use crate::{
     errors::ProtocolError,
     identifier::Identifier,
     metadata::Metadata,
     util::{hash, serializer},
 };
-
-// TODO implement!
-type ChainAssetLockProof = String;
-
-#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
-pub enum AssetLockProof {
-    Instant(InstantAssetLockProof),
-    Chain(ChainAssetLockProof),
-}
 
 /// Implement the Identity. Identity is a low-level construct that provides the foundation
 /// for user-facing functionality on the platform
