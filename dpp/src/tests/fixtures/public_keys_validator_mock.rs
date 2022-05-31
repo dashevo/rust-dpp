@@ -26,7 +26,7 @@ impl PublicKeysValidatorMock {
     }
 
     pub fn returns_fun(
-        &mut self,
+        &self,
         func: impl Fn() -> Result<ValidationResult<()>, NonConsensusError> + 'static,
     ) {
         *self.returns_fn.lock().unwrap() = Some(Box::new(func))

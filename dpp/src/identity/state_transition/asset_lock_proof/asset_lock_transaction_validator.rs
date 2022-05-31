@@ -4,11 +4,11 @@ use crate::consensus::basic::identity::{
     InvalidIdentityAssetLockTransactionError, InvalidIdentityAssetLockTransactionOutputError,
 };
 use crate::state_repository::StateRepositoryLike;
-use crate::tests::utils::vec_to_array;
 use crate::validation::ValidationResult;
 use crate::{NonConsensusError};
 use dashcore::consensus;
 use dashcore::{OutPoint, Transaction};
+use crate::util::vec::vec_to_array;
 
 #[derive(Clone, Debug)]
 pub struct AssetLockTransactionResultData {

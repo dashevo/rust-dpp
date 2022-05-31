@@ -1,6 +1,7 @@
 mod asset_lock_proof_validator;
 mod asset_lock_transaction_validator;
 mod instant;
+pub mod chain;
 
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;
