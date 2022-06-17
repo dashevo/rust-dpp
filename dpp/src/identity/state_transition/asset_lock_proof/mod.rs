@@ -2,6 +2,8 @@ mod asset_lock_proof_validator;
 mod asset_lock_transaction_validator;
 mod instant;
 pub mod chain;
+mod asset_lock_public_key_hash_fetcher;
+mod asset_lock_transaction_output_fetcher;
 
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;

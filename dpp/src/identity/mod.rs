@@ -10,4 +10,6 @@ pub use identity_facade::*;
 pub use identity_public_key::*;
 
 mod credits_converter;
+mod errors;
+
 pub use credits_converter::*;
