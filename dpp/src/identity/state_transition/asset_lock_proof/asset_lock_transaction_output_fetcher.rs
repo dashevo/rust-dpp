@@ -1,9 +1,10 @@
 use dashcore::Transaction;
+use crate::identity::errors::{AssetLockTransactionIsNotFoundError, UnknownAssetLockProofTypeError};
 use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, AssetLockProofType};
 use crate::state_repository::StateRepositoryLike;
 
 pub struct AssetLockTransactionOutputFetcher<SR: StateRepositoryLike> {
-    stateRepositorty: SR,
+    state_repository: SR,
 }
 
 pub type ExecutionContext = String;
@@ -11,35 +12,34 @@ pub type ExecutionContext = String;
 impl<SR: StateRepositoryLike> AssetLockTransactionOutputFetcher<SR> {
     pub fn new(state_repository: SR) -> Self {
         Self {
-            stateRepositorty: state_repository
+            state_repository
         }
     }
 
-    pub async fn fetch(&self, assetLockProof: AssetLockProof, executionContext: ExecutionContext) -> Result<()> {
-        if (assetLockProof.getType() == AssetLockProofType::Instant) {
-            return assetLockProof.getOutput();
+    pub async fn fetch(&self, asset_lock_proof: AssetLockProof, execution_context: ExecutionContext) -> Result<(), AssetLockTransactionIsNotFoundError> {
+        if asset_lock_proof.getType() == AssetLockProofType::Instant {
+            return asset_lock_proof.getOutput();
         }
 
-        if (assetLockProof.getType() == AssetLockProofType::Chain) {
-            let outPoint = Transaction.parseOutPointBuffer(assetLockProof.getOutPoint());
+        if asset_lock_proof.getType() == AssetLockProofType::Chain {
+            let out_point = Transaction::parseOutPointBuffer(asset_lock_proof.getOutPoint());
 
-            let { outputIndex, transactionHash } = outPoint;
+            let output_index = out_point.outputIndex;
+            let transaction_hash = out_point.transactionHash;
 
-            let rawTransaction = self.stateRepository.fetchTransaction(
-                transactionHash,
-                executionContext,
+            let raw_transaction = self.state_repository.fetchTransaction(
+                transaction_hash,
+                execution_context,
             ).await;
 
-            if (rawTransaction.is_none()) {
-                Err(AssetLockTransactionIsNotFoundError::new(transactionHash));
+            if raw_transaction.is_none() {
+                return Err(AssetLockTransactionIsNotFoundError::new(transaction_hash));
             }
 
-            let transaction = new Transaction(rawTransaction.data);
-            return transaction.outputs[outputIndex];
+            let transaction = Transaction::new(raw_transaction.data);
+            return Ok(transaction.outputs[output_index]);
         }
 
-        throw new UnknownAssetLockProofTypeError(assetLockProof.getType());
-        
-        None
+        Err(UnknownAssetLockProofTypeError::new(asset_lock_proof.getType()))
     }
 }
