@@ -19,3 +19,8 @@ pub enum AssetLockProof {
     Instant(InstantAssetLockProof),
     Chain(ChainAssetLockProof),
 }
+
+pub enum AssetLockProofType {
+    Instant = 0,
+    Chain = 1,
+}
