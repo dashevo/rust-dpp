@@ -24,24 +24,24 @@ impl ChainAssetLockProof {
     }
 
     /// Get proof type
-    pub fn get_type() -> u8 {
+    pub fn asset_lock_type() -> u8 {
         return 1;
     }
 
     /// Get Asset Lock proof core height
-    pub fn get_core_chain_locked_height(&self) -> u32 {
+    pub fn core_chain_locked_height(&self) -> u32 {
         return self.core_chain_locked_height;
     }
 
     /// Get out_point
-    pub fn get_out_point(&self) -> &[u8] {
+    pub fn out_point(&self) -> &[u8] {
         return &self.out_point;
     }
 
     /// Create identifier
     pub fn create_identifier(&self) -> Identifier {
         return Identifier::new(
-            vec_to_array(hash(self.get_out_point()).as_ref())
+            vec_to_array(hash(self.out_point()).as_ref())
                 .expect("Expected hash function to give a 32 byte output"),
         );
     }

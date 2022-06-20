@@ -8,11 +8,10 @@ mod asset_lock_transaction_output_fetcher;
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;
 pub use instant::*;
+pub use chain::*;
 
 use serde::{Serialize, Deserialize};
-
-// TODO implement!
-type ChainAssetLockProof = String;
+use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
 
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum AssetLockProof {

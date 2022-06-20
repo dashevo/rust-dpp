@@ -5,7 +5,7 @@ use crate::state_repository::StateRepositoryLike;
 
 pub struct AssetLockPublicKeyHashFetcher<SR> where SR: StateRepositoryLike {
     state_repository: SR,
-    asset_lock_transaction_output_fetcher: AssetLockTransactionOutputFetcher
+    asset_lock_transaction_output_fetcher: AssetLockTransactionOutputFetcher<SR>
 }
 
 impl<SR> AssetLockPublicKeyHashFetcher<SR> where SR: StateRepositoryLike {

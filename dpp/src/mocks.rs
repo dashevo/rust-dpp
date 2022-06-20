@@ -229,7 +229,7 @@ impl DocumentValidator {
         &self,
         _raw_document: &JsonValue,
         _data_contract: &DataContract,
-    ) -> ValidationResult {
+    ) -> ValidationResult<()> {
         ValidationResult::default()
     }
 }
