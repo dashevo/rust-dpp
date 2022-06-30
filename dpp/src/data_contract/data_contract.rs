@@ -1,4 +1,5 @@
-use super::errors::*;
+use super::drive::{self, DriveExt};
+use super::{drive_types, errors::*};
 use crate::data_contract::get_binary_properties_from_schema::get_binary_properties;
 use crate::util::json_value::{JsonValueExt, ReplaceWith};
 use crate::util::string_encoding::Encoding;
@@ -25,36 +26,6 @@ pub const SCHEMA: &str = "https://schema.dash.org/dpp-0-4-0/meta/data-contract";
 
 pub const IDENTIFIER_FIELDS: [&str; 2] = [PROPERTY_ID, PROPERTY_OWNER_ID];
 
-impl Convertible for DataContract {
-    fn to_object(&self) -> Result<JsonValue, ProtocolError> {
-        let mut json_object = serde_json::to_value(&self)?;
-        if !json_object.is_object() {
-            return Err(anyhow!("the Data Contract isn't a JSON Value Object").into());
-        }
-
-        json_object.replace_identifier_paths(IDENTIFIER_FIELDS, ReplaceWith::Bytes)?;
-        Ok(json_object)
-    }
-
-    /// Returns Data Contract as a JSON Value
-    fn to_json(&self) -> Result<JsonValue, ProtocolError> {
-        Ok(serde_json::to_value(&self)?)
-    }
-
-    /// Returns Data Contract as a Buffer
-    fn to_buffer(&self) -> Result<Vec<u8>, ProtocolError> {
-        let protocol_version = self.protocol_version;
-        // what means skip_identifiers_conversion
-        let mut json_object = self.to_object()?;
-
-        if let JsonValue::Object(ref mut o) = json_object {
-            o.remove("protocolVersion");
-        };
-
-        serializer::value_to_cbor(json_object, Some(protocol_version))
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct DataContract {
@@ -69,13 +40,22 @@ pub struct DataContract {
     pub documents: BTreeMap<DocumentType, JsonSchema>,
     #[serde(rename = "$defs", default)]
     pub defs: BTreeMap<DocumentType, JsonSchema>,
+
     #[serde(skip)]
     pub metadata: Option<Metadata>,
     #[serde(skip)]
     pub entropy: [u8; 32],
     #[serde(skip)]
     pub binary_properties: BTreeMap<DocumentType, BTreeMap<PropertyPath, JsonValue>>,
+
+    // Drive related-fields
+    pub keeps_history: bool,
+    pub readonly: bool,
+    pub documents_keep_history_contract_default: bool,
+    pub documents_mutable_contract_default: bool,
 }
+
+// TODO-> probably we should create a separate structure for JSON format
 
 impl DataContract {
     pub fn new() -> Self {
@@ -193,6 +173,36 @@ impl DataContract {
             .iter()
             .map(|(doc_type, schema)| (String::from(doc_type), get_binary_properties(schema)))
             .collect();
+    }
+}
+
+impl Convertible for DataContract {
+    fn to_object(&self) -> Result<JsonValue, ProtocolError> {
+        let mut json_object = serde_json::to_value(&self)?;
+        if !json_object.is_object() {
+            return Err(anyhow!("the Data Contract isn't a JSON Value Object").into());
+        }
+
+        json_object.replace_identifier_paths(IDENTIFIER_FIELDS, ReplaceWith::Bytes)?;
+        Ok(json_object)
+    }
+
+    /// Returns Data Contract as a JSON Value
+    fn to_json(&self) -> Result<JsonValue, ProtocolError> {
+        Ok(serde_json::to_value(&self)?)
+    }
+
+    /// Returns Data Contract as a Buffer
+    fn to_buffer(&self) -> Result<Vec<u8>, ProtocolError> {
+        let protocol_version = self.protocol_version;
+        // what means skip_identifiers_conversion
+        let mut json_object = self.to_object()?;
+
+        if let JsonValue::Object(ref mut o) = json_object {
+            o.remove("protocolVersion");
+        };
+
+        serializer::value_to_cbor(json_object, Some(protocol_version))
     }
 }
 

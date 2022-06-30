@@ -30,6 +30,12 @@ futures = { version ="0.3"}
 chrono = { version="0.4", default-features=false, features=["wasmbind", "clock"]}
 itertools = { version ="0.10"}
 regex = { version="1.5"}
+integer-encoding  =  { version="3.0.3"}
+
+
+# this should be replaced with random
+rand  =  { version="0.8.4"}
+
 
 
 

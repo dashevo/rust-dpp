@@ -1519,7 +1519,7 @@ mod test {
         print_json_schema_errors(&result);
 
         assert_eq!(
-            "/documents/new/properties/something/items",
+            "/documents/indexedDocument/properties/firstName",
             schema_error.instance_path().to_string()
         );
         assert_eq!(Some("const"), schema_error.keyword());

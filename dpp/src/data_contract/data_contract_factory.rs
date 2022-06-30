@@ -82,6 +82,11 @@ impl DataContractFactory {
                 });
             }
         }
+
+        // DataType to JsonFormat
+
+        // here we should convert it to the cbor and use cbor, deserializer to set up a new DataContract
+
         DataContract::from_raw_object(raw_data_contract)
     }
 
