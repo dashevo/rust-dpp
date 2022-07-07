@@ -1,8 +1,9 @@
+use dashcore::Transaction;
+use serde::{Deserialize, Serialize};
+
 use crate::identifier::Identifier;
 use crate::util::hash::hash;
 use crate::util::vec::vec_to_array;
-use dashcore::Transaction;
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct ChainAssetLockProof {

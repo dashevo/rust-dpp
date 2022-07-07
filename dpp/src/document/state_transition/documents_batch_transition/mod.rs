@@ -5,7 +5,6 @@ use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
-use crate::data_contract::DataContract;
 use crate::{
     identity::{KeyID, SecurityLevel},
     state_transition::{
@@ -13,11 +12,12 @@ use crate::{
         StateTransitionType,
     },
 };
+use crate::data_contract::DataContract;
 // TODO simplify imports
 use crate::document::document_transition::DocumentTransitionObjectLike;
 use crate::prelude::{DocumentTransition, Identifier};
-use crate::util::json_value::{JsonValueExt, ReplaceWith};
 use crate::ProtocolError;
+use crate::util::json_value::{JsonValueExt, ReplaceWith};
 
 pub mod document_transition;
 pub mod validation;
@@ -244,7 +244,7 @@ mod test {
         tests::fixtures::{get_data_contract_fixture, get_documents_fixture},
     };
 
-    use super::{document_transition::Action, *};
+    use super::{*, document_transition::Action};
 
     #[test]
     fn should_return_highest_sec_level_for_all_transitions() {

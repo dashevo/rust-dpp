@@ -1,5 +1,6 @@
-use crate::SerdeParsingError;
 use serde_json::{Map, Value};
+
+use crate::SerdeParsingError;
 
 pub fn get_protocol_version(
     protocol_structure_json: &Map<String, Value>,

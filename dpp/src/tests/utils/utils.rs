@@ -1,10 +1,10 @@
 use std::num::ParseIntError;
 
-use crate::InvalidVectorSizeError;
 use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
 
+use crate::InvalidVectorSizeError;
 use crate::prelude::Identifier;
 
 #[cfg(test)]

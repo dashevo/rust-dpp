@@ -1,6 +1,4 @@
-use crate::identity::state_transition::asset_lock_proof::{
-    InstantAssetLockProofStructureValidator,
-};
+use crate::identity::state_transition::asset_lock_proof::InstantAssetLockProofStructureValidator;
 use crate::state_repository::StateRepositoryLike;
 
 pub struct AssetLockProofValidator<SR: StateRepositoryLike> {

@@ -1,20 +1,19 @@
+use anyhow::anyhow;
+use lazy_static::lazy_static;
+use serde_json::Value as JsonValue;
 use std::sync::Arc;
 
 use crate::{
     consensus::basic::BasicError,
     data_contract::{
-        enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema,
-        enrich_data_contract_with_base_schema::PREFIX_BYTE_0, DataContract,
+        DataContract,
+        enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema, enrich_data_contract_with_base_schema::PREFIX_BYTE_0,
     },
+    ProtocolError,
     util::json_value::JsonValueExt,
     validation::{JsonSchemaValidator, ValidationResult},
     version::ProtocolVersionValidator,
-    ProtocolError,
 };
-use anyhow::anyhow;
-use lazy_static::lazy_static;
-
-use serde_json::Value as JsonValue;
 
 const PROPERTY_PROTOCOL_VERSION: &str = "$protocolVersion";
 const PROPERTY_DOCUMENT_TYPE: &str = "$type";
@@ -91,7 +90,14 @@ impl DocumentValidator {
 
 #[cfg(test)]
 mod test {
+    use jsonschema::{
+        error::{TypeKind, ValidationErrorKind},
+        primitive_type::PrimitiveType,
+    };
     use serde_json::json;
+    use serde_json::Value as JsonValue;
+    use std::sync::Arc;
+    use test_case::test_case;
 
     use crate::{
         codes::ErrorWithCode,
@@ -100,17 +106,10 @@ mod test {
         tests::fixtures::{get_data_contract_fixture, get_documents_fixture},
         util::json_value::JsonValueExt,
         validation::ValidationResult,
-        version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
+        version::{COMPATIBILITY_MAP, LATEST_VERSION, ProtocolVersionValidator},
     };
 
     use super::DocumentValidator;
-    use jsonschema::{
-        error::{TypeKind, ValidationErrorKind},
-        primitive_type::PrimitiveType,
-    };
-    use serde_json::Value as JsonValue;
-    use std::sync::Arc;
-    use test_case::test_case;
 
     struct TestData {
         data_contract: DataContract,

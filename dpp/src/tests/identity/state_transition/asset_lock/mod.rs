@@ -1,3 +1,4 @@
+pub use instant::*;
+
 mod instant;
 
-pub use instant::*;

@@ -6,8 +6,8 @@ use crate::{
     document::document_transition::Action,
     errors::ProtocolError,
     util::deserializer,
-    util::json_value::JsonValueExt,
     util::json_value::{self, ReplaceWith},
+    util::json_value::JsonValueExt,
 };
 
 use super::{DocumentBaseTransition, DocumentTransitionObjectLike};

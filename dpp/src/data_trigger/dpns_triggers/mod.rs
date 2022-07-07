@@ -1,16 +1,16 @@
-use anyhow::Context;
 use anyhow::{anyhow, bail};
+use anyhow::Context;
 use serde_json::{json, Value as JsonValue};
 
-use crate::document::Document;
-use crate::util::hash::hash;
-use crate::util::string_encoding::Encoding;
 use crate::{
     document::document_transition::DocumentTransition, get_from_transition, prelude::Identifier,
     state_repository::StateRepositoryLike, util::json_value::JsonValueExt,
 };
+use crate::document::Document;
+use crate::util::hash::hash;
+use crate::util::string_encoding::Encoding;
 
-use super::{new_error, DataTriggerExecutionContext, DataTriggerExecutionResult};
+use super::{DataTriggerExecutionContext, DataTriggerExecutionResult, new_error};
 
 const MAX_PRINTABLE_DOMAIN_NAME_LENGTH: usize = 253;
 const PROPERTY_LABEL: &str = "label";

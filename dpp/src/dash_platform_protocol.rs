@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use crate::errors::DashPlatformProtocolInitError;
-use crate::identity::validation::PublicKeysValidator;
 use crate::identity::IdentityFacade;
-use crate::version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION};
+use crate::identity::validation::PublicKeysValidator;
+use crate::version::{COMPATIBILITY_MAP, LATEST_VERSION, ProtocolVersionValidator};
 
 pub struct DashPlatformProtocol<SR> {
     // Version of protocol

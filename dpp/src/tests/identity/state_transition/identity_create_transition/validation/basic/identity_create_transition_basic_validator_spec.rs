@@ -21,11 +21,13 @@
 // let TestConsensusError = require("../../../../../../../lib/test/mocks/TestConsensusError");
 // let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
 
+use std::sync::Arc;
+
+use serde_json::Value;
+
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
 use crate::identity::validation::TPublicKeysValidator;
 use crate::version::ProtocolVersionValidator;
-use serde_json::Value;
-use std::sync::Arc;
 
 fn setup_test(
     public_keys_validator: Arc<impl TPublicKeysValidator>,
@@ -48,13 +50,16 @@ fn setup_test(
 }
 
 mod validate_identity_create_transition_basic_factory {
-    use super::setup_test;
+    use std::sync::Arc;
+
     use crate::identity::validation::PublicKeysInIdentityCreateTransitionValidator;
     use crate::tests::fixtures::PublicKeysValidatorMock;
     use crate::tests::utils::SerdeTestExtension;
     use crate::validation::ValidationResult;
-    use std::sync::Arc;
-    // let validator.validate;
+
+    use super::setup_test;
+
+// let validator.validate;
     // let rawStateTransition;
     // let stateTransition;
     // let validatePublicKeysMock;
@@ -109,14 +114,15 @@ mod validate_identity_create_transition_basic_factory {
     // });
 
     mod protocol_version {
-        use crate::{assert_consensus_errors, NonConsensusError};
-        use jsonschema::error::ValidationErrorKind;
         use std::sync::Arc;
 
+        use jsonschema::error::ValidationErrorKind;
+
+        use crate::{assert_consensus_errors, NonConsensusError};
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator};
         use crate::tests::identity::state_transition::identity_create_transition::validation::basic::identity_create_transition_basic_validator_spec::setup_test;
-        use crate::tests::utils::{SerdeTestExtension};
+        use crate::tests::utils::SerdeTestExtension;
 
         #[test]
         pub fn should_be_present() {
@@ -187,15 +193,18 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod type_a {
-        use super::super::setup_test;
+        use std::sync::Arc;
+
+        use jsonschema::error::ValidationErrorKind;
+
         use crate::assert_consensus_errors;
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
-        use jsonschema::error::ValidationErrorKind;
-        use std::sync::Arc;
+
+        use super::super::setup_test;
 
         #[test]
         pub fn should_be_present() {
@@ -249,7 +258,10 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod asset_lock_proof {
-        use super::super::setup_test;
+        use std::sync::Arc;
+
+        use jsonschema::error::ValidationErrorKind;
+
         use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
@@ -257,9 +269,9 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
-        use jsonschema::error::ValidationErrorKind;
-        use std::sync::Arc;
         use crate::util::json_path::JsonPathStep;
+
+        use super::super::setup_test;
 
         #[test]
         pub fn should_be_present() {
@@ -336,7 +348,11 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod public_keys {
-        use super::super::setup_test;
+        use std::sync::Arc;
+
+        use jsonschema::error::ValidationErrorKind;
+        use serde_json::Value;
+
         use crate::assert_consensus_errors;
         use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
@@ -346,9 +362,8 @@ mod validate_identity_create_transition_basic_factory {
         use crate::tests::fixtures::PublicKeysValidatorMock;
         use crate::tests::utils::SerdeTestExtension;
         use crate::validation::ValidationResult;
-        use jsonschema::error::ValidationErrorKind;
-        use serde_json::Value;
-        use std::sync::Arc;
+
+        use super::super::setup_test;
 
         #[test]
         pub fn should_be_present() {
@@ -502,15 +517,18 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod signature {
-        use super::super::setup_test;
+        use std::sync::Arc;
+
+        use jsonschema::error::ValidationErrorKind;
+
         use crate::assert_consensus_errors;
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
-        use jsonschema::error::ValidationErrorKind;
-        use std::sync::Arc;
+
+        use super::super::setup_test;
 
         #[test]
         pub fn should_be_present() {

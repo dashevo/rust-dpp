@@ -1,6 +1,6 @@
 use crate::{
-    dash_platform_protocol::DPPOptions, state_repository::MockStateRepositoryLike,
-    DashPlatformProtocol,
+    dash_platform_protocol::DPPOptions, DashPlatformProtocol,
+    state_repository::MockStateRepositoryLike,
 };
 
 // TODO creation of DPP object for testing needs to be improved

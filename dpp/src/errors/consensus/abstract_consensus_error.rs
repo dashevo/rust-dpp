@@ -15,10 +15,9 @@ use crate::consensus::basic::identity::{
 use crate::errors::consensus::basic::{
     BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
-use crate::errors::StateError;
-
 #[cfg(test)]
 use crate::errors::consensus::basic::TestConsensusError;
+use crate::errors::StateError;
 
 #[derive(Error, Debug)]
 //#[cfg_attr(test, derive(Clone))]

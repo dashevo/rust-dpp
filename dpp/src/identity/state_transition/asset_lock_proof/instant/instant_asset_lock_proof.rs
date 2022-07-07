@@ -1,5 +1,6 @@
 use dashcore::{InstantLock, Transaction};
 use serde::{Deserialize, Serialize};
+
 use crate::identifier::Identifier;
 use crate::InvalidVectorSizeError;
 use crate::util::hash::hash;

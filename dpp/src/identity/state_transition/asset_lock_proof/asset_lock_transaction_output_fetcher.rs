@@ -1,5 +1,6 @@
 use dashcore::psbt::serialize::Deserialize;
 use dashcore::Transaction;
+
 use crate::identity::errors::{AssetLockTransactionIsNotFoundError, UnknownAssetLockProofTypeError};
 use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, AssetLockProofType};
 use crate::state_repository::StateRepositoryLike;

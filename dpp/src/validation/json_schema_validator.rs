@@ -1,9 +1,9 @@
 use jsonschema::{JSONSchema, KeywordDefinition};
 use serde_json::{json, Value};
 
+use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 use crate::consensus::ConsensusError;
 use crate::validation::ValidationResult;
-use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 
 pub struct JsonSchemaValidator {
     raw_schema_json: Value,

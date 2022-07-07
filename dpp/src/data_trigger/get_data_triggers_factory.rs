@@ -8,9 +8,9 @@ use crate::{
     },
     data_trigger::{
         dashpay_data_triggers::create_contract_request_data_trigger,
-        dpns_triggers::create_domain_data_trigger,
-        feature_flags_data_triggers::create_feature_flag_data_trigger, reject_data_trigger,
         DataTriggerExecutionContext,
+        dpns_triggers::create_domain_data_trigger, feature_flags_data_triggers::create_feature_flag_data_trigger,
+        reject_data_trigger,
     },
     document::document_transition::Action,
     errors::ProtocolError,

@@ -4,13 +4,12 @@ use std::convert::{TryFrom, TryInto};
 
 use anyhow::anyhow;
 use ciborium::value::Value as CborValue;
-
 use serde_json::{Map, Value as JsonValue};
 
 use crate::identifier::Identifier;
+use crate::ProtocolError;
 use crate::util::json_value::ReplaceWith;
 use crate::util::string_encoding::Encoding;
-use crate::ProtocolError;
 
 pub fn value_to_bytes(value: &CborValue) -> Result<Option<Vec<u8>>, ProtocolError> {
     match value {

@@ -1,8 +1,10 @@
-use crate::identity::validation::TPublicKeysValidator;
-use crate::validation::ValidationResult;
-use crate::NonConsensusError;
-use serde_json::Value;
 use std::sync::Mutex;
+
+use serde_json::Value;
+
+use crate::identity::validation::TPublicKeysValidator;
+use crate::NonConsensusError;
+use crate::validation::ValidationResult;
 
 #[cfg(test)]
 pub struct PublicKeysValidatorMock {
