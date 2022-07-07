@@ -1,6 +1,9 @@
+use thiserror::Error;
+
 use crate::data_contract::DataContract;
 use crate::errors::consensus::ConsensusError;
-use thiserror::Error;
+
+// TODO - to delete
 
 #[derive(Error, Debug)]
 pub enum DataContractError {

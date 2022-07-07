@@ -1,17 +1,19 @@
-use crate::util::deserializer;
-use anyhow::{anyhow, bail};
 use std::{collections::BTreeMap, convert::TryInto};
 
+use anyhow::{anyhow, bail};
 use log::trace;
+use serde::de::DeserializeOwned;
 use serde_json::{Number, Value as JsonValue};
+
+use crate::util::deserializer;
+use crate::{
+    errors::ProtocolError,
+    identifier::{self, Identifier},
+};
 
 use super::{
     json_path::{JsonPath, JsonPathLiteral, JsonPathStep},
     string_encoding::Encoding,
-};
-use crate::{
-    errors::ProtocolError,
-    identifier::{self, Identifier},
 };
 
 const PROPERTY_CONTENT_MEDIA_TYPE: &str = "contentMediaType";
@@ -28,6 +30,9 @@ pub enum ReplaceWith {
 pub trait JsonValueExt {
     /// assumes the Json Value is a map and tries to remove the given property
     fn remove(&mut self, property_name: &str) -> Result<JsonValue, anyhow::Error>;
+    /// assumes the Json Value is a map and tries to remove the given property and deserialize into the provided type
+    fn remove_into<K: DeserializeOwned>(&mut self, property_name: &str)
+        -> Result<K, anyhow::Error>;
     /// assumes the Json Value is a map and tries to insert the given value under given property
     fn insert(&mut self, property_name: String, value: JsonValue) -> Result<(), anyhow::Error>;
     fn get_string(&self, property_name: &str) -> Result<&str, anyhow::Error>;
@@ -66,6 +71,7 @@ pub trait JsonValueExt {
 
     fn parse_and_add_protocol_version(
         &mut self,
+        property_name: &str,
         protocol_bytes: &[u8],
     ) -> Result<(), ProtocolError>;
 }
@@ -76,6 +82,27 @@ impl JsonValueExt for JsonValue {
             Some(map) => {
                 map.insert(property_name, value);
                 Ok(())
+            }
+            None => bail!("the property '{}' isn't a map: '{:?}'", property_name, self),
+        }
+    }
+
+    fn remove_into<K: DeserializeOwned>(
+        &mut self,
+        property_name: &str,
+    ) -> Result<K, anyhow::Error> {
+        match self.as_object_mut() {
+            Some(map) => {
+                if let Some(data) = map.remove(property_name) {
+                    serde_json::from_value(data)
+                        .map_err(|err| anyhow!("unable convert data: {}`", err))
+                } else {
+                    bail!(
+                        "the property '{}' doesn't exist in {:?}",
+                        property_name,
+                        self
+                    )
+                }
             }
             None => bail!("the property '{}' isn't a map: '{:?}'", property_name, self),
         }
@@ -212,7 +239,14 @@ impl JsonValueExt for JsonValue {
             let mut to_replace = get_value_mut(raw_path, self);
             match to_replace {
                 Some(ref mut v) => {
-                    replace_identifier(v, with)?;
+                    replace_identifier(v, with).map_err(|err| {
+                        anyhow!(
+                            "unable replace the {:?} with {:?}: '{}'",
+                            raw_path,
+                            with,
+                            err
+                        )
+                    })?;
                 }
                 None => {
                     trace!("path '{}' is not found, replacing to {:?} ", raw_path, with)
@@ -231,8 +265,16 @@ impl JsonValueExt for JsonValue {
         for raw_path in paths {
             let mut to_replace = get_value_mut(raw_path, self);
             match to_replace {
-                Some(ref mut v) => {
-                    replace_binary(v, with)?;
+                Some(ref mut value) => {
+                    replace_binary(value, with).map_err(|err| {
+                        anyhow!(
+                            "unable replace {:?} with {:?}: '{}' input data: '{}'",
+                            raw_path,
+                            with,
+                            err,
+                            value
+                        )
+                    })?;
                 }
                 None => {
                     trace!("path '{}' is not found, replacing to {:?} ", raw_path, with)
@@ -244,13 +286,14 @@ impl JsonValueExt for JsonValue {
 
     fn parse_and_add_protocol_version<'a>(
         &mut self,
+        property_name: &str,
         protocol_bytes: &[u8],
     ) -> Result<(), ProtocolError> {
         let protocol_version = deserializer::get_protocol_version(protocol_bytes)?;
         match self {
             JsonValue::Object(ref mut m) => {
                 m.insert(
-                    String::from("$protocolVersion"),
+                    String::from(property_name),
                     JsonValue::Number(Number::from(protocol_version)),
                 );
             }
@@ -317,7 +360,7 @@ pub fn replace_identifier(
     Ok(())
 }
 
-pub fn replace_binary(to_replace: &mut JsonValue, with: ReplaceWith) -> Result<(), ProtocolError> {
+pub fn replace_binary(to_replace: &mut JsonValue, with: ReplaceWith) -> Result<(), anyhow::Error> {
     let mut json_value = JsonValue::Null;
     std::mem::swap(to_replace, &mut json_value);
     match with {
@@ -330,9 +373,8 @@ pub fn replace_binary(to_replace: &mut JsonValue, with: ReplaceWith) -> Result<(
             *to_replace = JsonValue::String(base64::encode(data_bytes));
         }
         ReplaceWith::Bytes => {
-            let data_string: String = serde_json::from_value(json_value)?;
-            let identifier = Identifier::from_string(&data_string, Encoding::Base58)?.to_vec();
-            *to_replace = JsonValue::Array(identifier);
+            let base64: String = serde_json::from_value(json_value)?;
+            *to_replace = JsonValue::from(base64::decode(base64)?);
         }
     }
     Ok(())

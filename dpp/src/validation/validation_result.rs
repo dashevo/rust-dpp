@@ -1,7 +1,6 @@
 use crate::errors::consensus::ConsensusError;
 
 #[derive(Default, Debug)]
-//#[cfg_attr(test, derive(Clone))]
 pub struct ValidationResult<TData: Clone> {
     pub errors: Vec<ConsensusError>,
     // TODO: data can be anything, figure out what to do with it

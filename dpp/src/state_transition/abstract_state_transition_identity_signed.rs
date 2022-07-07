@@ -1,8 +1,8 @@
-use dashcore::secp256k1::{PublicKey as RawPublicKey, SecretKey as RawSecretKey};
+use std::convert::TryInto;
 
 use anyhow::anyhow;
 use bls_signatures::Serialize;
-use std::convert::TryInto;
+use dashcore::secp256k1::{PublicKey as RawPublicKey, SecretKey as RawSecretKey};
 
 use crate::{
     identity::{IdentityPublicKey, KeyID, KeyType, Purpose, SecurityLevel},
@@ -141,22 +141,22 @@ pub fn get_public_bls_key(private_key: &[u8]) -> Result<Vec<u8>, ProtocolError> 
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use bls_signatures::Serialize as BlsSerialize;
+    use serde::{Deserialize, Serialize};
+    use serde_json::json;
+
     use crate::document::DocumentsBatchTransition;
     use crate::{
         assert_error_contains,
         identity::{KeyID, SecurityLevel},
-        mocks,
         state_transition::{
             StateTransition, StateTransitionConvert, StateTransitionLike, StateTransitionType,
         },
         util::hash::ripemd160_sha256,
     };
-    use bls_signatures::Serialize as BlsSerialize;
-    use serde::{Deserialize, Serialize};
-    use serde_json::json;
 
     use super::StateTransitionIdentitySigned;
+    use super::*;
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]

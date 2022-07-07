@@ -1,5 +1,16 @@
 use std::num::ParseIntError;
+
 use crate::InvalidVectorSizeError;
+
+fn byte_to_hex(byte: &u8) -> String {
+    format!("{:02x}", byte)
+}
+
+pub fn encode_hex<T: Clone + Into<Vec<u8>>>(bytes: &T) -> String {
+    let hex_vec: Vec<String> = bytes.clone().into().iter().map(byte_to_hex).collect();
+
+    hex_vec.join("")
+}
 
 pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
     (0..s.len())
@@ -27,11 +38,11 @@ impl From<ParseIntError> for DecodeError {
 }
 
 pub fn decode_hex_bls_sig(s: &str) -> Result<[u8; 96], DecodeError> {
-    Ok(hex_to_array::<96>(s)?)
+    hex_to_array::<96>(s)
 }
 
 pub fn decode_hex_sha256(s: &str) -> Result<[u8; 32], DecodeError> {
-    Ok(hex_to_array::<32>(s)?)
+    hex_to_array::<32>(s)
 }
 
 pub fn hex_to_array<const N: usize>(s: &str) -> Result<[u8; N], DecodeError> {

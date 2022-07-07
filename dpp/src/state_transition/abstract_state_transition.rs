@@ -1,7 +1,14 @@
+use std::convert::TryInto;
+use std::fmt::Debug;
+
 use anyhow::anyhow;
+use bls_signatures::{
+    verify_messages, PrivateKey as BLSPrivateKey, PublicKey as BLSPublicKey,
+    Serialize as BLSSerialize,
+};
 use dashcore::signer;
 use serde::Serialize;
-use std::fmt::Debug;
+use serde_json::Value as JsonValue;
 
 use crate::{
     identity::KeyType,
@@ -12,15 +19,10 @@ use crate::{
         serializer,
     },
 };
-use serde_json::Value as JsonValue;
-use std::convert::TryInto;
 
 use super::{StateTransition, StateTransitionType};
-use bls_signatures::{
-    verify_messages, PrivateKey as BLSPrivateKey, PublicKey as BLSPublicKey,
-    Serialize as BLSSerialize,
-};
 
+const PROPERTY_SIGNATURE: &str = "signature";
 const PROPERTY_PROTOCOL_VERSION: &str = "protocolVersion";
 
 pub const DOCUMENT_TRANSITION_TYPES: [StateTransitionType; 1] =
@@ -145,6 +147,7 @@ pub trait StateTransitionLike:
 // TODO remove 'unimplemented' when get rid of state transition mocks
 /// The trait contains methods related to conversion of StateTransition into different formats
 pub trait StateTransitionConvert: Serialize {
+    // TODO remove this as it is not necessary and can be hardcoded
     fn signature_property_paths() -> Vec<&'static str>;
     fn identifiers_property_paths() -> Vec<&'static str>;
     fn binary_property_paths() -> Vec<&'static str>;

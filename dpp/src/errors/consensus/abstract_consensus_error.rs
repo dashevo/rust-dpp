@@ -1,3 +1,6 @@
+use jsonschema::ValidationError;
+use thiserror::Error;
+
 use crate::codes::ErrorWithCode;
 use crate::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
@@ -13,8 +16,6 @@ use crate::errors::consensus::basic::{
     BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
 use crate::errors::StateError;
-use jsonschema::ValidationError;
-use thiserror::Error;
 
 #[cfg(test)]
 use crate::errors::consensus::basic::TestConsensusError;

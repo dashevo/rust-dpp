@@ -1,7 +1,9 @@
-use crate::{errors::consensus::ConsensusError, errors::ProtocolError};
+use std::convert::TryInto;
+
 use anyhow::anyhow;
 use serde_json::{Map, Number, Value as JsonValue};
-use std::convert::TryInto;
+
+use crate::{errors::consensus::ConsensusError, errors::ProtocolError};
 
 pub fn parse_protocol_version(
     protocol_bytes: &[u8],
@@ -24,7 +26,7 @@ pub fn get_protocol_version(version_bytes: &[u8]) -> Result<u32, ProtocolError> 
         .into());
     } else {
         let version_set_bytes: [u8; 4] = version_bytes.try_into().unwrap();
-        u32::from_be_bytes(version_set_bytes)
+        u32::from_le_bytes(version_set_bytes)
     })
 }
 
@@ -32,6 +34,7 @@ pub mod serde_entropy {
     use std::convert::TryInto;
 
     use serde::{Deserialize, Deserializer, Serializer};
+
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<[u8; 32], D::Error> {
         let data: String = Deserialize::deserialize(d)?;
         base64::decode(&data)

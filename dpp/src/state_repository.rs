@@ -1,9 +1,11 @@
+use anyhow::Result as AnyResult;
 use async_trait::async_trait;
+#[cfg(test)]
+use mockall::{automock, predicate::*};
 use serde_json::Value as JsonValue;
 
 use crate::prelude::*;
 
-use anyhow::Result as AnyResult;
 use dashcore::InstantLock;
 
 #[cfg(test)]

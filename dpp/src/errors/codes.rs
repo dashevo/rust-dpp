@@ -2,6 +2,7 @@ use super::{
     abstract_state_error::StateError, consensus::basic::BasicError, consensus::ConsensusError,
     DataTriggerError,
 };
+
 pub trait ErrorWithCode {
     // Returns the Error Code
     fn get_code(&self) -> u32;
@@ -76,6 +77,8 @@ impl ErrorWithCode for BasicError {
         match *self {
             // Document
             Self::DataContractContPresent { .. } => 1018,
+            Self::InvalidDocumentTypeError { .. } => 1024,
+            Self::MissingDocumentTypeError { .. } => 1028,
             // Data contract
             Self::InvalidDataContractVersionError { .. } => 4013,
         }
