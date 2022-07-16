@@ -7,6 +7,7 @@ pub use invalid_vector_size_error::*;
 pub use non_consensus_error::*;
 pub use public_key_validation_error::*;
 pub use serde_parsing_error::*;
+pub use dpp_error::*;
 
 mod compatible_protocol_version_is_not_defined_error;
 pub mod consensus;
@@ -21,3 +22,4 @@ pub mod codes;
 pub mod errors;
 
 mod data_trigger;
+mod dpp_error;

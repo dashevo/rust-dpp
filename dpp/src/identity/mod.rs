@@ -11,5 +11,5 @@ pub mod state_transition;
 pub mod validation;
 
 mod credits_converter;
-mod errors;
+pub mod errors;
 

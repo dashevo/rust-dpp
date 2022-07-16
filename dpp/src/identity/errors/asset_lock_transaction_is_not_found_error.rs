@@ -1,5 +1,6 @@
 use dashcore::Txid;
 use thiserror::Error;
+use crate::DPPError;
 
 #[derive(Error, Debug, Clone, PartialEq, Eq)]
 #[error("Asset Lock transaction {transaction_id:?} is not found")]
@@ -16,5 +17,11 @@ impl AssetLockTransactionIsNotFoundError {
 
     pub fn transaction_id(&self) -> Txid {
         self.transaction_id
+    }
+}
+
+impl From<AssetLockTransactionIsNotFoundError> for DPPError {
+    fn from(error: AssetLockTransactionIsNotFoundError) -> Self {
+        Self::AssetLockOutputNotFoundError(error)
     }
 }

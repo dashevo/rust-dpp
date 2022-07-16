@@ -67,7 +67,7 @@ where
                     }
 
                     // Slicing from 1 bytes, which is OP_RETURN, to the end of the script
-                    let public_key_hash = &output.script_pubkey.as_bytes()[1..];
+                    let public_key_hash = &output.script_pubkey.as_bytes()[2..];
                     // 20 bytes is the size of ripemd160, which should be stored after the OP_RETURN
                     if public_key_hash.len() != 20 {
                         result.add_error(InvalidAssetLockTransactionOutputReturnSize::new(

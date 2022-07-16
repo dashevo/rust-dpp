@@ -1,7 +1,9 @@
 use dashcore::psbt::serialize::Deserialize;
-use dashcore::Transaction;
+use dashcore::{Transaction, TxOut};
+use futures::TryFutureExt;
+use crate::DPPError;
 
-use crate::identity::errors::{AssetLockTransactionIsNotFoundError, UnknownAssetLockProofTypeError};
+use crate::identity::errors::{AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError, UnknownAssetLockProofTypeError};
 use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, AssetLockProofType};
 use crate::state_repository::StateRepositoryLike;
 
@@ -18,10 +20,10 @@ impl<SR: StateRepositoryLike> AssetLockTransactionOutputFetcher<SR> {
         }
     }
 
-    pub async fn fetch(&self, asset_lock_proof: AssetLockProof, execution_context: ExecutionContext) -> Result<(), AssetLockTransactionIsNotFoundError> {
+    pub async fn fetch(&self, asset_lock_proof: AssetLockProof, execution_context: ExecutionContext) -> Result<&TxOut, DPPError> {
         match asset_lock_proof {
             AssetLockProof::Instant(asset_lock_proof) => {
-                Ok(asset_lock_proof.output())
+                asset_lock_proof.output().ok_or_else(||AssetLockOutputNotFoundError::new())
             }
             AssetLockProof::Chain(asset_lock_proof) => {
                 let out_point = Transaction::parseOutPointBuffer(asset_lock_proof.out_point());
@@ -34,7 +36,7 @@ impl<SR: StateRepositoryLike> AssetLockTransactionOutputFetcher<SR> {
                     execution_context,
                 ).await? {
                     let transaction = Transaction::deserialize(&raw_transaction)?;
-                    Ok(transaction.outputs[output_index])
+                    transaction.output.get(output_index).ok_or_else(||AssetLockOutputNotFoundError::new())
                 } else {
                     Err(AssetLockTransactionIsNotFoundError::new(transaction_hash))
                 }

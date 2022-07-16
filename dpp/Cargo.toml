@@ -13,7 +13,7 @@ anyhow = { version = "1.0"}
 thiserror = { version = "1.0"}
 lazy_static = { version ="1.4"}
 serde = { version="1.0", features=["derive"]}
-dashcore = { git="https://github.com/dashevo/rust-dashcore", features=["no-std", "secp-recovery", "rand", "signer"], default-features = false }
+dashcore = { git="https://github.com/dashevo/rust-dashcore", features=["no-std", "secp-recovery", "rand", "signer"], default-features = false, rev="509a090d2c8b4ad951b656f0669a3bd01ef99778" }
 # the same version used by dashcore I guess?
 rand = "0.6.5"
 serde_json = { version="1.0", features=["preserve_order"]}

@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
 use crate::{errors::ProtocolError, identifier::Identifier, metadata::Metadata, util::hash};
-use crate::util::serializer;
 use crate::identity::identity_public_key;
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::util::cbor_value::{CborBTreeMapHelper, CborCanonicalMap};

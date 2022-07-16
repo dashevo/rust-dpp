@@ -1,4 +1,4 @@
-use dashcore::{InstantLock, Transaction};
+use dashcore::{InstantLock, Transaction, TxOut};
 use serde::{Deserialize, Serialize};
 
 use crate::identifier::Identifier;
@@ -64,8 +64,8 @@ impl InstantAssetLockProof {
         self.transaction.getOutPointBuffer(self.output_index())
     }
 
-    pub fn output(&self) {
-        self.transaction.outputs[self.output_index()];
+    pub fn output(&self) -> Option<&TxOut> {
+        self.transaction.output.get(self.output_index())
     }
 
     pub fn create_identifier(&self) -> Result<Identifier, InvalidVectorSizeError> {
