@@ -259,6 +259,7 @@ mod validate_identity_create_transition_basic_factory {
 
     mod asset_lock_proof {
         use std::sync::Arc;
+        use crate::util::json_path::JsonPathStep;
 
         use jsonschema::error::ValidationErrorKind;
 
@@ -269,7 +270,6 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
-        use crate::util::json_path::JsonPathStep;
 
         use super::super::setup_test;
 
@@ -427,7 +427,7 @@ mod validate_identity_create_transition_basic_factory {
 
             let result = validator.validate(&raw_state_transition).unwrap();
 
-            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 65);
 
             let error = errors.first().unwrap();
 
@@ -451,7 +451,7 @@ mod validate_identity_create_transition_basic_factory {
 
             let result = validator.validate(&raw_state_transition).unwrap();
 
-            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
 
             let error = errors.first().unwrap();
 
