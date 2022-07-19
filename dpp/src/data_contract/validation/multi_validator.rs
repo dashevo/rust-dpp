@@ -1,16 +1,23 @@
-use serde_json::Value as JsonValue;
-
 use regex::Regex;
+use serde_json::Value as JsonValue;
 
 use crate::{
     consensus::{basic::BasicError, ConsensusError},
     validation::ValidationResult,
 };
 
-type SubValidator =
-    fn(path: &str, key: &str, parent: &JsonValue, value: &JsonValue, result: &mut ValidationResult<()>);
+type SubValidator = fn(
+    path: &str,
+    key: &str,
+    parent: &JsonValue,
+    value: &JsonValue,
+    result: &mut ValidationResult<()>,
+);
 
-pub fn validate(raw_data_contract: &JsonValue, validators: &[SubValidator]) -> ValidationResult<()> {
+pub fn validate(
+    raw_data_contract: &JsonValue,
+    validators: &[SubValidator],
+) -> ValidationResult<()> {
     let mut result = ValidationResult::default();
     let mut values_queue: Vec<(&JsonValue, String)> = vec![(raw_data_contract, String::from(""))];
 

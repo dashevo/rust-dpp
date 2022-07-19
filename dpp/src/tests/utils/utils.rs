@@ -1,11 +1,8 @@
-use std::num::ParseIntError;
-
 use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
 
 use crate::prelude::Identifier;
-use crate::InvalidVectorSizeError;
 
 #[cfg(test)]
 #[macro_export]

@@ -1,14 +1,9 @@
-use anyhow::bail;
 use dashcore::hashes::hex::ToHex;
 use dashcore::psbt::serialize::Deserialize;
 use dashcore::{OutPoint, Transaction, TxOut};
-use futures::TryFutureExt;
 
-use crate::identity::errors::{
-    AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError,
-    UnknownAssetLockProofTypeError,
-};
-use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, AssetLockProofType};
+use crate::identity::errors::{AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError};
+use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::state_repository::StateRepositoryLike;
 use crate::DPPError;
 

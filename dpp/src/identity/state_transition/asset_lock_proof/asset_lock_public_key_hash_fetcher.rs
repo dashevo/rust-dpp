@@ -1,4 +1,3 @@
-use crate::identity::errors::AssetLockOutputNotFoundError;
 use crate::identity::state_transition::asset_lock_proof::asset_lock_transaction_output_fetcher::{
     AssetLockTransactionOutputFetcher, ExecutionContext,
 };

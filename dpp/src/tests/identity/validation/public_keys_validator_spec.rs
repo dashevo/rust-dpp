@@ -29,8 +29,8 @@ pub mod id {
     use crate::errors::consensus::ConsensusError;
     use crate::identity::validation::TPublicKeysValidator;
     use crate::tests::identity::validation::public_keys_validator_spec::setup_test;
+    use crate::tests::utils::serde_set_ref;
     use crate::tests::utils::SerdeTestExtension;
-    use crate::tests::utils::{serde_remove_ref, serde_set_ref};
 
     #[test]
     pub fn should_be_present() {

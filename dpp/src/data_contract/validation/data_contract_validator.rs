@@ -410,7 +410,10 @@ fn validate_max_unique_indices(indices: &[Index], document_type: &str) -> Valida
 }
 
 /// checks if the system properties are not included in index definition
-fn validate_no_system_indices(index_definition: &Index, document_type: &str) -> ValidationResult<()> {
+fn validate_no_system_indices(
+    index_definition: &Index,
+    document_type: &str,
+) -> ValidationResult<()> {
     let mut result = ValidationResult::default();
 
     for (property_name, _) in index_definition.properties.iter().flatten() {

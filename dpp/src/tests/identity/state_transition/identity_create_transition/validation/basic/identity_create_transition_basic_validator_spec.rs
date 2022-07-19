@@ -269,7 +269,6 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
-        use crate::util::json_path::JsonPathStep;
 
         use super::super::setup_test;
 

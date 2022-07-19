@@ -1,5 +1,5 @@
-use dashcore::Transaction;
 use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
 
 use crate::identifier::Identifier;
 use crate::util::hash::hash;
@@ -10,7 +10,7 @@ pub struct ChainAssetLockProof {
     #[serde(rename = "type")]
     asset_lock_type: u8,
     core_chain_locked_height: u32,
-    // outpoints are actually fixed sized, remove vec from here
+    #[serde(with = "BigArray")]
     out_point: [u8; 36],
 }
 

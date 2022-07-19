@@ -14,7 +14,6 @@ use crate::{
     tests::fixtures::get_data_contract_fixture,
     util::json_value::JsonValueExt,
     version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
-    Convertible,
 };
 
 struct TestData {

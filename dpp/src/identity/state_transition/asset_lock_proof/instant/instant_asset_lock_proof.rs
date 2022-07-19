@@ -1,15 +1,14 @@
 use dashcore::{InstantLock, Transaction, TxOut};
-use serde::{Deserialize, Serialize};
 
 use crate::identifier::Identifier;
 use crate::util::hash::hash;
 use crate::util::vec::vec_to_array;
 use crate::InvalidVectorSizeError;
 
-#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug)]
+// #[serde(rename_all = "camelCase")]
 pub struct InstantAssetLockProof {
-    #[serde(rename = "type")]
+    // #[serde(rename = "type")]
     asset_lock_type: u8,
     instant_lock: InstantLock,
     transaction: Transaction,
@@ -69,7 +68,12 @@ impl InstantAssetLockProof {
     }
 
     pub fn create_identifier(&self) -> Result<Identifier, InvalidVectorSizeError> {
-        let buffer = hash(self.transaction().out_point_buffer(self.output_index()));
+        // TODO: remove unwrap
+        let buffer = hash(
+            self.transaction()
+                .out_point_buffer(self.output_index())
+                .unwrap(),
+        );
         Ok(Identifier::new(vec_to_array(&buffer)?))
     }
 }

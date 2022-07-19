@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;
 pub use chain::*;
@@ -14,7 +12,7 @@ mod asset_lock_transaction_validator;
 pub mod chain;
 mod instant;
 
-#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub enum AssetLockProof {
     Instant(InstantAssetLockProof),
     Chain(ChainAssetLockProof),
