@@ -21,14 +21,7 @@ use crate::util::string_encoding::Encoding;
 
 use super::errors::*;
 
-const PROPERTY_PROTOCOL_VERSION: &str = "protocolVersion";
-const PROPERTY_ID: &str = "$id";
-const PROPERTY_OWNER_ID: &str = "ownerId";
-const PROPERTY_VERSION: &str = "version";
-const PROPERTY_SCHEMA: &str = "$schema";
-const PROPERTY_DOCUMENTS: &str = "documents";
-const PROPERTY_DEFINITIONS: &str = "$defs";
-const PROPERTY_ENTROPY: &str = "entropy";
+use super::properties::*;
 
 pub type JsonSchema = JsonValue;
 type DocumentType = String;
@@ -82,6 +75,7 @@ pub struct DataContract {
     pub documents: BTreeMap<DocumentType, JsonSchema>,
     #[serde(rename = "$defs", default)]
     pub defs: BTreeMap<DocumentType, JsonSchema>,
+
     #[serde(skip)]
     pub metadata: Option<Metadata>,
     #[serde(skip)]
@@ -298,14 +292,15 @@ impl DataContract {
     }
 
     pub fn get_document_schema(&self, doc_type: &str) -> Result<&JsonSchema, ProtocolError> {
-        let d =
+        let document =
             self.documents
                 .get(doc_type)
                 .ok_or(DataContractError::InvalidDocumentTypeError {
                     doc_type: doc_type.to_owned(),
                     data_contract: self.clone(),
                 })?;
-        Ok(d)
+
+        Ok(document)
     }
 
     pub fn get_document_schema_ref(&self, doc_type: &str) -> Result<String, ProtocolError> {
@@ -393,7 +388,7 @@ mod test {
 
     fn init() {
         let _ = env_logger::builder()
-            .filter_level(log::LevelFilter::Trace)
+            .filter_level(log::LevelFilter::Debug)
             .try_init();
     }
 

@@ -35,6 +35,8 @@ pub trait JsonValueExt {
         -> Result<K, anyhow::Error>;
     /// assumes the Json Value is a map and tries to insert the given value under given property
     fn insert(&mut self, property_name: String, value: JsonValue) -> Result<(), anyhow::Error>;
+    /// assumes the Json Value is an array and tries to add value to the array
+    fn push(&mut self, value: JsonValue) -> Result<(), anyhow::Error>;
     fn get_string(&self, property_name: &str) -> Result<&str, anyhow::Error>;
     fn get_i64(&self, property_name: &str) -> Result<i64, anyhow::Error>;
     fn get_f64(&self, property_name: &str) -> Result<f64, anyhow::Error>;
@@ -77,13 +79,27 @@ pub trait JsonValueExt {
 }
 
 impl JsonValueExt for JsonValue {
+    fn push(&mut self, value: JsonValue) -> Result<(), anyhow::Error> {
+        match self.as_array_mut() {
+            Some(map) => {
+                map.push(value);
+                Ok(())
+            }
+            None => bail!("data isn't an array: '{:?}'", self),
+        }
+    }
+
     fn insert(&mut self, property_name: String, value: JsonValue) -> Result<(), anyhow::Error> {
         match self.as_object_mut() {
             Some(map) => {
                 map.insert(property_name, value);
                 Ok(())
             }
-            None => bail!("the property '{}' isn't a map: '{:?}'", property_name, self),
+            None => bail!(
+                "getting property '{}' failed: the data isn't a map: '{:?}'",
+                self,
+                property_name
+            ),
         }
     }
 
@@ -133,7 +149,11 @@ impl JsonValueExt for JsonValue {
         if let JsonValue::String(s) = property_value {
             return Ok(s);
         }
-        bail!("{:?} isn't a string", property_value);
+        bail!(
+            "getting property '{}' failed: {:?} isn't a number",
+            property_name,
+            property_value
+        );
     }
 
     fn get_u64(&self, property_name: &str) -> Result<u64, anyhow::Error> {
@@ -150,7 +170,11 @@ impl JsonValueExt for JsonValue {
                 .as_u64()
                 .ok_or_else(|| anyhow!("unable convert {} to u64", s));
         }
-        bail!("{:?} isn't a number", property_value);
+        bail!(
+            "getting property '{}' failed: {:?} isn't a number",
+            property_name,
+            property_value
+        );
     }
 
     fn get_i64(&self, property_name: &str) -> Result<i64, anyhow::Error> {
@@ -167,7 +191,11 @@ impl JsonValueExt for JsonValue {
                 .as_i64()
                 .ok_or_else(|| anyhow!("unable convert {} to i64", s));
         }
-        bail!("{:?} isn't a number", property_value);
+        bail!(
+            "getting property '{}' failed: {:?} isn't a number",
+            property_name,
+            property_value
+        );
     }
 
     fn get_f64(&self, property_name: &str) -> Result<f64, anyhow::Error> {
@@ -184,7 +212,11 @@ impl JsonValueExt for JsonValue {
                 .as_f64()
                 .ok_or_else(|| anyhow!("unable convert {} to f64", s));
         }
-        bail!("{:?} isn't a number", property_value);
+        bail!(
+            "getting property '{}' failed: {:?} isn't a number",
+            property_name,
+            property_value
+        );
     }
 
     // TODO this method has an additional allocation which should be avoided
@@ -197,7 +229,8 @@ impl JsonValueExt for JsonValue {
             )
         })?;
 
-        Ok(serde_json::from_value(property_value.clone())?)
+        serde_json::from_value(property_value.clone())
+            .map_err(|e| anyhow!("getting property '{}' failed: {}", property_name, e))
     }
 
     /// returns the value from the JsonValue based on the path: i.e "root.data[0].id"

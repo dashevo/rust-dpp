@@ -18,9 +18,10 @@ use crate::util::hash::hash;
 use crate::util::json_value::{JsonValueExt, ReplaceWith};
 
 pub mod document_factory;
+pub mod document_validator;
 pub mod errors;
 pub mod generate_document_id;
-mod state_transition;
+pub mod state_transition;
 
 const IDENTIFIER_FIELDS: [&str; 3] = ["$id", "$dataContractId", "$ownerId"];
 
@@ -34,7 +35,7 @@ pub struct Document {
     #[serde(rename = "$type")]
     pub document_type: String,
     #[serde(rename = "$revision")]
-    pub revision: i64,
+    pub revision: u32,
     #[serde(rename = "$dataContractId")]
     pub data_contract_id: Identifier,
     #[serde(rename = "$ownerId")]
@@ -205,7 +206,7 @@ mod test {
 
     fn init() {
         let _ = env_logger::builder()
-            .filter_level(log::LevelFilter::Trace)
+            .filter_level(log::LevelFilter::Debug)
             .try_init();
     }
 

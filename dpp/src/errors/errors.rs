@@ -6,6 +6,7 @@ use crate::consensus::ConsensusError;
 use crate::data_contract::{DataContract, errors::*};
 use crate::document::{Document, errors::*};
 use crate::identity::{IdentityPublicKey, Purpose, SecurityLevel};
+use crate::prelude::Identifier;
 use crate::state_transition::StateTransition;
 
 #[derive(Error, Debug)]
@@ -107,6 +108,9 @@ pub enum ProtocolError {
         errors: Vec<ConsensusError>,
         raw_data_contract: JsonValue,
     },
+
+    #[error("Data Contract is not present")]
+    DataContractNotPresentError { data_contract_id: Identifier },
 }
 
 impl From<NonConsensusError> for ProtocolError {
