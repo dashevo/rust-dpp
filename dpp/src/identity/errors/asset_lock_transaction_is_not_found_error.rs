@@ -22,6 +22,6 @@ impl AssetLockTransactionIsNotFoundError {
 
 impl From<AssetLockTransactionIsNotFoundError> for DPPError {
     fn from(error: AssetLockTransactionIsNotFoundError) -> Self {
-        Self::AssetLockOutputNotFoundError(error)
+        Self::AssetLockTransactionIsNotFoundError(error)
     }
 }

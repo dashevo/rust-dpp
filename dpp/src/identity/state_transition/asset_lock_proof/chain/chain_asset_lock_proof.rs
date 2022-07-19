@@ -11,11 +11,11 @@ pub struct ChainAssetLockProof {
     asset_lock_type: u8,
     core_chain_locked_height: u32,
     // outpoints are actually fixed sized, remove vec from here
-    out_point: Vec<u8>,
+    out_point: [u8; 36],
 }
 
 impl ChainAssetLockProof {
-    pub fn new(core_chain_locked_height: u32, out_point: Vec<u8>) -> Self {
+    pub fn new(core_chain_locked_height: u32, out_point: [u8; 36]) -> Self {
         Self {
             // TODO: change to const
             asset_lock_type: 1,
@@ -35,7 +35,7 @@ impl ChainAssetLockProof {
     }
 
     /// Get out_point
-    pub fn out_point(&self) -> &[u8] {
+    pub fn out_point(&self) -> &[u8; 36] {
         return &self.out_point;
     }
 

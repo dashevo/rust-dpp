@@ -9,5 +9,7 @@ pub enum DPPError {
     #[error("Expected public key hash to be 20 bytes")]
     WrongPublicKeyHashSize,
     #[error("Expected output type to be OP_RETURN output")]
-    WrongBurnOutputType
+    WrongBurnOutputType,
+    #[error("Invalid transaction")]
+    InvalidAssetLockTransaction
 }
