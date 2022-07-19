@@ -56,12 +56,12 @@ impl InstantAssetLockProof {
         &self.transaction
     }
 
-    pub fn output_index(&self) -> u32 {
-        self.output_index
+    pub fn output_index(&self) -> usize {
+        self.output_index as usize
     }
 
-    pub fn out_point(&self) {
-        self.transaction.getOutPointBuffer(self.output_index())
+    pub fn out_point(&self) -> Option<[u8; 36]> {
+        self.transaction.out_point_buffer(self.output_index())
     }
 
     pub fn output(&self) -> Option<&TxOut> {
