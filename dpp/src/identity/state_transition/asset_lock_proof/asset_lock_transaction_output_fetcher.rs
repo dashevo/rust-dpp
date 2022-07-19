@@ -1,13 +1,16 @@
 use anyhow::bail;
+use dashcore::hashes::hex::ToHex;
 use dashcore::psbt::serialize::Deserialize;
 use dashcore::{OutPoint, Transaction, TxOut};
-use dashcore::hashes::hex::ToHex;
 use futures::TryFutureExt;
-use crate::DPPError;
 
-use crate::identity::errors::{AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError, UnknownAssetLockProofTypeError};
+use crate::identity::errors::{
+    AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError,
+    UnknownAssetLockProofTypeError,
+};
 use crate::identity::state_transition::asset_lock_proof::{AssetLockProof, AssetLockProofType};
 use crate::state_repository::StateRepositoryLike;
+use crate::DPPError;
 
 pub struct AssetLockTransactionOutputFetcher<SR: StateRepositoryLike> {
     state_repository: SR,
@@ -17,16 +20,19 @@ pub type ExecutionContext = String;
 
 impl<SR: StateRepositoryLike> AssetLockTransactionOutputFetcher<SR> {
     pub fn new(state_repository: SR) -> Self {
-        Self {
-            state_repository
-        }
+        Self { state_repository }
     }
 
-    pub async fn fetch(&self, asset_lock_proof: &AssetLockProof, execution_context: ExecutionContext) -> Result<TxOut, DPPError> {
+    pub async fn fetch(
+        &self,
+        asset_lock_proof: &AssetLockProof,
+        execution_context: ExecutionContext,
+    ) -> Result<TxOut, DPPError> {
         match asset_lock_proof {
-            AssetLockProof::Instant(asset_lock_proof) => {
-                asset_lock_proof.output().ok_or_else(||DPPError::from(AssetLockOutputNotFoundError::new())).cloned()
-            }
+            AssetLockProof::Instant(asset_lock_proof) => asset_lock_proof
+                .output()
+                .ok_or_else(|| DPPError::from(AssetLockOutputNotFoundError::new()))
+                .cloned(),
             AssetLockProof::Chain(asset_lock_proof) => {
                 let out_point_buffer = *asset_lock_proof.out_point();
                 let out_point = OutPoint::from(out_point_buffer);
@@ -34,14 +40,26 @@ impl<SR: StateRepositoryLike> AssetLockTransactionOutputFetcher<SR> {
                 let output_index = out_point.vout as usize;
                 let transaction_hash = out_point.txid;
 
-                if let Some(raw_transaction) = self.state_repository.fetch_transaction::<Vec<u8>>(
-                    &transaction_hash.to_hex(),
-                    // execution_context,
-                ).await.map_err(|_| { DPPError::InvalidAssetLockTransaction })? {
-                    let transaction = Transaction::deserialize(&raw_transaction).map_err(|_| DPPError::InvalidAssetLockTransaction )?;
-                    transaction.output.get(output_index).ok_or_else(||AssetLockOutputNotFoundError::new().into()).cloned()
+                if let Some(raw_transaction) = self
+                    .state_repository
+                    .fetch_transaction::<Vec<u8>>(
+                        &transaction_hash.to_hex(),
+                        // execution_context,
+                    )
+                    .await
+                    .map_err(|_| DPPError::InvalidAssetLockTransaction)?
+                {
+                    let transaction = Transaction::deserialize(&raw_transaction)
+                        .map_err(|_| DPPError::InvalidAssetLockTransaction)?;
+                    transaction
+                        .output
+                        .get(output_index)
+                        .ok_or_else(|| AssetLockOutputNotFoundError::new().into())
+                        .cloned()
                 } else {
-                    Err(DPPError::from(AssetLockTransactionIsNotFoundError::new(transaction_hash)))
+                    Err(DPPError::from(AssetLockTransactionIsNotFoundError::new(
+                        transaction_hash,
+                    )))
                 }
             }
         }

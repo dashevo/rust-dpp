@@ -1,7 +1,7 @@
 #![allow(clippy::from_over_into)]
 
-use std::{collections::HashMap, convert::TryFrom, hash::Hash};
 use std::convert::TryInto;
+use std::{collections::HashMap, convert::TryFrom, hash::Hash};
 
 use anyhow::{anyhow, bail};
 use ciborium::value::Value as CborValue;
@@ -83,7 +83,9 @@ impl std::fmt::Display for Purpose {
 }
 
 #[repr(u8)]
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize_repr, Deserialize_repr, PartialOrd, Ord)]
+#[derive(
+    Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize_repr, Deserialize_repr, PartialOrd, Ord,
+)]
 pub enum SecurityLevel {
     MASTER = 0,
     CRITICAL = 1,

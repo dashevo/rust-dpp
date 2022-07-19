@@ -8,9 +8,7 @@ pub struct UnknownAssetLockProofTypeError {
 
 impl UnknownAssetLockProofTypeError {
     pub fn new(asset_lock_type: u32) -> Self {
-        Self {
-            asset_lock_type
-        }
+        Self { asset_lock_type }
     }
 
     pub fn asset_lock_type(&self) -> u32 {

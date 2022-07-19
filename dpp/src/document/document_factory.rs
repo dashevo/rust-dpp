@@ -1,21 +1,21 @@
 use chrono::Utc;
+use itertools::Itertools;
 use serde_json::{json, Value as JsonValue};
 
 use crate::{
     data_contract::DataContract,
     mocks,
     prelude::Identifier,
-    ProtocolError,
-    util::{json_schema::JsonSchemaExt, json_value::JsonValueExt},
     util::entropy_generator,
+    util::{json_schema::JsonSchemaExt, json_value::JsonValueExt},
+    ProtocolError,
 };
-use itertools::Itertools;
 
 use super::{
-    Document,
     document_transition::{self, Action},
-    DocumentsBatchTransition, generate_document_id::generate_document_id,
     document_validator::DocumentValidator,
+    generate_document_id::generate_document_id,
+    Document, DocumentsBatchTransition,
 };
 
 const PROPERTY_DOCUMENT_PROTOCOL_VERSION: &str = "$protocolVersion";

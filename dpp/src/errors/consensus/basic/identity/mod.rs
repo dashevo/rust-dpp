@@ -14,6 +14,7 @@ pub use missing_master_public_key_error::*;
 
 mod duplicated_identity_public_key_error;
 mod duplicated_identity_public_key_id_error;
+mod identity_asset_lock_proof_locked_transaction_mismatch_error;
 mod identity_asset_lock_transaction_out_point_already_exists_error;
 mod identity_asset_lock_transaction_output_not_found_error;
 mod invalid_asset_lock_transaction_output_return_size;
@@ -24,5 +25,3 @@ mod invalid_identity_public_key_security_level_error;
 mod invalid_instant_asset_lock_proof_error;
 mod invalid_instant_asset_lock_proof_signature_error;
 mod missing_master_public_key_error;
-mod identity_asset_lock_proof_locked_transaction_mismatch_error;
-

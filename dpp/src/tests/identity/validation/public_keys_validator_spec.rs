@@ -2,10 +2,10 @@ use serde_json::{json, Value};
 
 use crate::assert_consensus_errors;
 use crate::consensus::ConsensusError;
-use crate::identity::{KeyType, Purpose, SecurityLevel};
 use crate::identity::validation::PublicKeysValidator;
 use crate::identity::validation::TPublicKeysValidator;
-use crate::tests::utils::{serde_set_ref};
+use crate::identity::{KeyType, Purpose, SecurityLevel};
+use crate::tests::utils::serde_set_ref;
 
 fn setup_test() -> (Vec<Value>, PublicKeysValidator) {
     (
@@ -29,8 +29,8 @@ pub mod id {
     use crate::errors::consensus::ConsensusError;
     use crate::identity::validation::TPublicKeysValidator;
     use crate::tests::identity::validation::public_keys_validator_spec::setup_test;
-    use crate::tests::utils::{serde_remove_ref, serde_set_ref};
     use crate::tests::utils::SerdeTestExtension;
+    use crate::tests::utils::{serde_remove_ref, serde_set_ref};
 
     #[test]
     pub fn should_be_present() {

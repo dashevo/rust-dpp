@@ -1,3 +1,20 @@
+use futures::future::LocalBoxFuture;
+
+pub use data_trigger_execution_context::*;
+pub use data_trigger_execution_result::*;
+pub use reject_data_trigger::*;
+
+use crate::document::document_transition::{Action, DocumentCreateTransition, DocumentTransition};
+use crate::{
+    errors::DataTriggerError, get_from_transition, prelude::Identifier,
+    state_repository::StateRepositoryLike,
+};
+
+use self::dashpay_data_triggers::create_contract_request_data_trigger;
+use self::dpns_triggers::create_domain_data_trigger;
+use self::feature_flags_data_triggers::create_feature_flag_data_trigger;
+use self::reward_share_data_triggers::create_masternode_reward_shares_data_trigger;
+
 mod data_trigger_execution_context;
 
 pub mod dashpay_data_triggers;
@@ -8,22 +25,6 @@ pub mod reward_share_data_triggers;
 
 mod data_trigger_execution_result;
 mod reject_data_trigger;
-use futures::future::LocalBoxFuture;
-
-pub use data_trigger_execution_context::*;
-pub use data_trigger_execution_result::*;
-pub use reject_data_trigger::*;
-
-use crate::{
-    errors::DataTriggerError, get_from_transition, prelude::Identifier,
-    state_repository::StateRepositoryLike,
-};
-use crate::document::document_transition::{Action, DocumentCreateTransition, DocumentTransition};
-
-use self::dashpay_data_triggers::create_contract_request_data_trigger;
-use self::dpns_triggers::create_domain_data_trigger;
-use self::feature_flags_data_triggers::create_feature_flag_data_trigger;
-use self::reward_share_data_triggers::create_masternode_reward_shares_data_trigger;
 
 pub type BoxedTrigger<'a, SR> = Box<Trigger<'a, SR>>;
 pub type Trigger<'a, SR> =

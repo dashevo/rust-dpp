@@ -59,7 +59,7 @@ mod validate_identity_create_transition_basic_factory {
 
     use super::setup_test;
 
-// let validator.validate;
+    // let validator.validate;
     // let rawStateTransition;
     // let stateTransition;
     // let validatePublicKeysMock;
@@ -259,7 +259,6 @@ mod validate_identity_create_transition_basic_factory {
 
     mod asset_lock_proof {
         use std::sync::Arc;
-        use crate::util::json_path::JsonPathStep;
 
         use jsonschema::error::ValidationErrorKind;
 
@@ -270,6 +269,7 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
+        use crate::util::json_path::JsonPathStep;
 
         use super::super::setup_test;
 
@@ -322,7 +322,11 @@ mod validate_identity_create_transition_basic_factory {
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
             );
-            let kek = raw_state_transition.get_mut("assetLockProof").unwrap().as_object_mut().unwrap();
+            let kek = raw_state_transition
+                .get_mut("assetLockProof")
+                .unwrap()
+                .as_object_mut()
+                .unwrap();
             kek.insert("version".into(), "totally not a valid type".into());
             let err = TestConsensusError::new("test");
             //let asset_lock_error = ConsensusError::from(err.clone());
@@ -463,7 +467,11 @@ mod validate_identity_create_transition_basic_factory {
         pub fn should_be_valid() {
             let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
             let pk_error = TestConsensusError::new("test");
-            pk_validator_mock.returns_fun(move || Ok(ValidationResult::new(Some(vec![ConsensusError::from(TestConsensusError::new("test"))]))));
+            pk_validator_mock.returns_fun(move || {
+                Ok(ValidationResult::new(Some(vec![ConsensusError::from(
+                    TestConsensusError::new("test"),
+                )])))
+            });
 
             let (raw_state_transition, validator) = setup_test(
                 pk_validator_mock.clone(),
@@ -491,8 +499,11 @@ mod validate_identity_create_transition_basic_factory {
         pub fn should_have_at_least_1_master_key() {
             let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
             let pk_error = TestConsensusError::new("test");
-            pk_validator_mock.returns_fun(move || Ok(ValidationResult::new(Some(vec![ConsensusError::from(TestConsensusError::new("test"))]))));
-
+            pk_validator_mock.returns_fun(move || {
+                Ok(ValidationResult::new(Some(vec![ConsensusError::from(
+                    TestConsensusError::new("test"),
+                )])))
+            });
 
             let (raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
@@ -615,7 +626,6 @@ mod validate_identity_create_transition_basic_factory {
     pub fn should_return_valid_result() {
         let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
         pk_validator_mock.returns_fun(move || Ok(ValidationResult::default()));
-
 
         let (raw_state_transition, validator) = setup_test(
             pk_validator_mock.clone(),

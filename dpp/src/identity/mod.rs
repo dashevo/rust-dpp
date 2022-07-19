@@ -12,4 +12,3 @@ pub mod validation;
 
 mod credits_converter;
 pub mod errors;
-

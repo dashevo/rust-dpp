@@ -8,11 +8,11 @@ pub use instant::*;
 use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
 
 mod asset_lock_proof_validator;
-mod asset_lock_transaction_validator;
-mod instant;
-pub mod chain;
 mod asset_lock_public_key_hash_fetcher;
 mod asset_lock_transaction_output_fetcher;
+mod asset_lock_transaction_validator;
+pub mod chain;
+mod instant;
 
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum AssetLockProof {

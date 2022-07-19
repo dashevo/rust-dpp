@@ -13,4 +13,3 @@ mod test_consensus_error;
 mod unsupported_protocol_version_error;
 
 mod abstract_basic_error;
-

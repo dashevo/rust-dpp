@@ -1,18 +1,19 @@
+use std::sync::Arc;
+
 use anyhow::anyhow;
 use lazy_static::lazy_static;
 use serde_json::Value as JsonValue;
-use std::sync::Arc;
 
 use crate::{
     consensus::basic::BasicError,
     data_contract::{
-        DataContract,
-        enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema, enrich_data_contract_with_base_schema::PREFIX_BYTE_0,
+        enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema,
+        enrich_data_contract_with_base_schema::PREFIX_BYTE_0, DataContract,
     },
-    ProtocolError,
     util::json_value::JsonValueExt,
     validation::{JsonSchemaValidator, ValidationResult},
     version::ProtocolVersionValidator,
+    ProtocolError,
 };
 
 const PROPERTY_PROTOCOL_VERSION: &str = "$protocolVersion";
@@ -38,7 +39,7 @@ impl DocumentValidator {
         &self,
         raw_document: &JsonValue,
         data_contract: &DataContract,
-    ) -> Result<ValidationResult, ProtocolError> {
+    ) -> Result<ValidationResult<()>, ProtocolError> {
         let mut result = ValidationResult::default();
 
         let maybe_document_type = raw_document.get(PROPERTY_DOCUMENT_TYPE);
@@ -90,13 +91,14 @@ impl DocumentValidator {
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
     use jsonschema::{
         error::{TypeKind, ValidationErrorKind},
         primitive_type::PrimitiveType,
     };
     use serde_json::json;
     use serde_json::Value as JsonValue;
-    use std::sync::Arc;
     use test_case::test_case;
 
     use crate::{
@@ -106,7 +108,7 @@ mod test {
         tests::fixtures::{get_data_contract_fixture, get_documents_fixture},
         util::json_value::JsonValueExt,
         validation::ValidationResult,
-        version::{COMPATIBILITY_MAP, LATEST_VERSION, ProtocolVersionValidator},
+        version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
     };
 
     use super::DocumentValidator;
@@ -505,7 +507,7 @@ mod test {
         assert!(result.is_valid())
     }
 
-    fn get_first_schema_error(result: &ValidationResult) -> &JsonSchemaError {
+    fn get_first_schema_error(result: &ValidationResult<()>) -> &JsonSchemaError {
         result
             .errors
             .get(0)

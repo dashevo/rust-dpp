@@ -1,4 +1,5 @@
 use thiserror::Error;
+
 use crate::identity::errors::{AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError};
 
 #[derive(Error, Debug)]
@@ -11,5 +12,5 @@ pub enum DPPError {
     #[error("Expected output type to be OP_RETURN output")]
     WrongBurnOutputType,
     #[error("Invalid transaction")]
-    InvalidAssetLockTransaction
+    InvalidAssetLockTransaction,
 }

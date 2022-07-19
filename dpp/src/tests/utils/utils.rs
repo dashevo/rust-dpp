@@ -4,8 +4,8 @@ use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
 
-use crate::InvalidVectorSizeError;
 use crate::prelude::Identifier;
+use crate::InvalidVectorSizeError;
 
 #[cfg(test)]
 #[macro_export]
