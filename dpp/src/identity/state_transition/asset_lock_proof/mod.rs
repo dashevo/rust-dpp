@@ -4,6 +4,7 @@ pub use chain::*;
 pub use instant::*;
 
 use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
+use serde::{Serialize, Deserialize};
 
 mod asset_lock_proof_validator;
 mod asset_lock_public_key_hash_fetcher;
@@ -12,7 +13,7 @@ mod asset_lock_transaction_validator;
 pub mod chain;
 mod instant;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum AssetLockProof {
     Instant(InstantAssetLockProof),
     Chain(ChainAssetLockProof),

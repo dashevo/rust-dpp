@@ -1,18 +1,35 @@
+use std::convert::{TryFrom, TryInto};
+use ciborium::ser::Error;
 use dashcore::{InstantLock, Transaction, TxOut};
+use dashcore::consensus::Encodable;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::identifier::Identifier;
 use crate::util::hash::hash;
 use crate::util::vec::vec_to_array;
-use crate::InvalidVectorSizeError;
+use crate::{InvalidVectorSizeError, ProtocolError};
+use crate::util::cbor_value::CborCanonicalMap;
 
 #[derive(Clone, Debug)]
-// #[serde(rename_all = "camelCase")]
 pub struct InstantAssetLockProof {
-    // #[serde(rename = "type")]
     asset_lock_type: u8,
     instant_lock: InstantLock,
     transaction: Transaction,
     output_index: u32,
+}
+
+impl Serialize for InstantAssetLockProof {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        let raw = RawInstantLock::try_from(self)?;
+        raw.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for InstantAssetLockProof {
+    fn deserialize<D>(deserializer: D) -> Result<Self,D::Error> where D: Deserializer<'de> {
+        let raw = RawInstantLock::deserialize(deserializer)?;
+        Ok(raw.try_into()?)
+    }
 }
 
 impl Default for InstantAssetLockProof {
@@ -76,11 +93,56 @@ impl InstantAssetLockProof {
         );
         Ok(Identifier::new(vec_to_array(&buffer)?))
     }
+
+    pub fn to_buffer(&self) -> Result<Vec<u8>, ProtocolError> {
+        let mut map = CborCanonicalMap::new();
+        let mut is_lock_buffer = Vec::<u8>::new();
+        let mut transaction_buffer = Vec::<u8>::new();
+        self.instant_lock.consensus_encode(&mut is_lock_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        self.transaction.consensus_encode(&mut transaction_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+
+        map.insert("type", self.asset_lock_type);
+        map.insert("outputIndex", self.output_index);
+        map.insert("transaction", transaction_buffer);
+        map.insert("instantLock", is_lock_buffer);
+
+        map.to_bytes().map_err(|e| ProtocolError::EncodingError(e.to_string()))
+    }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct RawInstantLock {
+    #[serde(rename = "type")]
     lock_type: u8,
     instant_lock: Vec<u8>,
     transaction: Vec<u8>,
     output_index: u32,
 }
+
+impl TryFrom<RawInstantLock> for InstantAssetLockProof {
+    type Error = ProtocolError;
+
+    fn try_from(raw_instant_lock: RawInstantLock) -> Result<Self, Self::Error> {
+        todo!()
+    }
+}
+
+impl TryFrom<&InstantAssetLockProof> for RawInstantLock {
+    type Error = ProtocolError;
+
+    fn try_from(instant_asset_lock_proof: &InstantAssetLockProof) -> Result<Self, Self::Error> {
+        let mut is_lock_buffer = Vec::<u8>::new();
+        let mut transaction_buffer = Vec::<u8>::new();
+        instant_asset_lock_proof.instant_lock.consensus_encode(&mut is_lock_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        instant_asset_lock_proof.transaction.consensus_encode(&mut transaction_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+
+        Ok(Self {
+            lock_type: instant_asset_lock_proof.asset_lock_type,
+            instant_lock: is_lock_buffer,
+            transaction: transaction_buffer,
+            output_index: instant_asset_lock_proof.output_index
+        })
+    }
+}
+
