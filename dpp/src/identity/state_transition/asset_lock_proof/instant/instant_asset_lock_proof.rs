@@ -1,16 +1,16 @@
 use std::convert::{TryFrom, TryInto};
-use anyhow::bail;
-use dashcore::{InstantLock, Transaction, TxOut};
+
 use dashcore::consensus::Encodable;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use dashcore::{InstantLock, Transaction, TxOut};
 use serde::de::Error as DeError;
 use serde::ser::Error;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::identifier::Identifier;
+use crate::util::cbor_value::CborCanonicalMap;
 use crate::util::hash::hash;
 use crate::util::vec::vec_to_array;
 use crate::{InvalidVectorSizeError, ProtocolError};
-use crate::util::cbor_value::CborCanonicalMap;
 
 #[derive(Clone, Debug)]
 pub struct InstantAssetLockProof {
@@ -21,22 +21,26 @@ pub struct InstantAssetLockProof {
 }
 
 impl Serialize for InstantAssetLockProof {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        let raw = RawInstantLock::try_from(self).map_err(|e| S::Error::custom(e.to_string()))?;
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let raw = RawInstantLock::try_from(self)
+            .map_err(|e| S::Error::custom(e.to_string()))?;
 
-        // match raw_kek {
-        //     Ok(raw) => { raw.serialize(serializer) }
-        //     Err(e) => { Err(S::Error::custom(e.to_string())) }
-        // }
-        // //
         raw.serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for InstantAssetLockProof {
-    fn deserialize<D>(deserializer: D) -> Result<Self,D::Error> where D: Deserializer<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let raw = RawInstantLock::deserialize(deserializer)?;
-        Ok(raw.try_into().map_err(|e: ProtocolError| D::Error::custom(e.to_string()))?)
+        Ok(raw
+            .try_into()
+            .map_err(|e: ProtocolError| D::Error::custom(e.to_string()))?)
     }
 }
 
@@ -106,15 +110,20 @@ impl InstantAssetLockProof {
         let mut map = CborCanonicalMap::new();
         let mut is_lock_buffer = Vec::<u8>::new();
         let mut transaction_buffer = Vec::<u8>::new();
-        self.instant_lock.consensus_encode(&mut is_lock_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
-        self.transaction.consensus_encode(&mut transaction_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        self.instant_lock
+            .consensus_encode(&mut is_lock_buffer)
+            .map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        self.transaction
+            .consensus_encode(&mut transaction_buffer)
+            .map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
 
         map.insert("type", self.asset_lock_type);
         map.insert("outputIndex", self.output_index);
         map.insert("transaction", transaction_buffer);
         map.insert("instantLock", is_lock_buffer);
 
-        map.to_bytes().map_err(|e| ProtocolError::EncodingError(e.to_string()))
+        map.to_bytes()
+            .map_err(|e| ProtocolError::EncodingError(e.to_string()))
     }
 }
 
@@ -142,15 +151,20 @@ impl TryFrom<&InstantAssetLockProof> for RawInstantLock {
     fn try_from(instant_asset_lock_proof: &InstantAssetLockProof) -> Result<Self, Self::Error> {
         let mut is_lock_buffer = Vec::<u8>::new();
         let mut transaction_buffer = Vec::<u8>::new();
-        instant_asset_lock_proof.instant_lock.consensus_encode(&mut is_lock_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
-        instant_asset_lock_proof.transaction.consensus_encode(&mut transaction_buffer).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        instant_asset_lock_proof
+            .instant_lock
+            .consensus_encode(&mut is_lock_buffer)
+            .map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        instant_asset_lock_proof
+            .transaction
+            .consensus_encode(&mut transaction_buffer)
+            .map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
 
         Ok(Self {
             lock_type: instant_asset_lock_proof.asset_lock_type,
             instant_lock: is_lock_buffer,
             transaction: transaction_buffer,
-            output_index: instant_asset_lock_proof.output_index
+            output_index: instant_asset_lock_proof.output_index,
         })
     }
 }
-
