@@ -1,8 +1,10 @@
 use std::convert::{TryFrom, TryInto};
-use ciborium::ser::Error;
+use anyhow::bail;
 use dashcore::{InstantLock, Transaction, TxOut};
 use dashcore::consensus::Encodable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::de::Error as DeError;
+use serde::ser::Error;
 
 use crate::identifier::Identifier;
 use crate::util::hash::hash;
@@ -20,7 +22,13 @@ pub struct InstantAssetLockProof {
 
 impl Serialize for InstantAssetLockProof {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        let raw = RawInstantLock::try_from(self)?;
+        let raw = RawInstantLock::try_from(self).map_err(|e| S::Error::custom(e.to_string()))?;
+
+        // match raw_kek {
+        //     Ok(raw) => { raw.serialize(serializer) }
+        //     Err(e) => { Err(S::Error::custom(e.to_string())) }
+        // }
+        // //
         raw.serialize(serializer)
     }
 }
@@ -28,7 +36,7 @@ impl Serialize for InstantAssetLockProof {
 impl<'de> Deserialize<'de> for InstantAssetLockProof {
     fn deserialize<D>(deserializer: D) -> Result<Self,D::Error> where D: Deserializer<'de> {
         let raw = RawInstantLock::deserialize(deserializer)?;
-        Ok(raw.try_into()?)
+        Ok(raw.try_into().map_err(|e: ProtocolError| D::Error::custom(e.to_string()))?)
     }
 }
 
