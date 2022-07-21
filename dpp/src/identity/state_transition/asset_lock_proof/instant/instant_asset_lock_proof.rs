@@ -1,6 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 
-use dashcore::consensus::Encodable;
+use dashcore::consensus::{Decodable, Encodable};
 use dashcore::{InstantLock, Transaction, TxOut};
 use serde::de::Error as DeError;
 use serde::ser::Error;
@@ -38,9 +38,9 @@ impl<'de> Deserialize<'de> for InstantAssetLockProof {
         D: Deserializer<'de>,
     {
         let raw = RawInstantLock::deserialize(deserializer)?;
-        Ok(raw
+        raw
             .try_into()
-            .map_err(|e: ProtocolError| D::Error::custom(e.to_string()))?)
+            .map_err(|e: ProtocolError| D::Error::custom(e.to_string()))
     }
 }
 
@@ -141,7 +141,15 @@ impl TryFrom<RawInstantLock> for InstantAssetLockProof {
     type Error = ProtocolError;
 
     fn try_from(raw_instant_lock: RawInstantLock) -> Result<Self, Self::Error> {
-        todo!()
+        let transaction = Transaction::consensus_decode(raw_instant_lock.transaction.as_slice()).map_err(|e| ProtocolError::DecodingError(e.to_string()))?;
+        let instant_lock = InstantLock::consensus_decode(raw_instant_lock.instant_lock.as_slice()).map_err(|e| ProtocolError::DecodingError(e.to_string()))?;
+
+        Ok(Self {
+            asset_lock_type: raw_instant_lock.lock_type,
+            transaction,
+            instant_lock,
+            output_index: raw_instant_lock.output_index
+        })
     }
 }
 
