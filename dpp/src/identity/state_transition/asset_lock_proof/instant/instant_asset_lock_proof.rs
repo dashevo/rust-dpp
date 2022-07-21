@@ -25,8 +25,7 @@ impl Serialize for InstantAssetLockProof {
     where
         S: Serializer,
     {
-        let raw = RawInstantLock::try_from(self)
-            .map_err(|e| S::Error::custom(e.to_string()))?;
+        let raw = RawInstantLock::try_from(self).map_err(|e| S::Error::custom(e.to_string()))?;
 
         raw.serialize(serializer)
     }
@@ -38,8 +37,7 @@ impl<'de> Deserialize<'de> for InstantAssetLockProof {
         D: Deserializer<'de>,
     {
         let raw = RawInstantLock::deserialize(deserializer)?;
-        raw
-            .try_into()
+        raw.try_into()
             .map_err(|e: ProtocolError| D::Error::custom(e.to_string()))
     }
 }
@@ -141,14 +139,16 @@ impl TryFrom<RawInstantLock> for InstantAssetLockProof {
     type Error = ProtocolError;
 
     fn try_from(raw_instant_lock: RawInstantLock) -> Result<Self, Self::Error> {
-        let transaction = Transaction::consensus_decode(raw_instant_lock.transaction.as_slice()).map_err(|e| ProtocolError::DecodingError(e.to_string()))?;
-        let instant_lock = InstantLock::consensus_decode(raw_instant_lock.instant_lock.as_slice()).map_err(|e| ProtocolError::DecodingError(e.to_string()))?;
+        let transaction = Transaction::consensus_decode(raw_instant_lock.transaction.as_slice())
+            .map_err(|e| ProtocolError::DecodingError(e.to_string()))?;
+        let instant_lock = InstantLock::consensus_decode(raw_instant_lock.instant_lock.as_slice())
+            .map_err(|e| ProtocolError::DecodingError(e.to_string()))?;
 
         Ok(Self {
             asset_lock_type: raw_instant_lock.lock_type,
             transaction,
             instant_lock,
-            output_index: raw_instant_lock.output_index
+            output_index: raw_instant_lock.output_index,
         })
     }
 }
