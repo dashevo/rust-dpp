@@ -4,7 +4,6 @@ use std::convert::{TryFrom, TryInto};
 
 use anyhow::anyhow;
 use ciborium::value::Value as CborValue;
-
 use serde_json::{Map, Value as JsonValue};
 
 use crate::identifier::Identifier;

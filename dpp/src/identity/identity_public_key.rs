@@ -83,7 +83,9 @@ impl std::fmt::Display for Purpose {
 }
 
 #[repr(u8)]
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize_repr, Deserialize_repr, PartialOrd, Ord)]
+#[derive(
+    Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize_repr, Deserialize_repr, PartialOrd, Ord,
+)]
 pub enum SecurityLevel {
     MASTER = 0,
     CRITICAL = 1,

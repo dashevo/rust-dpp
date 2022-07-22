@@ -1,5 +1,3 @@
-use std::num::ParseIntError;
-
 use anyhow::Result;
 use getrandom::getrandom;
 use serde_json::Value;
@@ -98,11 +96,49 @@ pub fn get_data_from_file(file_path: &str) -> Result<String> {
     Ok(d)
 }
 
-pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
-    (0..s.len())
-        .step_by(2)
-        .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
-        .collect()
+pub trait SerdeTestExtension {
+    fn remove_key(&mut self, key: impl Into<String>);
+    fn set_key_value<T, S>(&mut self, key: T, value: S)
+    where
+        T: Into<String>,
+        S: Into<serde_json::Value>,
+        serde_json::Value: From<S>;
+    fn get_value(&self, key: impl Into<String>) -> &Value;
+    fn get_value_mut(&mut self, key: impl Into<String>) -> &mut Value;
+}
+
+impl SerdeTestExtension for serde_json::Value {
+    fn remove_key(&mut self, key: impl Into<String>) {
+        self.as_object_mut()
+            .expect("Expected value to be an JSON object")
+            .remove(&key.into());
+    }
+
+    fn set_key_value<T, S>(&mut self, key: T, value: S)
+    where
+        T: Into<String>,
+        S: Into<Value>,
+        Value: From<S>,
+    {
+        let map = self
+            .as_object_mut()
+            .expect("Expected value to be an JSON object");
+        map.insert(key.into(), serde_json::Value::from(value));
+    }
+
+    fn get_value(&self, key: impl Into<String>) -> &Value {
+        self.as_object()
+            .expect("Expected key to exist")
+            .get(&key.into())
+            .expect("Expected key to exist")
+    }
+
+    fn get_value_mut(&mut self, key: impl Into<String>) -> &mut Value {
+        self.as_object_mut()
+            .expect("Expected key to exist")
+            .get_mut(&key.into())
+            .expect("Expected key to exist")
+    }
 }
 
 // fn byte_to_hex(byte: &u8) -> String {

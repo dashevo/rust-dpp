@@ -20,7 +20,6 @@ use crate::{
 };
 
 use super::errors::*;
-
 use super::properties::*;
 
 pub type JsonSchema = JsonValue;

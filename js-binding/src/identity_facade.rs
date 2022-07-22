@@ -9,7 +9,7 @@ use dpp::version::ProtocolVersionValidator;
 use dpp::NonConsensusError;
 
 #[wasm_bindgen(js_name=ValidationResult)]
-pub struct ValidationResultWasm(ValidationResult);
+pub struct ValidationResultWasm(ValidationResult<()>);
 
 #[wasm_bindgen(js_class=ValidationResult)]
 impl ValidationResultWasm {
@@ -30,8 +30,8 @@ impl ValidationResultWasm {
     }
 }
 
-impl From<ValidationResult> for ValidationResultWasm {
-    fn from(validation_result: ValidationResult) -> Self {
+impl From<ValidationResult<()>> for ValidationResultWasm {
+    fn from(validation_result: ValidationResult<()>) -> Self {
         ValidationResultWasm(validation_result)
     }
 }

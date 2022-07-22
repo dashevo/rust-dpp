@@ -1,5 +1,6 @@
+use dpp::identity::state_transition::asset_lock_proof::AssetLockProof;
 use dpp::identity::IdentityPublicKey;
-use dpp::identity::{AssetLockProof, Identity, KeyID};
+use dpp::identity::{Identity, KeyID};
 use dpp::metadata::Metadata;
 use wasm_bindgen::prelude::*;
 

@@ -4,16 +4,18 @@ use crate::{
     CompatibleProtocolVersionIsNotDefinedError, InvalidVectorSizeError, SerdeParsingError,
 };
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 pub enum NonConsensusError {
     #[error("Unexpected serde parsing error")]
     SerdeParsingError(SerdeParsingError),
     #[error("{0}")]
     CompatibleProtocolVersionIsNotDefinedError(CompatibleProtocolVersionIsNotDefinedError),
     #[error("{0}")]
-    SerdeJsonError(serde_json::Error),
+    SerdeJsonError(String),
     #[error("{0}")]
     InvalidVectorSizeError(InvalidVectorSizeError),
+    #[error("{0}")]
+    StateRepositoryFetchError(String),
 }
 
 impl From<SerdeParsingError> for NonConsensusError {
@@ -30,7 +32,7 @@ impl From<CompatibleProtocolVersionIsNotDefinedError> for NonConsensusError {
 
 impl From<serde_json::Error> for NonConsensusError {
     fn from(err: serde_json::Error) -> Self {
-        Self::SerdeJsonError(err)
+        Self::SerdeJsonError(err.to_string())
     }
 }
 
