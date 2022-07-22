@@ -3,7 +3,9 @@ use std::sync::Arc;
 use lazy_static::lazy_static;
 use serde_json::Value;
 
+use crate::identity::state_transition::asset_lock_proof::AssetLockProofValidator;
 use crate::identity::validation::TPublicKeysValidator;
+use crate::state_repository::StateRepositoryLike;
 use crate::util::protocol_data::{get_protocol_version, get_raw_public_keys};
 use crate::validation::{JsonSchemaValidator, ValidationResult};
 use crate::version::ProtocolVersionValidator;
@@ -16,21 +18,22 @@ lazy_static! {
     .unwrap();
 }
 
-pub struct IdentityCreateTransitionBasicValidator<T, S> {
+pub struct IdentityCreateTransitionBasicValidator<T, S, SR: StateRepositoryLike> {
     protocol_version_validator: Arc<ProtocolVersionValidator>,
     json_schema_validator: JsonSchemaValidator,
     public_keys_validator: Arc<T>,
     public_keys_in_identity_transition_validator: Arc<S>,
-    proof_validator: Arc<u64>,
+    asset_lock_proof_validator: Arc<AssetLockProofValidator<SR>>,
 }
 
-impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
-    IdentityCreateTransitionBasicValidator<T, S>
+impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
+    IdentityCreateTransitionBasicValidator<T, S, SR>
 {
     pub fn new(
         protocol_version_validator: Arc<ProtocolVersionValidator>,
         public_keys_validator: Arc<T>,
         public_keys_in_identity_transition_validator: Arc<S>,
+        asset_lock_proof_validator: Arc<AssetLockProofValidator<SR>>,
     ) -> Result<Self, DashPlatformProtocolInitError> {
         let json_schema_validator =
             JsonSchemaValidator::new(INDENTITY_CREATE_TRANSITION_SCHEMA.clone())?;
@@ -40,13 +43,13 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
             json_schema_validator,
             public_keys_validator,
             public_keys_in_identity_transition_validator,
-            proof_validator: Arc::new(0),
+            asset_lock_proof_validator,
         };
 
         Ok(identity_validator)
     }
 
-    pub fn validate(
+    pub async fn validate(
         &self,
         identity_create_transition_json: &Value,
     ) -> Result<ValidationResult<()>, NonConsensusError> {
@@ -84,17 +87,13 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator>
             return Ok(result);
         }
 
-        // const proofValidationFunction = proofValidationFunctionsByType[
-        //     rawStateTransition.assetLockProof.type
-        // ];
-        //
-        // const assetLockProofValidationResult = await proofValidationFunction(
-        //     rawStateTransition.assetLockProof,
-        // );
-        //
-        // result.merge(
-        //     assetLockProofValidationResult,
-        // );
+        result.merge(self.asset_lock_proof_validator.validate_structure(
+            identity_transition_map.get("").ok_or_else(|| {
+                NonConsensusError::SerdeJsonError(String::from(
+                    "identity state transition must contain an asset lock proof",
+                ))
+            })?,
+        ).await?);
 
         Ok(result)
     }

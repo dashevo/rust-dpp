@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use dashcore::consensus;
 use dashcore::InstantLock;
 use lazy_static::lazy_static;
@@ -27,7 +28,7 @@ where
     SR: StateRepositoryLike,
 {
     json_schema_validator: JsonSchemaValidator,
-    state_repository: SR,
+    state_repository: Arc<SR>,
     asset_lock_transaction_validator: AssetLockTransactionValidator<SR>,
 }
 
@@ -36,7 +37,7 @@ where
     SR: StateRepositoryLike,
 {
     pub fn new(
-        state_repository: SR,
+        state_repository: Arc<SR>,
         asset_lock_transaction_validator: AssetLockTransactionValidator<SR>,
     ) -> Result<Self, DashPlatformProtocolInitError> {
         let json_schema_validator =

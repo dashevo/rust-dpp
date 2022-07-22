@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use dashcore::consensus;
 use dashcore::{OutPoint, Transaction};
 
@@ -35,14 +36,14 @@ pub struct AssetLockTransactionValidator<SR>
 where
     SR: StateRepositoryLike,
 {
-    state_repository: SR,
+    state_repository: Arc<SR>,
 }
 
 impl<SR> AssetLockTransactionValidator<SR>
 where
     SR: StateRepositoryLike,
 {
-    pub fn new(state_repository: SR) -> Self {
+    pub fn new(state_repository: Arc<SR>) -> Self {
         Self { state_repository }
     }
 
