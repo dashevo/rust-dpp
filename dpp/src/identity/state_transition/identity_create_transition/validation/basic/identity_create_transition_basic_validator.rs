@@ -18,6 +18,8 @@ lazy_static! {
     .unwrap();
 }
 
+const ASSET_LOCK_PROOF_PROPERTY_NAME: &str = "assetLockProof";
+
 pub struct IdentityCreateTransitionBasicValidator<T, S, SR: StateRepositoryLike> {
     protocol_version_validator: Arc<ProtocolVersionValidator>,
     json_schema_validator: JsonSchemaValidator,
@@ -74,6 +76,7 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
             return Ok(result);
         }
 
+        println!("2");
         let public_keys = get_raw_public_keys(identity_transition_map)?;
 
         result.merge(self.public_keys_validator.validate_keys(public_keys)?);
@@ -87,13 +90,16 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
             return Ok(result);
         }
 
+        println!("3");
         result.merge(self.asset_lock_proof_validator.validate_structure(
-            identity_transition_map.get("").ok_or_else(|| {
+            identity_transition_map.get(ASSET_LOCK_PROOF_PROPERTY_NAME).ok_or_else(|| {
                 NonConsensusError::SerdeJsonError(String::from(
                     "identity state transition must contain an asset lock proof",
                 ))
             })?,
         ).await?);
+
+        println!("4");
 
         Ok(result)
     }

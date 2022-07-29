@@ -17,9 +17,12 @@ impl<SR: StateRepositoryLike> AssetLockProofValidator<SR> {
     }
 
     pub async fn validate_structure(&self, raw_asset_lock_proof: &serde_json::Value) -> Result<ValidationResult<PublicKeyHash>, NonConsensusError> {
+        println!("6");
         let asset_lock: AssetLockProof = serde_json::from_value(raw_asset_lock_proof.clone())?;
+        println!("7");
         match asset_lock {
             AssetLockProof::Instant(instant_asset_lock) => {
+                println!("8");
                 self.instant_asset_lock_structure_validator.validate(raw_asset_lock_proof).await
             }
             AssetLockProof::Chain(_) => {
