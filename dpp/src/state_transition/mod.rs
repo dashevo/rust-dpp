@@ -9,6 +9,7 @@ use crate::data_contract::state_transition::{
 };
 // TODO unify the import paths ::object::state_transition::*
 use crate::document::DocumentsBatchTransition;
+use crate::identity::state_transition::identity_credit_withdrawal_transition::IdentityCreditWithdrawalTransition;
 use crate::mocks;
 
 mod abstract_state_transition;
@@ -25,6 +26,7 @@ macro_rules! call_method {
             StateTransition::DocumentsBatch(st) => st.$method($args),
             StateTransition::IdentityCreate(st) => st.$method($args),
             StateTransition::IdentityTopUp(st) => st.$method($args),
+            StateTransition::IdentityCreditWithdrawal(st) => st.$method($args),
         }
     };
     ($state_transition:expr, $method:ident ) => {
@@ -34,6 +36,7 @@ macro_rules! call_method {
             StateTransition::DocumentsBatch(st) => st.$method(),
             StateTransition::IdentityCreate(st) => st.$method(),
             StateTransition::IdentityTopUp(st) => st.$method(),
+            StateTransition::IdentityCreditWithdrawal(st) => st.$method(),
         }
     };
 }
@@ -46,6 +49,9 @@ macro_rules! call_static_method {
             StateTransition::DocumentsBatch(_) => DocumentsBatchTransition::$method(),
             StateTransition::IdentityCreate(_) => mocks::IdentityCreateTransition::$method(),
             StateTransition::IdentityTopUp(_) => mocks::IdentityTopUpTransition::$method(),
+            StateTransition::IdentityCreditWithdrawal(_) => {
+                IdentityCreditWithdrawalTransition::$method()
+            }
         }
     };
 }
@@ -57,6 +63,7 @@ pub enum StateTransition {
     DocumentsBatch(DocumentsBatchTransition),
     IdentityCreate(mocks::IdentityCreateTransition),
     IdentityTopUp(mocks::IdentityTopUpTransition),
+    IdentityCreditWithdrawal(IdentityCreditWithdrawalTransition),
 }
 
 impl StateTransition {
@@ -153,6 +160,12 @@ impl From<mocks::IdentityCreateTransition> for StateTransition {
 impl From<mocks::IdentityTopUpTransition> for StateTransition {
     fn from(d: mocks::IdentityTopUpTransition) -> Self {
         Self::IdentityTopUp(d)
+    }
+}
+
+impl From<IdentityCreditWithdrawalTransition> for StateTransition {
+    fn from(d: IdentityCreditWithdrawalTransition) -> Self {
+        Self::IdentityCreditWithdrawal(d)
     }
 }
 

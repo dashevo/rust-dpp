@@ -48,6 +48,9 @@ pub enum BasicError {
         index_properties: Vec<String>,
         document_type: String,
     },
+
+    #[error("Identity {identity_id} is not present")]
+    IdentityNotPresent { identity_id: Identifier },
 }
 
 impl From<IndexError> for BasicError {
