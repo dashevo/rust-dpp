@@ -26,10 +26,7 @@ where
 
         let mut existing_identity = maybe_existing_identity.unwrap();
 
-        // TODO: create special transaction for Core
-
-        // TODO: what about negative balances yo???
-        existing_identity.balance -= state_transition.amount as i64;
+        existing_identity = existing_identity.reduce_balance(state_transition.amount);
 
         self.state_repository
             .update_identity(existing_identity)
