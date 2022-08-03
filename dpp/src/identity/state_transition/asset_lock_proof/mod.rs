@@ -59,12 +59,10 @@ impl TryFrom<&serde_json::Value> for AssetLockProof {
 
         match proof_type {
             AssetLockProofType::Instant => {
-                let proof: InstantAssetLockProof = serde_json::from_value(value.clone()).map_err(|e| SerdeParsingError::new(e.to_string()))?;
-                Ok(Self::Instant(proof))
+                Ok(Self::Instant(serde_json::from_value(value.clone())?))
             }
             AssetLockProofType::Chain => {
-                let proof: ChainAssetLockProof = serde_json::from_value(value.clone()).map_err(|e| SerdeParsingError::new(e.to_string()))?;
-                Ok(Self::Chain(proof))
+                Ok(Self::Chain(serde_json::from_value(value.clone())?))
             }
         }
     }

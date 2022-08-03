@@ -1,3 +1,4 @@
+use serde_json::Error;
 use thiserror::Error;
 
 #[derive(Debug, Error, Clone, Eq, PartialEq)]
@@ -15,5 +16,11 @@ impl SerdeParsingError {
 
     pub fn message(&self) -> &str {
         &self.message
+    }
+}
+
+impl From<serde_json::Error> for SerdeParsingError {
+    fn from(err: Error) -> Self {
+        Self::new(err.to_string())
     }
 }
