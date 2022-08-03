@@ -12,6 +12,8 @@ use serde_json::Value as JsonValue;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::errors::{InvalidVectorSizeError, ProtocolError};
+use crate::identity::state_transition::identity_create_transition::SerializationOptions;
+use crate::SerdeParsingError;
 use crate::util::cbor_value::{CborCanonicalMap, CborMapExtension};
 use crate::util::json_value::{JsonValueExt, ReplaceWith};
 use crate::util::vec;
@@ -293,6 +295,22 @@ impl IdentityPublicKey {
         let identity_public_key: IdentityPublicKey = serde_json::from_value(raw_object)?;
 
         Ok(identity_public_key)
+    }
+
+    /// Return raw data, with all binary fields represented as arrays
+    pub fn to_raw_json_object(&self) -> Result<JsonValue, SerdeParsingError> {
+        let value = serde_json::to_value(&self)?;
+
+        Ok(value)
+    }
+
+    /// Return json with all binary data converted to base64
+    pub fn to_json(&self) -> Result<JsonValue, SerdeParsingError> {
+        let mut value = self.to_raw_json_object()?;
+
+        value.replace_binary_paths(BINARY_DATA_FIELDS, ReplaceWith::Base64);
+
+        Ok(value)
     }
 
     pub fn from_cbor_value(cbor_value: &CborValue) -> Result<Self, ProtocolError> {
