@@ -70,14 +70,32 @@ impl TryFrom<&serde_json::Value> for AssetLockProof {
     }
 }
 
-impl From<AssetLockProof> for serde_json::Value {
-    fn from(asset_lock_proof: AssetLockProof) -> Self {
-        todo!()
+impl TryFrom<AssetLockProof> for serde_json::Value {
+    type Error = serde_json::Error;
+
+    fn try_from(asset_lock_proof: AssetLockProof) -> Result<Self, Self::Error> {
+        match asset_lock_proof {
+            AssetLockProof::Instant(instant_proof) => {
+                serde_json::to_value(instant_proof)
+            }
+            AssetLockProof::Chain(chain_proof) => {
+                serde_json::to_value(chain_proof)
+            }
+        }
     }
 }
 
-impl From<&AssetLockProof> for serde_json::Value {
-    fn from(asset_lock_proof: &AssetLockProof) -> Self {
-        todo!()
+impl TryFrom<&AssetLockProof> for serde_json::Value {
+    type Error = serde_json::Error;
+
+    fn try_from(asset_lock_proof: &AssetLockProof) -> Result<Self, Self::Error> {
+        match asset_lock_proof {
+            AssetLockProof::Instant(instant_proof) => {
+                serde_json::to_value(instant_proof)
+            }
+            AssetLockProof::Chain(chain_proof) => {
+                serde_json::to_value(chain_proof)
+            }
+        }
     }
 }

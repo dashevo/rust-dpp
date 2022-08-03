@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use crate::identity::IdentityPublicKey;
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::prelude::Identifier;
@@ -108,7 +108,7 @@ impl IdentityCreateTransition {
     }
 
     /// Get state transition as JSON
-    pub fn toJSON(&self) -> serde_json::Value {
+    pub fn toJSON(&self) -> Result<serde_json::Value, serde_json::Error> {
     // return {
     // super.toJSON(),
     // assetLockProof: this.getAssetLockProof().toJSON(),
@@ -117,11 +117,11 @@ impl IdentityCreateTransition {
         let mut json = serde_json::Value::Object(Default::default());
 
         if let Some(proof) = &self.asset_lock_proof {
-            let proof_val: serde_json::Value = proof.into();
+            let proof_val: serde_json::Value = proof.try_into()?;
             json.insert(ASSET_LOCK_PROOF_PROPERTY_NAME.to_string(), proof_val);
         }
 
-        json
+        Ok(json)
     }
 
     /// Returns ids of created identities
