@@ -1,4 +1,6 @@
+use std::convert::TryFrom;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;
@@ -6,6 +8,9 @@ pub use chain::*;
 pub use instant::*;
 
 use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
+use crate::prelude::Identifier;
+use crate::SerdeParsingError;
+use crate::util::json_value::JsonValueExt;
 
 mod asset_lock_proof_validator;
 mod asset_lock_public_key_hash_fetcher;
@@ -23,4 +28,56 @@ pub enum AssetLockProof {
 pub enum AssetLockProofType {
     Instant = 0,
     Chain = 1,
+}
+
+impl TryFrom<u64> for AssetLockProofType {
+    type Error = SerdeParsingError;
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        match value {
+            0 => { Ok(Self::Instant) },
+            1 => { Ok(Self::Chain) },
+            _ => { Err(SerdeParsingError::new("Unexpected asset lock proof type")) }
+        }
+    }
+}
+
+impl AssetLockProof {
+    /// TODO: Implement
+    pub fn create_identifier(&self) -> Identifier {
+        Identifier::default()
+    }
+}
+
+impl TryFrom<&serde_json::Value> for AssetLockProof {
+    type Error = SerdeParsingError;
+
+    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        //let proof_map = value.as_object().ok_or_else(|| SerdeParsingError::new("Expected asset lock proof to be an object"))?;
+        let proof_type_int = value.get_u64("type").map_err(|e| SerdeParsingError::new(e.to_string()))?;
+        let proof_type = AssetLockProofType::try_from(proof_type_int)?;
+
+        match proof_type {
+            AssetLockProofType::Instant => {
+                let proof: InstantAssetLockProof = serde_json::from_value(value.clone()).map_err(|e| SerdeParsingError::new(e.to_string()))?;
+                Ok(Self::Instant(proof))
+            }
+            AssetLockProofType::Chain => {
+                let proof: ChainAssetLockProof = serde_json::from_value(value.clone()).map_err(|e| SerdeParsingError::new(e.to_string()))?;
+                Ok(Self::Chain(proof))
+            }
+        }
+    }
+}
+
+impl From<AssetLockProof> for serde_json::Value {
+    fn from(asset_lock_proof: AssetLockProof) -> Self {
+        todo!()
+    }
+}
+
+impl From<&AssetLockProof> for serde_json::Value {
+    fn from(asset_lock_proof: &AssetLockProof) -> Self {
+        todo!()
+    }
 }
