@@ -94,7 +94,7 @@ impl JsonSchemaExt for JsonValue {
 }
 
 // Indices documentation:  https://dashplatform.readme.io/docs/reference-data-contracts#document-indices
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Index {
     pub name: String,
     pub properties: Vec<BTreeMap<String, OrderBy>>,
@@ -102,7 +102,7 @@ pub struct Index {
     pub unique: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Eq)]
 pub enum OrderBy {
     #[serde(rename = "asc")]
     Asc,
