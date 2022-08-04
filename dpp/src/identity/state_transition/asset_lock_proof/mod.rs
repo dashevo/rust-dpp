@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use dashcore::OutPoint;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -6,6 +7,7 @@ pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_validator::*;
 pub use chain::*;
 pub use instant::*;
+pub use asset_lock_transaction_output_fetcher::*;
 
 use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
 use crate::prelude::Identifier;
@@ -58,6 +60,18 @@ impl AssetLockProof {
     /// TODO: Implement
     pub fn create_identifier(&self) -> Identifier {
         Identifier::default()
+    }
+
+    pub fn out_point(&self) -> Option<[u8; 36]> {
+        match self {
+            AssetLockProof::Instant(proof) => {
+                proof.out_point()
+            }
+            AssetLockProof::Chain(_) => {
+                // TODO: Implement
+                Some([0; 36])
+            }
+        }
     }
 }
 

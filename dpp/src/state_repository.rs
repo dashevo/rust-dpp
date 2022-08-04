@@ -95,4 +95,6 @@ pub trait StateRepositoryLike: Send + Sync {
     async fn fetch_sml_store<T>(&self) -> AnyResult<T>
     where
         T: for<'de> serde::de::Deserialize<'de> + 'static;
+
+    async fn create_identity(&self, identity: &Identity) -> AnyResult<()>;
 }

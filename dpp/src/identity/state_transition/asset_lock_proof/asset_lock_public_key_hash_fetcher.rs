@@ -23,11 +23,10 @@ where
     pub async fn fetch_public_key_hash(
         &self,
         asset_lock_proof: AssetLockProof,
-        execution_context: ExecutionContext,
     ) -> Result<[u8; 20], DPPError> {
         let output = self
             .asset_lock_transaction_output_fetcher
-            .fetch(&asset_lock_proof, execution_context)
+            .fetch(&asset_lock_proof)
             .await?;
 
         if output.script_pubkey.is_op_return() {
