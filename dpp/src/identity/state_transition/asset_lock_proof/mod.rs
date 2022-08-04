@@ -25,6 +25,18 @@ pub enum AssetLockProof {
     Chain(ChainAssetLockProof),
 }
 
+impl Default for AssetLockProof {
+    fn default() -> Self {
+        Self::Instant(InstantAssetLockProof::default())
+    }
+}
+
+impl AsRef<AssetLockProof> for AssetLockProof {
+    fn as_ref(&self) -> &AssetLockProof {
+        &self
+    }
+}
+
 pub enum AssetLockProofType {
     Instant = 0,
     Chain = 1,

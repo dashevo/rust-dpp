@@ -8,7 +8,7 @@ use ciborium::value::Value as CborValue;
 use dashcore::PublicKey;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value as JsonValue;
+use serde_json::{Value as JsonValue};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::errors::{InvalidVectorSizeError, ProtocolError};

@@ -1,15 +1,17 @@
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::identity::{IdentityPublicKey, JsonIdentityPublicKey};
 use crate::prelude::Identifier;
-use crate::state_transition::{StateTransition, StateTransitionConvert, StateTransitionLike, StateTransitionType};
+use crate::state_transition::{
+    StateTransition, StateTransitionConvert, StateTransitionLike, StateTransitionType,
+};
 use crate::util::json_value::JsonValueExt;
+use crate::util::string_encoding::Encoding;
 use crate::{ProtocolError, SerdeParsingError};
-use serde_json::Value as JsonValue;
-use std::convert::{TryFrom, TryInto};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::de::Error as DeError;
 use serde::ser::Error as SerError;
-use crate::util::string_encoding::Encoding;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Value as JsonValue;
+use std::convert::{TryFrom, TryInto};
 
 mod property_names {
     pub const PUBLIC_KEYS: &str = "publicKeys";
@@ -23,7 +25,7 @@ mod property_names {
 #[derive(Debug, Copy, Clone)]
 pub struct SerializationOptions {
     pub skip_signature: bool,
-    pub skip_identifiers_conversion: bool
+    pub skip_identifiers_conversion: bool,
 }
 
 impl Default for SerializationOptions {
@@ -38,9 +40,9 @@ impl Default for SerializationOptions {
 #[derive(Debug, Clone)]
 pub struct IdentityCreateTransition {
     // Own ST fields
-    public_keys: Vec<IdentityPublicKey>,
-    asset_lock_proof: Option<AssetLockProof>,
-    identity_id: Identifier,
+    pub public_keys: Vec<IdentityPublicKey>,
+    pub asset_lock_proof: AssetLockProof,
+    pub identity_id: Identifier,
     // Generic identity ST fields
     pub protocol_version: u32,
     pub transition_type: StateTransitionType,
@@ -55,7 +57,7 @@ impl Default for IdentityCreateTransition {
             asset_lock_proof: Default::default(),
             identity_id: Default::default(),
             protocol_version: Default::default(),
-            signature: Default::default()
+            signature: Default::default(),
         }
     }
 }
@@ -68,10 +70,12 @@ impl From<IdentityCreateTransition> for StateTransition {
 
 impl Serialize for IdentityCreateTransition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
+    where
+        S: Serializer,
     {
-        let raw = self.to_json_object(Default::default()).map_err(|e| S::Error::custom(e.to_string()))?;
+        let raw = self
+            .to_json_object(Default::default())
+            .map_err(|e| S::Error::custom(e.to_string()))?;
 
         raw.serialize(serializer)
     }
@@ -79,13 +83,12 @@ impl Serialize for IdentityCreateTransition {
 
 impl<'de> Deserialize<'de> for IdentityCreateTransition {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         let value = serde_json::Value::deserialize(deserializer)?;
 
-        Self::new(value)
-            .map_err(|e| D::Error::custom(e.to_string()))
+        Self::new(value).map_err(|e| D::Error::custom(e.to_string()))
     }
 }
 
@@ -128,11 +131,11 @@ impl IdentityCreateTransition {
     pub fn set_asset_lock_proof(&mut self, asset_lock_proof: AssetLockProof) {
         self.identity_id = asset_lock_proof.create_identifier();
 
-        self.asset_lock_proof = Some(asset_lock_proof);
+        self.asset_lock_proof = asset_lock_proof;
     }
 
     /// Get asset lock proof
-    pub fn get_asset_lock_proof(&self) -> &Option<AssetLockProof> {
+    pub fn get_asset_lock_proof(&self) -> &AssetLockProof {
         &self.asset_lock_proof
     }
 
@@ -166,34 +169,54 @@ impl IdentityCreateTransition {
     }
 
     /// Get raw state transition
-    pub fn to_json_object(&self, options: SerializationOptions) -> Result<JsonValue, SerdeParsingError> {
+    pub fn to_json_object(
+        &self,
+        options: SerializationOptions,
+    ) -> Result<JsonValue, SerdeParsingError> {
         let mut json_map = JsonValue::Object(Default::default());
 
         if !options.skip_signature {
             let sig = self.signature.iter().map(|num| JsonValue::from(*num));
-            json_map.insert(property_names::SIGNATURE.to_string(), JsonValue::Array(sig.collect()));
+            json_map.insert(
+                property_names::SIGNATURE.to_string(),
+                JsonValue::Array(sig.collect()),
+            );
         }
 
         if !options.skip_identifiers_conversion {
             let bytes = self.signature.iter().map(|num| JsonValue::from(*num));
-            json_map.insert(property_names::IDENTITY_ID.to_string(), JsonValue::Array(bytes.collect()));
+            json_map.insert(
+                property_names::IDENTITY_ID.to_string(),
+                JsonValue::Array(bytes.collect()),
+            );
         } else {
-            json_map.insert(property_names::IDENTITY_ID.to_string(), JsonValue::String(self.identity_id.to_string(Encoding::Base58)));
+            json_map.insert(
+                property_names::IDENTITY_ID.to_string(),
+                JsonValue::String(self.identity_id.to_string(Encoding::Base58)),
+            );
         }
 
-        let pk_values = self.public_keys.iter().map(|pk| {
-            pk.to_raw_json_object()
-        }).collect::<Result<Vec<JsonValue>, SerdeParsingError>>()?;
+        let pk_values = self
+            .public_keys
+            .iter()
+            .map(|pk| pk.to_raw_json_object())
+            .collect::<Result<Vec<JsonValue>, SerdeParsingError>>()?;
 
-        json_map.insert(property_names::PUBLIC_KEYS.to_string(), JsonValue::Array(pk_values));
+        json_map.insert(
+            property_names::PUBLIC_KEYS.to_string(),
+            JsonValue::Array(pk_values),
+        );
 
-        // TODO: that probably shouldn't be an option
-        if let Some(proof) = &self.asset_lock_proof {
-            json_map.insert(property_names::ASSET_LOCK_PROOF.to_string(), proof.try_into()?);
-        }
+        json_map.insert(
+            property_names::ASSET_LOCK_PROOF.to_string(),
+            self.asset_lock_proof.as_ref().try_into()?,
+        );
 
         // TODO ??
-        json_map.insert(property_names::PROTOCOL_VERSION.to_string(), JsonValue::Number(self.get_protocol_version().into()));
+        json_map.insert(
+            property_names::PROTOCOL_VERSION.to_string(),
+            JsonValue::Number(self.get_protocol_version().into()),
+        );
 
         Ok(json_map)
     }
@@ -220,20 +243,15 @@ impl StateTransitionConvert for IdentityCreateTransition {
 
         // TODO: super.toJSON()
 
-        if let Some(proof) = &self.asset_lock_proof {
-            let proof_val: serde_json::Value = proof.try_into()?;
-            json.insert(property_names::ASSET_LOCK_PROOF.to_string(), proof_val);
-        }
+        json.insert(property_names::ASSET_LOCK_PROOF.to_string(), self.asset_lock_proof.as_ref().try_into()?);
 
         let public_keys = self
             .public_keys
             .iter()
             .map(|pk| {
-                let json_key: JsonIdentityPublicKey = pk.into();
-
-                serde_json::to_value(json_key)
+                pk.to_json()
             })
-            .collect::<Result<Vec<JsonValue>, serde_json::Error>>()?;
+            .collect::<Result<Vec<JsonValue>, SerdeParsingError>>()?;
 
         json.insert(
             property_names::PUBLIC_KEYS.to_string(),
