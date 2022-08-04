@@ -267,7 +267,7 @@ impl DocumentType {
                 }
                 _ => {
                     field_type = string_to_field_type(type_value)
-                        .ok_or({ ContractError::ValueWrongType("invalid type") })?;
+                        .ok_or_else(||{ ContractError::ValueWrongType("invalid type") })?;
                     document_properties.insert(
                         prefixed_property_key,
                         DocumentField {

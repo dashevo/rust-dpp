@@ -339,6 +339,7 @@ mod validate_identity_create_transition_basic_factory {
                 .unwrap();
             kek.insert("version".into(), "totally not a valid type".into());
             let err = TestConsensusError::new("test");
+            println!("1");
             //let asset_lock_error = ConsensusError::from(err.clone());
             //let asset_lock_result = ValidationResult::<()>::new(Some(vec![asset_lock_error]));
 
@@ -441,7 +442,7 @@ mod validate_identity_create_transition_basic_factory {
 
             let result = validator.validate(&raw_state_transition).await.unwrap();
 
-            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 65);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
 
             let error = errors.first().unwrap();
 
@@ -465,7 +466,7 @@ mod validate_identity_create_transition_basic_factory {
 
             let result = validator.validate(&raw_state_transition).await.unwrap();
 
-            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 2);
+            let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
             let error = errors.first().unwrap();
 
@@ -642,6 +643,8 @@ mod validate_identity_create_transition_basic_factory {
             Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
         );
         let result = validator.validate(&raw_state_transition).await.unwrap();
+
+        println!("{:?}", result.errors);
 
         assert!(result.is_valid());
         assert_eq!(
