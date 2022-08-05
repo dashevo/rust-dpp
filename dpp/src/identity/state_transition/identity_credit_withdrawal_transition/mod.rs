@@ -28,12 +28,12 @@ pub const IDENTIFIER_FIELDS: [&str; 2] = [PROPERTY_IDENTITY_ID, PROPERTY_OWNER_I
 pub enum Pooling {
     Never = 0,
     IfAvailable = 1,
-    Standart = 2,
+    Standard = 2,
 }
 
 impl std::default::Default for Pooling {
     fn default() -> Self {
-        Pooling::Standart
+        Pooling::Standard
     }
 }
 
