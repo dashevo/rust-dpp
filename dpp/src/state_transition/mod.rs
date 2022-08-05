@@ -157,9 +157,3 @@ impl From<IdentityCreditWithdrawalTransition> for StateTransition {
         Self::IdentityCreditWithdrawal(d)
     }
 }
-
-// impl From<mocks::IdentityTopUpTransition> for StateTransition {
-//     fn from(d: mocks::IdentityTopUpTransition) -> Self {
-//         Self::IdentityTopUp(d)
-//     }
-// }
