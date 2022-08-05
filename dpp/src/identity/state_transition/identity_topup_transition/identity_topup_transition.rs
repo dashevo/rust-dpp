@@ -7,7 +7,7 @@ use crate::state_transition::{
 };
 use crate::util::json_value::JsonValueExt;
 use crate::util::string_encoding::Encoding;
-use crate::{ProtocolError, SerdeParsingError};
+use crate::{InvalidVectorSizeError, ProtocolError, SerdeParsingError};
 use serde::de::Error as DeError;
 use serde::ser::Error as SerError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -102,7 +102,7 @@ impl IdentityTopUpTransition {
         }
 
         if let Some(proof) = transition_map.get(property_names::ASSET_LOCK_PROOF) {
-            state_transition.set_asset_lock_proof(AssetLockProof::try_from(proof)?);
+            state_transition.set_asset_lock_proof(AssetLockProof::try_from(proof)?)?;
         }
 
         Ok(state_transition)
@@ -114,10 +114,12 @@ impl IdentityTopUpTransition {
     }
 
     /// Set asset lock
-    pub fn set_asset_lock_proof(&mut self, asset_lock_proof: AssetLockProof) {
-        self.identity_id = asset_lock_proof.create_identifier();
+    pub fn set_asset_lock_proof(&mut self, asset_lock_proof: AssetLockProof) -> Result<(), InvalidVectorSizeError> {
+        self.identity_id = asset_lock_proof.create_identifier()?;
 
         self.asset_lock_proof = asset_lock_proof;
+
+        Ok(())
     }
 
     /// Get asset lock proof

@@ -60,6 +60,11 @@ where
         // );
         //
         let mut result = ValidationResult::default();
+
+        println!("{:?}", raw_asset_lock_proof);
+
+        println!("hehe");
+
         result.merge(self.json_schema_validator.validate(raw_asset_lock_proof)?);
 
         // if !result.isValid() {
@@ -67,6 +72,7 @@ where
         // }
 
         if !result.is_valid() {
+            println!("Not hehe");
             return Ok(result);
         }
 
@@ -124,11 +130,15 @@ where
         // return result;
         // }
 
+        println!("Mda");
+
         let is_signature_verified = self
             .state_repository
             .verify_instant_lock(&instant_lock)
             .await
             .map_err(|err| NonConsensusError::StateRepositoryFetchError(err.to_string()))?;
+
+        println!("Mde");
 
         if !is_signature_verified {
             result.add_error(InvalidInstantAssetLockProofSignatureError::new());
