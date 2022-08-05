@@ -49,8 +49,8 @@ pub enum BasicError {
         document_type: String,
     },
 
-    #[error("Identity {identity_id} is not present")]
-    IdentityNotPresent { identity_id: Identifier },
+    #[error("Identity {identity_id} not found")]
+    IdentityNotFoundError { identity_id: Identifier },
 }
 
 impl From<IndexError> for BasicError {

@@ -36,7 +36,7 @@ where
 
         let existing_identity = match maybe_existing_identity {
             Ok(None) | Err(_) => {
-                let err = BasicError::IdentityNotPresent {
+                let err = BasicError::IdentityNotFoundError {
                     identity_id: state_transition.identity_id.clone(),
                 };
 

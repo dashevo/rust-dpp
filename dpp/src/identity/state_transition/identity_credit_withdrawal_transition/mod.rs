@@ -58,12 +58,12 @@ impl std::default::Default for IdentityCreditWithdrawalTransition {
             protocol_version: Default::default(),
             transition_type: StateTransitionType::IdentityCreditWithdrawal,
             identity_id: Default::default(),
-            amount: 0,
-            core_fee: 0,
+            amount: Default::default(),
+            core_fee: Default::default(),
             pooling: Default::default(),
-            output: vec![],
-            signature_public_key_id: 0,
-            signature: vec![],
+            output: Default::default(),
+            signature_public_key_id: Default::default(),
+            signature: Default::default(),
         }
     }
 }
@@ -136,5 +136,45 @@ impl StateTransitionConvert for IdentityCreditWithdrawalTransition {
 
     fn binary_property_paths() -> Vec<&'static str> {
         vec![PROPERTY_SIGNATURE, PROPERTY_OUTPUT]
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use serde_json::json;
+
+    use crate::{
+        identity::state_transition::properties::{
+            PROPERTY_PROTOCOL_VERSION, PROPERTY_TRANSITION_TYPE,
+        },
+        util::string_encoding::Encoding,
+        version,
+    };
+
+    use super::*;
+
+    struct TestData {
+        state_transition: IdentityCreditWithdrawalTransition,
+    }
+
+    fn get_test_data() -> TestData {
+        let state_transition = IdentityCreditWithdrawalTransition::from_raw_object(json!({
+            PROPERTY_PROTOCOL_VERSION: version::LATEST_VERSION,
+            PROPERTY_TRANSITION_TYPE: StateTransitionType::IdentityCreditWithdrawal,
+            PROPERTY_IDENTITY_ID: Identifier::new(rand::random()).to_string(Encoding::Base58),
+        }))
+        .expect("state transition should be created without errors");
+
+        TestData { state_transition }
+    }
+
+    #[test]
+    fn should_return_protocol_version() {
+        let TestData { state_transition } = get_test_data();
+
+        assert_eq!(
+            version::LATEST_VERSION,
+            state_transition.get_protocol_version()
+        )
     }
 }

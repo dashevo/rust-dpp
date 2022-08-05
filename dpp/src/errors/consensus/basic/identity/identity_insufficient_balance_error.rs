@@ -5,8 +5,8 @@ use crate::prelude::Identifier;
 #[derive(Error, Debug, Clone, PartialEq, Eq)]
 #[error("Insufficient identity ${identity_id} balance ${balance}")]
 pub struct IdentityInsufficientBalanceError {
-    identity_id: Identifier,
-    balance: i64,
+    pub identity_id: Identifier,
+    pub balance: i64,
 }
 
 impl IdentityInsufficientBalanceError {
