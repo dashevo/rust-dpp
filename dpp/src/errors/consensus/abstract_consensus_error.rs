@@ -18,7 +18,6 @@ use crate::errors::consensus::basic::{
     BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
 use crate::errors::StateError;
-use crate::prelude::Identifier;
 
 use super::basic::identity::IdentityInsufficientBalanceError;
 

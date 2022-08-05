@@ -13,7 +13,7 @@ use crate::{
 lazy_static! {
     static ref INDENTITY_CREDIT_WITHDRAWAL_TRANSITION_SCHEMA: Value =
         serde_json::from_str(include_str!(
-            "../../../../../../schema/identity/stateTransition/identityCreditWithdrawal.json"
+            "../../../../../schema/identity/stateTransition/identityCreditWithdrawal.json"
         ))
         .unwrap();
 }
