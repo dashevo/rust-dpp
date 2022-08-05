@@ -36,6 +36,7 @@ use crate::version::ProtocolVersionValidator;
 pub fn setup_test(
     public_keys_validator: Arc<impl TPublicKeysValidator>,
     public_keys_transition_validator: Arc<impl TPublicKeysValidator>,
+    state_repository_mock: MockStateRepositoryLike
 ) -> (
     Value,
     IdentityCreateTransitionBasicValidator<
@@ -44,7 +45,7 @@ pub fn setup_test(
         MockStateRepositoryLike,
     >,
 ) {
-    let state_repository = Arc::new(MockStateRepositoryLike::new());
+    let state_repository = Arc::new(state_repository_mock);
     let asset_lock_transaction_validator =
         AssetLockTransactionValidator::new(state_repository.clone());
     let instant_asset_lock_validator = InstantAssetLockProofStructureValidator::new(
@@ -76,6 +77,7 @@ mod validate_identity_create_transition_basic_factory {
     use crate::tests::fixtures::PublicKeysValidatorMock;
     use crate::tests::utils::SerdeTestExtension;
     use crate::validation::ValidationResult;
+    use crate::state_repository::MockStateRepositoryLike;
 
     pub use super::setup_test;
 
@@ -145,12 +147,15 @@ mod validate_identity_create_transition_basic_factory {
         };
         use crate::tests::utils::SerdeTestExtension;
         use crate::{assert_consensus_errors, NonConsensusError};
+        use crate::state_repository::MockStateRepositoryLike;
 
         #[tokio::test]
         pub async fn should_be_present() {
+            let state_repository = MockStateRepositoryLike::new();
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                state_repository
             );
             raw_state_transition.remove_key("protocolVersion");
 
@@ -175,6 +180,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("protocolVersion", "1");
 
@@ -193,6 +199,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("protocolVersion", -1);
 
@@ -225,6 +232,7 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
+        use crate::state_repository::MockStateRepositoryLike;
 
         use super::super::setup_test;
 
@@ -233,6 +241,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.remove_key("type");
             let result = validator.validate(&raw_state_transition).await.unwrap();
@@ -257,6 +266,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("type", 666);
 
@@ -291,6 +301,7 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
+        use crate::state_repository::MockStateRepositoryLike;
 
         use super::super::setup_test;
 
@@ -299,6 +310,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.remove_key("assetLockProof");
 
@@ -324,6 +336,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("assetLockProof", 1);
 
@@ -342,13 +355,14 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
-            let kek = raw_state_transition
+            let st_map = raw_state_transition
                 .get_mut("assetLockProof")
                 .unwrap()
                 .as_object_mut()
                 .unwrap();
-            kek.insert("version".into(), "totally not a valid type".into());
+            st_map.insert("version".into(), "totally not a valid type".into());
             let err = TestConsensusError::new("test");
             println!("1");
             //let asset_lock_error = ConsensusError::from(err.clone());
@@ -388,6 +402,7 @@ mod validate_identity_create_transition_basic_factory {
         use crate::tests::fixtures::PublicKeysValidatorMock;
         use crate::tests::utils::SerdeTestExtension;
         use crate::validation::ValidationResult;
+        use crate::state_repository::MockStateRepositoryLike;
 
         use super::super::setup_test;
 
@@ -396,6 +411,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.remove_key("publicKeys");
 
@@ -421,6 +437,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("publicKeys", Vec::<Value>::new());
 
@@ -439,6 +456,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
 
             let public_keys = raw_state_transition
@@ -466,6 +484,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
 
             let public_keys = raw_state_transition
@@ -498,6 +517,7 @@ mod validate_identity_create_transition_basic_factory {
             let (raw_state_transition, validator) = setup_test(
                 pk_validator_mock.clone(),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
 
             let result = validator.validate(&raw_state_transition).await.unwrap();
@@ -530,6 +550,7 @@ mod validate_identity_create_transition_basic_factory {
             let (raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 pk_validator_mock.clone(),
+                MockStateRepositoryLike::new()
             );
 
             let result = validator.validate(&raw_state_transition).await.unwrap();
@@ -560,6 +581,7 @@ mod validate_identity_create_transition_basic_factory {
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::tests::utils::SerdeTestExtension;
+        use crate::state_repository::MockStateRepositoryLike;
 
         use super::super::setup_test;
 
@@ -568,6 +590,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.remove_key("signature");
 
@@ -593,6 +616,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("signature", vec!["string"; 65]);
 
@@ -611,6 +635,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("signature", vec![0; 64]);
 
@@ -629,6 +654,7 @@ mod validate_identity_create_transition_basic_factory {
             let (mut raw_state_transition, validator) = setup_test(
                 Arc::new(PublicKeysValidator::new().unwrap()),
                 Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+                MockStateRepositoryLike::new()
             );
             raw_state_transition.set_key_value("signature", vec![0; 66]);
 
@@ -649,9 +675,14 @@ mod validate_identity_create_transition_basic_factory {
         let pk_validator_mock = Arc::new(PublicKeysValidatorMock::new());
         pk_validator_mock.returns_fun(move || Ok(ValidationResult::default()));
 
+        let mut state_repository = MockStateRepositoryLike::new();
+        state_repository.expect_verify_instant_lock().returning(|_asset_lock| Ok(true));
+        state_repository.expect_is_asset_lock_transaction_out_point_already_used().returning(|_asset_lock| Ok(false));
+
         let (raw_state_transition, validator) = setup_test(
             pk_validator_mock.clone(),
             Arc::new(PublicKeysInIdentityCreateTransitionValidator::default()),
+            state_repository
         );
         let result = validator.validate(&raw_state_transition).await.unwrap();
 

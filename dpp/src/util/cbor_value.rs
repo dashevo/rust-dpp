@@ -4,6 +4,7 @@ use std::convert::{TryFrom, TryInto};
 
 use anyhow::anyhow;
 use ciborium::value::Value as CborValue;
+use serde::Serialize;
 use serde_json::{Map, Value as JsonValue};
 
 use crate::identifier::Identifier;
@@ -240,6 +241,11 @@ pub struct CborCanonicalMap {
 impl CborCanonicalMap {
     pub fn new() -> Self {
         Self { inner: vec![] }
+    }
+
+    pub fn from_serializable<T>(value: &T) -> Result<Self, ProtocolError> where T: Serialize {
+        let cbor = ciborium::value::Value::serialized(&value).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+        CborCanonicalMap::try_from(cbor).map_err(|e| ProtocolError::EncodingError(e.to_string()))
     }
 
     pub fn from_vector(vec: Vec<(CborValue, CborValue)>) -> Self {
