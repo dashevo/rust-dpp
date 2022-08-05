@@ -7,7 +7,7 @@ use integer_encoding::{VarInt, VarIntReader};
 use rand::rngs::StdRng;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap};
+use std::collections::BTreeMap;
 use std::convert::{TryFrom, TryInto};
 
 use super::array_field::ArrayFieldType;
@@ -318,7 +318,7 @@ impl DocumentFieldType {
                     Ok(Some(Value::Map(values)))
                 }
             }
-            DocumentFieldType::Array(array_field_type) => {
+            DocumentFieldType::Array(_array_field_type) => {
                 Err(ContractError::Unsupported(
                     "serialization of arrays not yet supported",
                 ))

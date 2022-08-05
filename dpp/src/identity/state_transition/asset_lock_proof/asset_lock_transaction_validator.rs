@@ -1,6 +1,6 @@
-use std::sync::Arc;
 use dashcore::consensus;
 use dashcore::{OutPoint, Transaction};
+use std::sync::Arc;
 
 use crate::consensus::basic::identity::{
     IdentityAssetLockTransactionOutPointAlreadyExistsError,

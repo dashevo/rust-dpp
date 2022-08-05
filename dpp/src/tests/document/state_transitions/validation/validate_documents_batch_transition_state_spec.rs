@@ -106,15 +106,15 @@ fn set_updated_at(dt: &mut DocumentTransition, ts: Option<i64>) {
     match dt {
         DocumentTransition::Create(ref mut t) => t.updated_at = ts,
         DocumentTransition::Replace(ref mut t) => t.updated_at = ts,
-        DocumentTransition::Delete(ref mut t) => {}
+        DocumentTransition::Delete(ref mut _t) => {}
     }
 }
 
 fn set_created_at(dt: &mut DocumentTransition, ts: Option<i64>) {
     match dt {
         DocumentTransition::Create(ref mut t) => t.created_at = ts,
-        DocumentTransition::Replace(ref mut t) => {}
-        DocumentTransition::Delete(ref mut t) => {}
+        DocumentTransition::Replace(ref mut _t) => {}
+        DocumentTransition::Delete(ref mut _t) => {}
     }
 }
 #[tokio::test]

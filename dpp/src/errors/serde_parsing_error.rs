@@ -24,3 +24,9 @@ impl From<serde_json::Error> for SerdeParsingError {
         Self::new(err.to_string())
     }
 }
+
+impl From<anyhow::Error> for SerdeParsingError {
+    fn from(err: anyhow::Error) -> Self {
+        Self::new(err.to_string())
+    }
+}
