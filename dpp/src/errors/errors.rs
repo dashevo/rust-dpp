@@ -144,5 +144,7 @@ impl From<DataContractError> for ProtocolError {
 }
 
 impl From<SerdeParsingError> for ProtocolError {
-    fn from(e: SerdeParsingError) -> Self { ProtocolError::ParsingError(e.to_string()) }
+    fn from(e: SerdeParsingError) -> Self {
+        ProtocolError::ParsingError(e.to_string())
+    }
 }

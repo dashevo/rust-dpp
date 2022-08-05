@@ -1,6 +1,7 @@
 use dashcore::hashes::hex::ToHex;
 use dashcore::psbt::serialize::Deserialize;
 use dashcore::{OutPoint, Transaction, TxOut};
+use std::sync::Arc;
 
 use crate::identity::errors::{AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError};
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
@@ -8,21 +9,17 @@ use crate::state_repository::StateRepositoryLike;
 use crate::DPPError;
 
 pub struct AssetLockTransactionOutputFetcher<SR: StateRepositoryLike> {
-    state_repository: SR,
+    state_repository: Arc<SR>,
 }
 
 pub type ExecutionContext = String;
 
 impl<SR: StateRepositoryLike> AssetLockTransactionOutputFetcher<SR> {
-    pub fn new(state_repository: SR) -> Self {
+    pub fn new(state_repository: Arc<SR>) -> Self {
         Self { state_repository }
     }
 
-    pub async fn fetch(
-        &self,
-        asset_lock_proof: &AssetLockProof,
-        execution_context: ExecutionContext,
-    ) -> Result<TxOut, DPPError> {
+    pub async fn fetch(&self, asset_lock_proof: &AssetLockProof) -> Result<TxOut, DPPError> {
         match asset_lock_proof {
             AssetLockProof::Instant(asset_lock_proof) => asset_lock_proof
                 .output()

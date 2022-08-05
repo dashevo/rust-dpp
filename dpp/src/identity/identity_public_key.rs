@@ -8,15 +8,14 @@ use ciborium::value::Value as CborValue;
 use dashcore::PublicKey;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::{Value as JsonValue};
+use serde_json::Value as JsonValue;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::errors::{InvalidVectorSizeError, ProtocolError};
-use crate::identity::state_transition::identity_create_transition::SerializationOptions;
-use crate::SerdeParsingError;
 use crate::util::cbor_value::{CborCanonicalMap, CborMapExtension};
 use crate::util::json_value::{JsonValueExt, ReplaceWith};
 use crate::util::vec;
+use crate::SerdeParsingError;
 
 pub type KeyID = u64;
 
@@ -308,7 +307,7 @@ impl IdentityPublicKey {
     pub fn to_json(&self) -> Result<JsonValue, SerdeParsingError> {
         let mut value = self.to_raw_json_object()?;
 
-        value.replace_binary_paths(BINARY_DATA_FIELDS, ReplaceWith::Base64);
+        value.replace_binary_paths(BINARY_DATA_FIELDS, ReplaceWith::Base64)?;
 
         Ok(value)
     }

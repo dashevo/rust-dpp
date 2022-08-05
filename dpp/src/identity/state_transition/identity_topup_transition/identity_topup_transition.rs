@@ -1,4 +1,5 @@
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
+use crate::identity::state_transition::identity_create_transition::SerializationOptions;
 use crate::identity::IdentityPublicKey;
 use crate::prelude::Identifier;
 use crate::state_transition::{
@@ -22,23 +23,8 @@ mod property_names {
     pub const IDENTITY_ID: &str = "identityId";
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct SerializationOptions {
-    pub skip_signature: bool,
-    pub skip_identifiers_conversion: bool,
-}
-
-impl Default for SerializationOptions {
-    fn default() -> Self {
-        Self {
-            skip_identifiers_conversion: false,
-            skip_signature: false,
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
-pub struct IdentityCreateTransition {
+pub struct IdentityTopUpTransition {
     // Own ST fields
     pub public_keys: Vec<IdentityPublicKey>,
     pub asset_lock_proof: AssetLockProof,
@@ -49,10 +35,10 @@ pub struct IdentityCreateTransition {
     pub signature: Vec<u8>,
 }
 
-impl Default for IdentityCreateTransition {
+impl Default for IdentityTopUpTransition {
     fn default() -> Self {
         Self {
-            transition_type: StateTransitionType::IdentityCreate,
+            transition_type: StateTransitionType::IdentityTopUp,
             public_keys: Default::default(),
             asset_lock_proof: Default::default(),
             identity_id: Default::default(),
@@ -62,13 +48,13 @@ impl Default for IdentityCreateTransition {
     }
 }
 
-impl From<IdentityCreateTransition> for StateTransition {
-    fn from(d: IdentityCreateTransition) -> Self {
-        Self::IdentityCreate(d)
+impl From<IdentityTopUpTransition> for StateTransition {
+    fn from(d: IdentityTopUpTransition) -> Self {
+        Self::IdentityTopUp(d)
     }
 }
 
-impl Serialize for IdentityCreateTransition {
+impl Serialize for IdentityTopUpTransition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -81,7 +67,7 @@ impl Serialize for IdentityCreateTransition {
     }
 }
 
-impl<'de> Deserialize<'de> for IdentityCreateTransition {
+impl<'de> Deserialize<'de> for IdentityTopUpTransition {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -93,13 +79,13 @@ impl<'de> Deserialize<'de> for IdentityCreateTransition {
 }
 
 /// Main state transition functionality implementation
-impl IdentityCreateTransition {
+impl IdentityTopUpTransition {
     pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, SerdeParsingError> {
         // TODO
         //super(raw_state_transition);
 
         let mut state_transition = Self::default();
-        state_transition.transition_type = StateTransitionType::IdentityCreate;
+        state_transition.transition_type = StateTransitionType::IdentityTopUp;
 
         let transition_map = raw_state_transition.as_object().ok_or_else(|| {
             SerdeParsingError::new("Expected raw identity transition to be a map")
@@ -124,7 +110,7 @@ impl IdentityCreateTransition {
 
     /// Get State Transition type
     pub fn get_type() -> StateTransitionType {
-        StateTransitionType::IdentityCreate
+        StateTransitionType::IdentityTopUp
     }
 
     /// Set asset lock
@@ -227,7 +213,7 @@ impl IdentityCreateTransition {
     }
 }
 
-impl StateTransitionConvert for IdentityCreateTransition {
+impl StateTransitionConvert for IdentityTopUpTransition {
     fn signature_property_paths() -> Vec<&'static str> {
         vec![property_names::SIGNATURE]
     }
@@ -263,7 +249,7 @@ impl StateTransitionConvert for IdentityCreateTransition {
     }
 }
 
-impl StateTransitionLike for IdentityCreateTransition {
+impl StateTransitionLike for IdentityTopUpTransition {
     fn get_protocol_version(&self) -> u32 {
         unimplemented!()
     }
@@ -283,11 +269,3 @@ impl StateTransitionLike for IdentityCreateTransition {
         unimplemented!()
     }
 }
-
-// @typedef {RawStateTransition & Object} RawIdentityCreateTransition
-// @property {RawInstantAssetLockProof|RawChainAssetLockProof} assetLockProof
-// @property {RawIdentityPublicKey[]} publicKeys
-//
-// @typedef {JsonStateTransition & Object} JsonIdentityCreateTransition
-// @property {JsonInstantAssetLockProof|JsonChainAssetLockProof} assetLockProof
-// @property {JsonIdentityPublicKey[]} publicKeys

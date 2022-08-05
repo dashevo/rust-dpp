@@ -11,7 +11,7 @@ use crate::data_contract::state_transition::{
 use crate::document::DocumentsBatchTransition;
 use crate::identity::state_transition::identity_create_transition::IdentityCreateTransition;
 use crate::identity::state_transition::identity_credit_withdrawal_transition::IdentityCreditWithdrawalTransition;
-use crate::mocks;
+use crate::identity::state_transition::identity_topup_transition::IdentityTopUpTransition;
 
 mod abstract_state_transition;
 mod abstract_state_transition_identity_signed;
@@ -49,7 +49,7 @@ macro_rules! call_static_method {
             StateTransition::DataContractUpdate(_) => DataContractUpdateTransition::$method(),
             StateTransition::DocumentsBatch(_) => DocumentsBatchTransition::$method(),
             StateTransition::IdentityCreate(_) => IdentityCreateTransition::$method(),
-            StateTransition::IdentityTopUp(_) => mocks::IdentityTopUpTransition::$method(),
+            StateTransition::IdentityTopUp(_) => IdentityTopUpTransition::$method(),
             StateTransition::IdentityCreditWithdrawal(_) => {
                 IdentityCreditWithdrawalTransition::$method()
             }
@@ -63,7 +63,7 @@ pub enum StateTransition {
     DataContractUpdate(DataContractUpdateTransition),
     DocumentsBatch(DocumentsBatchTransition),
     IdentityCreate(IdentityCreateTransition),
-    IdentityTopUp(mocks::IdentityTopUpTransition),
+    IdentityTopUp(IdentityTopUpTransition),
     IdentityCreditWithdrawal(IdentityCreditWithdrawalTransition),
 }
 
@@ -149,12 +149,6 @@ impl From<DataContractUpdateTransition> for StateTransition {
 impl From<DocumentsBatchTransition> for StateTransition {
     fn from(d: DocumentsBatchTransition) -> Self {
         Self::DocumentsBatch(d)
-    }
-}
-
-impl From<mocks::IdentityTopUpTransition> for StateTransition {
-    fn from(d: mocks::IdentityTopUpTransition) -> Self {
-        Self::IdentityTopUp(d)
     }
 }
 

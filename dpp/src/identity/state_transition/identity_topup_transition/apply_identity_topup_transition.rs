@@ -1,5 +1,5 @@
 use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionOutputFetcher;
-use crate::identity::state_transition::identity_create_transition::IdentityCreateTransition;
+use crate::identity::state_transition::identity_topup_transition::IdentityTopUpTransition;
 use crate::identity::{convert_satoshi_to_credits, Identity};
 use crate::ProtocolError;
 use anyhow::{anyhow, Result};
@@ -8,7 +8,7 @@ use std::sync::Arc;
 use crate::state_repository::StateRepositoryLike;
 use crate::state_transition::StateTransitionLike;
 
-pub struct ApplyIdentityCreateTransition<SR>
+pub struct ApplyIdentityTopUpTransition<SR>
 where
     SR: StateRepositoryLike,
 {
@@ -16,13 +16,13 @@ where
     asset_lock_transaction_output_fetcher: Arc<AssetLockTransactionOutputFetcher<SR>>,
 }
 
-impl<SR> ApplyIdentityCreateTransition<SR>
+impl<SR> ApplyIdentityTopUpTransition<SR>
 where
     SR: StateRepositoryLike,
 {
-    pub async fn apply_identity_create_transition(
+    pub async fn apply_identity_topup_transition(
         &self,
-        state_transition: &IdentityCreateTransition,
+        state_transition: &IdentityTopUpTransition,
     ) -> Result<()> {
         let output = self
             .asset_lock_transaction_output_fetcher

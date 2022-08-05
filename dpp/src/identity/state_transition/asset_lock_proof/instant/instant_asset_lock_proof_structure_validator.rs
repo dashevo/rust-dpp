@@ -1,8 +1,8 @@
-use std::sync::Arc;
 use dashcore::consensus;
 use dashcore::InstantLock;
 use lazy_static::lazy_static;
 use serde_json::Value;
+use std::sync::Arc;
 
 use crate::consensus::basic::identity::{
     IdentityAssetLockProofLockedTransactionMismatchError, InvalidInstantAssetLockProofError,

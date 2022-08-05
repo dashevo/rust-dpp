@@ -1,6 +1,4 @@
-use crate::identity::state_transition::asset_lock_proof::asset_lock_transaction_output_fetcher::{
-    AssetLockTransactionOutputFetcher, ExecutionContext,
-};
+use crate::identity::state_transition::asset_lock_proof::asset_lock_transaction_output_fetcher::AssetLockTransactionOutputFetcher;
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::state_repository::StateRepositoryLike;
 use crate::util::vec::vec_to_array;
@@ -23,11 +21,10 @@ where
     pub async fn fetch_public_key_hash(
         &self,
         asset_lock_proof: AssetLockProof,
-        execution_context: ExecutionContext,
     ) -> Result<[u8; 20], DPPError> {
         let output = self
             .asset_lock_transaction_output_fetcher
-            .fetch(&asset_lock_proof, execution_context)
+            .fetch(&asset_lock_proof)
             .await?;
 
         if output.script_pubkey.is_op_return() {

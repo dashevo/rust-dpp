@@ -13,14 +13,14 @@ use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError}
 
 lazy_static! {
     static ref INDENTITY_CREATE_TRANSITION_SCHEMA: Value = serde_json::from_str(include_str!(
-        "../../../../../schema/identity/stateTransition/identityCreate.json"
+        "../../../../../schema/identity/stateTransition/identityTopUp.json"
     ))
     .unwrap();
 }
 
 const ASSET_LOCK_PROOF_PROPERTY_NAME: &str = "assetLockProof";
 
-pub struct IdentityCreateTransitionBasicValidator<T, S, SR: StateRepositoryLike> {
+pub struct IdentityTopUoTransitionBasicValidator<T, S, SR: StateRepositoryLike> {
     protocol_version_validator: Arc<ProtocolVersionValidator>,
     json_schema_validator: JsonSchemaValidator,
     public_keys_validator: Arc<T>,
@@ -29,7 +29,7 @@ pub struct IdentityCreateTransitionBasicValidator<T, S, SR: StateRepositoryLike>
 }
 
 impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
-    IdentityCreateTransitionBasicValidator<T, S, SR>
+    IdentityTopUoTransitionBasicValidator<T, S, SR>
 {
     pub fn new(
         protocol_version_validator: Arc<ProtocolVersionValidator>,
