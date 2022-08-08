@@ -7,12 +7,14 @@ pub use get_documents_fixture::*;
 pub use get_dpp::*;
 pub use get_protocol_version_validator_fixture::*;
 pub use identity_create_transition_fixture::*;
+pub use identity_credit_withdrawal_transition_fixture::*;
 pub use identity_fixture::*;
 pub use identity_fixture::*;
 pub use instant_asset_lock_proof_fixture::*;
 pub use public_keys_validator_mock::*;
 
 mod identity_create_transition_fixture;
+mod identity_credit_withdrawal_transition_fixture;
 mod instant_asset_lock_proof_fixture;
 mod public_keys_validator_mock;
 

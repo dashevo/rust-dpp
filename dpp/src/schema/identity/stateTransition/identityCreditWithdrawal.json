@@ -43,7 +43,7 @@
       "type": "array",
       "byteArray": true,
       "minItems": 65,
-      "maxItems": 96
+      "maxItems": 65
     },
     "signaturePublicKeyId": {
       "type": "integer",
@@ -55,6 +55,10 @@
     "protocolVersion",
     "type",
     "identityId",
+    "amount",
+    "coreFee",
+    "pooling",
+    "output",
     "signature",
     "signaturePublicKeyId"
   ]
