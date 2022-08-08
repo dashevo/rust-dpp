@@ -1,7 +1,7 @@
 use serde::de::Error as DeError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value as JsonValue;
-use std::convert::{TryFrom};
+use std::convert::TryFrom;
 
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_output_fetcher::*;
@@ -61,13 +61,18 @@ impl<'de> Deserialize<'de> for AssetLockProof {
         let proof_type_int = value
             .get_u64("type")
             .map_err(|e| D::Error::custom(e.to_string()))?;
-        let proof_type = AssetLockProofType::try_from(proof_type_int).map_err(|e| D::Error::custom(e.to_string()))?;
+        let proof_type = AssetLockProofType::try_from(proof_type_int)
+            .map_err(|e| D::Error::custom(e.to_string()))?;
 
         match proof_type {
-            AssetLockProofType::Instant => {
-                Ok(Self::Instant(serde_json::from_value(value.clone()).map_err(|e| D::Error::custom(e.to_string()))?))
-            }
-            AssetLockProofType::Chain => Ok(Self::Chain(serde_json::from_value(value.clone()).map_err(|e| D::Error::custom(e.to_string()))?)),
+            AssetLockProofType::Instant => Ok(Self::Instant(
+                serde_json::from_value(value.clone())
+                    .map_err(|e| D::Error::custom(e.to_string()))?,
+            )),
+            AssetLockProofType::Chain => Ok(Self::Chain(
+                serde_json::from_value(value.clone())
+                    .map_err(|e| D::Error::custom(e.to_string()))?,
+            )),
         }
     }
 }
@@ -114,11 +119,24 @@ impl TryFrom<u64> for AssetLockProofType {
 }
 
 impl AssetLockProof {
+    pub fn type_from_raw_value(value: &JsonValue) -> Option<AssetLockProofType> {
+        let proof_type_res = value.get_u64("type");
+
+        match proof_type_res {
+            Ok(proof_type_int) => {
+                let proof_type = AssetLockProofType::try_from(proof_type_int);
+                match proof_type {
+                    Ok(pt) => Some(pt),
+                    Err(_) => None,
+                }
+            }
+            Err(_) => None,
+        }
+    }
+
     pub fn create_identifier(&self) -> Result<Identifier, InvalidVectorSizeError> {
         match self {
-            AssetLockProof::Instant(instant_proof) => {
-                instant_proof.create_identifier()
-            }
+            AssetLockProof::Instant(instant_proof) => instant_proof.create_identifier(),
             AssetLockProof::Chain(chain_proof) => {
                 // TODO: fix return type
                 Ok(chain_proof.create_identifier())
@@ -129,7 +147,7 @@ impl AssetLockProof {
     pub fn out_point(&self) -> Option<[u8; 36]> {
         match self {
             AssetLockProof::Instant(proof) => proof.out_point(),
-            AssetLockProof::Chain(proof) => Some(*proof.out_point())
+            AssetLockProof::Chain(proof) => Some(*proof.out_point()),
         }
     }
 }

@@ -156,7 +156,7 @@ impl SerdeTestExtension for serde_json::Value {
 /// extracts all the errors from enum to a vector
 #[macro_export]
 macro_rules! assert_consensus_errors {
-    ($validation_result: expr, $variant:path, $expected_errors_count: expr) => {{
+    ($validation_result: expr, $variant: path, $expected_errors_count: expr) => {{
         if $validation_result.errors().len() != $expected_errors_count {
             for error in $validation_result.errors().iter() {
                 println!("{:?}", error);
@@ -170,7 +170,9 @@ macro_rules! assert_consensus_errors {
         for error in $validation_result.errors() {
             match error {
                 $variant(err) => errors.push(err),
-                _ => panic!("Expected $variant"),
+                err => {
+                    panic!("Got error that differs from what was expected: {:?}", err)
+                }
             }
         }
 

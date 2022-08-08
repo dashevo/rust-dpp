@@ -61,18 +61,9 @@ where
         //
         let mut result = ValidationResult::default();
 
-        println!("{:?}", raw_asset_lock_proof);
-
-        println!("hehe");
-
         result.merge(self.json_schema_validator.validate(raw_asset_lock_proof)?);
 
-        // if !result.isValid() {
-        // return result;
-        // }
-
         if !result.is_valid() {
-            println!("Not hehe");
             return Ok(result);
         }
 
@@ -92,7 +83,6 @@ where
             // TODO: remove unwrap
             .map(|val| val.as_u64().unwrap() as u8)
             .collect();
-        //let is_lock = consensus::deserialize::<InstantLock>(&raw_is_lock);
 
         let instant_lock_validation_result =
             match consensus::deserialize::<InstantLock>(&raw_is_lock) {

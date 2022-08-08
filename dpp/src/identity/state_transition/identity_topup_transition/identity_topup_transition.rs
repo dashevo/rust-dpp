@@ -114,7 +114,10 @@ impl IdentityTopUpTransition {
     }
 
     /// Set asset lock
-    pub fn set_asset_lock_proof(&mut self, asset_lock_proof: AssetLockProof) -> Result<(), InvalidVectorSizeError> {
+    pub fn set_asset_lock_proof(
+        &mut self,
+        asset_lock_proof: AssetLockProof,
+    ) -> Result<(), InvalidVectorSizeError> {
         self.identity_id = asset_lock_proof.create_identifier()?;
 
         self.asset_lock_proof = asset_lock_proof;

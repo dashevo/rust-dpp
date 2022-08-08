@@ -1,6 +1,6 @@
+use crate::InvalidVectorSizeError;
 use serde_json::Error;
 use thiserror::Error;
-use crate::InvalidVectorSizeError;
 
 #[derive(Debug, Error, Clone, Eq, PartialEq)]
 #[error("Serde parsing error: {message:?}")]

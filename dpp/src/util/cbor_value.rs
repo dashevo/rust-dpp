@@ -243,8 +243,12 @@ impl CborCanonicalMap {
         Self { inner: vec![] }
     }
 
-    pub fn from_serializable<T>(value: &T) -> Result<Self, ProtocolError> where T: Serialize {
-        let cbor = ciborium::value::Value::serialized(&value).map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
+    pub fn from_serializable<T>(value: &T) -> Result<Self, ProtocolError>
+    where
+        T: Serialize,
+    {
+        let cbor = ciborium::value::Value::serialized(&value)
+            .map_err(|e| ProtocolError::EncodingError(e.to_string()))?;
         CborCanonicalMap::try_from(cbor).map_err(|e| ProtocolError::EncodingError(e.to_string()))
     }
 
