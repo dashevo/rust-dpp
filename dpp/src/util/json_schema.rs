@@ -1,11 +1,9 @@
-use std::collections::BTreeMap;
-
 use anyhow::{anyhow, bail};
-use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::convert::TryFrom;
 
-use crate::data_contract::extra::IndexProperty;
+pub use super::index::Index;
+use super::index::IndexWithRawProperties;
 
 pub trait JsonSchemaExt {
     /// returns true if json value contains property 'type`, and it equals 'object'
@@ -105,56 +103,10 @@ impl JsonSchemaExt for JsonValue {
     }
 }
 
-// Indices documentation:  https://dashplatform.readme.io/docs/reference-data-contracts#document-indices
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct Index {
-    pub name: String,
-    // how to replace the To Index property
-    pub properties: Vec<IndexProperty>,
-    #[serde(default)]
-    pub unique: bool,
-}
-
-impl TryFrom<IndexWithRawProperties> for Index {
-    type Error = anyhow::Error;
-
-    fn try_from(raw_index: IndexWithRawProperties) -> Result<Self, Self::Error> {
-        let properties = raw_index
-            .properties
-            .into_iter()
-            .map(IndexProperty::try_from)
-            .collect::<Result<Vec<IndexProperty>, anyhow::Error>>()?;
-
-        Ok(Self {
-            name: raw_index.name,
-            unique: raw_index.unique,
-            properties,
-        })
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct IndexWithRawProperties {
-    pub name: String,
-    // how to replace the To Index property
-    pub properties: Vec<BTreeMap<String, String>>,
-    #[serde(default)]
-    pub unique: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Eq)]
-pub enum OrderBy {
-    #[serde(rename = "asc")]
-    Asc,
-    #[serde(rename = "desc")]
-    Desc,
-}
-
 #[cfg(test)]
 mod test {
-    use serde_json::json;
-
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn test_extract_indices() {
@@ -192,12 +144,12 @@ mod test {
         assert_eq!(indices.len(), 2);
         assert_eq!(indices[0].name, "first_index");
         assert_eq!(indices[0].properties.len(), 2);
-        //
+
         assert_eq!(indices[0].properties[0].name, "field_one");
         assert_eq!(indices[0].properties[1].name, "field_two");
 
-        assert_eq!(indices[0].properties[0].ascending, true);
-        assert_eq!(indices[0].properties[1].ascending, false);
+        assert!(indices[0].properties[0].ascending);
+        assert!(!indices[0].properties[1].ascending);
         assert!(indices[0].unique);
 
         assert_eq!(indices[1].name, "second_index");
