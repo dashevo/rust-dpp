@@ -40,9 +40,9 @@ pub fn validate_indices_are_backward_compatible<'a>(
         );
         let existing_schema_indices = existing_schema.get_indices().unwrap_or_default();
 
-        let changed_unique_existing_index =
+        let maybe_changed_unique_existing_index =
             get_changed_old_unique_index(&existing_schema_indices, &name_new_index_map);
-        if let Some(changed_index) = changed_unique_existing_index {
+        if let Some(changed_index) = maybe_changed_unique_existing_index {
             result.add_error(BasicError::DataContractUniqueIndicesChangedError {
                 document_type: document_type.to_owned(),
                 index_name: changed_index.name.clone(),
@@ -61,10 +61,8 @@ pub fn validate_indices_are_backward_compatible<'a>(
             })
         }
 
-        let maybe_new_unique_index = get_new_unique_index(
-            &existing_schema_indices,
-            name_new_index_map.iter().map(|(_, index)| index),
-        )?;
+        let maybe_new_unique_index =
+            get_new_unique_index(&existing_schema_indices, name_new_index_map.values())?;
         if let Some(index) = maybe_new_unique_index {
             result.add_error(BasicError::DataContractHaveNewUniqueIndexError {
                 document_type: document_type.to_owned(),
@@ -74,7 +72,7 @@ pub fn validate_indices_are_backward_compatible<'a>(
 
         let maybe_wrongly_constructed_new_index = get_wrongly_constructed_new_index(
             existing_schema_indices.iter(),
-            name_new_index_map.iter().map(|(_, index)| index),
+            name_new_index_map.values(),
         )?;
         if let Some(index) = maybe_wrongly_constructed_new_index {
             result.add_error(BasicError::DataContractInvalidIndexDefinitionUpdateError {
@@ -182,11 +180,10 @@ fn get_wrongly_updated_non_unique_index<'a>(
 ) -> Option<&'a Index> {
     // Checking every existing non-unique index, and it's respective new index
     // if they are changed per spec
-    // let existing_schema_indices = existing_schema.get_indices().unwrap_or_default();
     for index_definition in existing_schema_indices.iter().filter(|i| !i.unique) {
         let maybe_new_index_definition = new_indices.get(&index_definition.name);
         if let Some(new_index_definition) = maybe_new_index_definition {
-            // non-unique index can be ONLY updated by appending. The 'old' properties in the new
+            // Non-unique index can be ONLY updated by appending. The 'old' properties in the new
             // index must remain intact.
             let index_properties_len = index_definition.properties.len();
             if new_index_definition.properties[0..index_properties_len]
@@ -195,7 +192,7 @@ fn get_wrongly_updated_non_unique_index<'a>(
                 return Some(index_definition);
             }
 
-            // check if the rest of new indexes are defined in the existing schema
+            // Check if the rest of new indexes are defined in the existing schema
             for property in
                 new_index_definition.properties[index_definition.properties.len()..].iter()
             {
@@ -211,7 +208,7 @@ fn get_wrongly_updated_non_unique_index<'a>(
 fn to_index_by_name(indices: Vec<Index>) -> HashMap<String, Index> {
     let mut indices_by_name: HashMap<String, Index> = HashMap::new();
     for index in indices.into_iter() {
-        // there is an assumption that the index name must be unique
+        // There is an assumption that the index name must be unique
         indices_by_name.insert(index.name.clone(), index);
     }
     indices_by_name
