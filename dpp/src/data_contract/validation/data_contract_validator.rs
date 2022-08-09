@@ -171,7 +171,7 @@ fn validate_index_definitions(
                 .map(|property_name| {
                     (
                         property_name,
-                        get_property_definition_by_path(document_schema, &property_name).ok(),
+                        get_property_definition_by_path(document_schema, property_name).ok(),
                     )
                 })
                 .collect();

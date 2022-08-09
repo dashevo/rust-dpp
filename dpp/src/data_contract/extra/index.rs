@@ -1,8 +1,8 @@
-use std::{collections::BTreeMap, convert::TryFrom, sync::BarrierWaitResult};
+use std::{collections::BTreeMap, convert::TryFrom};
 
 use super::errors::ContractError;
 use anyhow::bail;
-use ciborium::value::{Value as CborValue, Value};
+use ciborium::value::Value;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
