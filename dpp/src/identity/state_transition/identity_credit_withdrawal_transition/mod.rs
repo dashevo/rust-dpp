@@ -33,7 +33,7 @@ pub enum Pooling {
 
 impl std::default::Default for Pooling {
     fn default() -> Self {
-        Pooling::Standard
+        Pooling::Never
     }
 }
 
@@ -121,7 +121,7 @@ impl StateTransitionLike for IdentityCreditWithdrawalTransition {
     }
 
     fn calculate_fee(&self) -> Result<u64, ProtocolError> {
-        todo!("fee calculation")
+        unimplemented!()
     }
 }
 
