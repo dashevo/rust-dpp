@@ -28,6 +28,8 @@ pub fn setup_test<SR: StateRepositoryLike>(
 
 #[cfg(test)]
 mod validate_identity_credit_withdrawal_transition_state_factory {
+    use anyhow::Error;
+
     use crate::assert_consensus_errors;
     use crate::consensus::ConsensusError;
     use crate::prelude::{Identifier, Identity};
@@ -86,6 +88,28 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
         let error = result.first_error().unwrap();
 
         assert_eq!(error.code(), 4023);
+    }
+
+    #[tokio::test]
+    async fn should_return_original_error_if_any() {
+        let mut state_repository = MockStateRepositoryLike::default();
+
+        state_repository
+            .expect_fetch_identity::<Identity>()
+            .times(1)
+            .withf(|id| *id == Identifier::default())
+            .returning(|_| Err(Error::msg("Some error")));
+
+        let (state_transition, validator) = setup_test(state_repository, Some(5));
+
+        let result = validator
+            .validate_identity_credit_withdrawal_transition_state(&state_transition)
+            .await;
+
+        match result {
+            Ok(_) => assert!(false, "should not return Ok result"),
+            Err(e) => assert_eq!(e.to_string(), "Some error"),
+        }
     }
 
     #[tokio::test]
