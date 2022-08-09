@@ -42,6 +42,8 @@ impl ErrorWithCode for ConsensusError {
             Self::StateError(e) => e.get_code(),
             Self::BasicError(e) => e.get_code(),
 
+            Self::IdentityAlreadyExistsError(_) => 4011,
+
             #[cfg(test)]
             ConsensusError::TestConsensusError(_) => 1000,
         }

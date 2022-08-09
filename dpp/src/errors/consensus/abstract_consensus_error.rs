@@ -12,6 +12,7 @@ use crate::consensus::basic::identity::{
     InvalidInstantAssetLockProofError, InvalidInstantAssetLockProofSignatureError,
     MissingMasterPublicKeyError,
 };
+use crate::consensus::state::identity::IdentityAlreadyExistsError;
 #[cfg(test)]
 use crate::errors::consensus::basic::TestConsensusError;
 use crate::errors::consensus::basic::{
@@ -80,6 +81,9 @@ pub enum ConsensusError {
         message: String,
     },
 
+    #[error(transparent)]
+    IdentityAlreadyExistsError(IdentityAlreadyExistsError),
+
     #[cfg(test)]
     #[cfg_attr(test, error("{0}"))]
     TestConsensusError(TestConsensusError),
@@ -122,6 +126,8 @@ impl ConsensusError {
 
             ConsensusError::StateError(e) => e.get_code(),
             ConsensusError::BasicError(e) => e.get_code(),
+
+            ConsensusError::IdentityAlreadyExistsError(_) => 4011,
 
             // Custom error for tests
             #[cfg(test)]
@@ -248,5 +254,11 @@ impl From<InvalidInstantAssetLockProofSignatureError> for ConsensusError {
 impl From<IdentityAssetLockProofLockedTransactionMismatchError> for ConsensusError {
     fn from(err: IdentityAssetLockProofLockedTransactionMismatchError) -> Self {
         Self::IdentityAssetLockProofLockedTransactionMismatchError(err)
+    }
+}
+
+impl From<IdentityAlreadyExistsError> for ConsensusError {
+    fn from(err: IdentityAlreadyExistsError) -> Self {
+        Self::IdentityAlreadyExistsError(err)
     }
 }
