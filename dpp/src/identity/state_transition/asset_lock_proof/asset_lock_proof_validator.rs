@@ -1,5 +1,5 @@
 use crate::identity::state_transition::asset_lock_proof::{
-    AssetLockProof, InstantAssetLockProofStructureValidator, PublicKeyHash,
+    AssetLockProof, AssetLockProofType, InstantAssetLockProofStructureValidator, PublicKeyHash,
 };
 use crate::state_repository::StateRepositoryLike;
 use crate::validation::ValidationResult;
@@ -22,17 +22,23 @@ impl<SR: StateRepositoryLike> AssetLockProofValidator<SR> {
         &self,
         raw_asset_lock_proof: &serde_json::Value,
     ) -> Result<ValidationResult<PublicKeyHash>, NonConsensusError> {
-        let asset_lock: AssetLockProof = serde_json::from_value(raw_asset_lock_proof.clone())?;
-        match asset_lock {
-            AssetLockProof::Instant(parsed) => {
-                println!("{:?}", parsed);
-                self.instant_asset_lock_structure_validator
-                    .validate(raw_asset_lock_proof)
-                    .await
+        let asset_lock_type = AssetLockProof::type_from_raw_value(&raw_asset_lock_proof);
+
+        if let Some(proof_type) = asset_lock_type {
+            match proof_type {
+                AssetLockProofType::Instant => {
+                    self.instant_asset_lock_structure_validator
+                        .validate(raw_asset_lock_proof)
+                        .await
+                }
+                AssetLockProofType::Chain => Err(NonConsensusError::SerdeJsonError(String::from(
+                    "Not implemented",
+                ))),
             }
-            AssetLockProof::Chain(_) => Err(NonConsensusError::SerdeJsonError(String::from(
-                "Not implemented",
-            ))),
+        } else {
+            Err(NonConsensusError::SerdeJsonError(String::from(
+                "Asset lock proof should have type field",
+            )))
         }
     }
 }

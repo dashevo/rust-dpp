@@ -22,8 +22,13 @@ pub struct InstantAssetLockProof {
 
 /// Deterministically sorts the keys in the serialized value. Needed to serialize and hash
 /// binaries.
-pub fn serialize_deterministically<T, S>(raw: &T, serializer: S) -> Result<S::Ok, S::Error> where T: Serialize, S: Serializer  {
-    let cbor_map = CborCanonicalMap::from_serializable(&raw).map_err(|e| S::Error::custom(e.to_string()))?;
+pub fn serialize_deterministically<T, S>(raw: &T, serializer: S) -> Result<S::Ok, S::Error>
+where
+    T: Serialize,
+    S: Serializer,
+{
+    let cbor_map =
+        CborCanonicalMap::from_serializable(&raw).map_err(|e| S::Error::custom(e.to_string()))?;
     let sorted_cbor = cbor_map.to_value_sorted();
 
     sorted_cbor.serialize(serializer)
