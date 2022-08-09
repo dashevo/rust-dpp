@@ -48,7 +48,8 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
 
         let result = validator
             .validate_identity_credit_withdrawal_transition_state(&state_transition)
-            .await;
+            .await
+            .unwrap();
 
         assert_consensus_errors!(result, ConsensusError::BasicError, 1);
 
@@ -77,7 +78,8 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
 
         let result = validator
             .validate_identity_credit_withdrawal_transition_state(&state_transition)
-            .await;
+            .await
+            .unwrap();
 
         assert_consensus_errors!(result, ConsensusError::IdentityInsufficientBalanceError, 1);
 
@@ -106,7 +108,8 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
 
         let result = validator
             .validate_identity_credit_withdrawal_transition_state(&state_transition)
-            .await;
+            .await
+            .unwrap();
 
         assert_eq!(result.is_valid(), true);
     }

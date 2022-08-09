@@ -6,6 +6,7 @@ use crate::{
     prelude::Identity,
     state_repository::StateRepositoryLike,
     validation::ValidationResult,
+    NonConsensusError,
 };
 
 pub struct IdentityCreditWithdrawalTransitionValidator<SR>
@@ -26,25 +27,26 @@ where
     pub async fn validate_identity_credit_withdrawal_transition_state(
         &self,
         state_transition: &IdentityCreditWithdrawalTransition,
-    ) -> ValidationResult<()> {
+    ) -> Result<ValidationResult<()>, NonConsensusError> {
         let mut result: ValidationResult<()> = ValidationResult::default();
 
-        let maybe_existing_identity: Result<Option<Identity>> = self
+        let maybe_existing_identity: Option<Identity> = self
             .state_repository
             .fetch_identity(&state_transition.identity_id)
-            .await;
+            .await
+            .map_err(|err| NonConsensusError::StateRepositoryFetchError(err.to_string()))?;
 
         let existing_identity = match maybe_existing_identity {
-            Ok(None) | Err(_) => {
+            None => {
                 let err = BasicError::IdentityNotFoundError {
                     identity_id: state_transition.identity_id.clone(),
                 };
 
                 result.add_error(err);
 
-                return result;
+                return Ok(result);
             }
-            Ok(Some(ei)) => ei,
+            Some(identity) => identity,
         };
 
         if existing_identity.get_balance() < state_transition.amount as i64 {
@@ -55,9 +57,9 @@ where
 
             result.add_error(err);
 
-            return result;
+            return Ok(result);
         }
 
-        result
+        Ok(result)
     }
 }
