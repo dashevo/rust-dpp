@@ -82,14 +82,14 @@ fn is_duplicate_by_indices(
         let mut original_hash = String::new();
         let mut hash_to_check = String::new();
 
-        for (property_name, _) in index.properties.iter().flatten() {
+        for property in index.properties.iter() {
             original_hash.push_str(&format!(
                 ":{}",
-                get_data_property(original_transition, property_name)
+                get_data_property(original_transition, &property.name)
             ));
             hash_to_check.push_str(&format!(
                 ":{}",
-                get_data_property(transition_to_check, property_name)
+                get_data_property(transition_to_check, &property.name)
             ));
         }
         if original_hash == hash_to_check {

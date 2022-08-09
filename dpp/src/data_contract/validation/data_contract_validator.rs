@@ -161,8 +161,7 @@ fn validate_index_definitions(
         let user_defined_properties = index_definition
             .properties
             .iter()
-            .flatten()
-            .map(|property| property.0)
+            .map(|property| &property.name)
             .filter(|property_name| {
                 !ALLOWED_INDEX_SYSTEM_PROPERTIES.contains(&property_name.as_str())
             });
@@ -172,7 +171,7 @@ fn validate_index_definitions(
                 .map(|property_name| {
                     (
                         property_name,
-                        get_property_definition_by_path(document_schema, property_name).ok(),
+                        get_property_definition_by_path(document_schema, &property_name).ok(),
                     )
                 })
                 .collect();
@@ -207,15 +206,13 @@ fn validate_index_definitions(
             let all_are_required = index_definition
                 .properties
                 .iter()
-                .flatten()
-                .map(|(field, _)| field)
+                .map(|property| &property.name)
                 .all(|field| required_fields.contains(&field.as_str()));
 
             let all_are_not_required = index_definition
                 .properties
                 .iter()
-                .flatten()
-                .map(|(field, _)| field)
+                .map(|property| &property.name)
                 .all(|field| !required_fields.contains(&field.as_str()));
 
             if !all_are_required && !all_are_not_required {
@@ -411,11 +408,11 @@ fn validate_max_unique_indices(indices: &[Index], document_type: &str) -> Valida
 fn validate_no_system_indices(index_definition: &Index, document_type: &str) -> ValidationResult {
     let mut result = ValidationResult::default();
 
-    for (property_name, _) in index_definition.properties.iter().flatten() {
-        if NOT_ALLOWED_SYSTEM_PROPERTIES.contains(&property_name.as_str()) {
+    for property in index_definition.properties.iter() {
+        if NOT_ALLOWED_SYSTEM_PROPERTIES.contains(&property.name.as_str()) {
             result.add_error(BasicError::IndexError(
                 IndexError::SystemPropertyIndexAlreadyPresentError {
-                    property_name: property_name.to_owned(),
+                    property_name: property.name.to_owned(),
                     document_type: document_type.to_owned(),
                     index_definition: index_definition.clone(),
                 },
