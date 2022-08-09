@@ -1,5 +1,8 @@
 #[cfg(test)]
 mod deserialization {
     #[test]
-    fn to_json() {}
+    fn from_json() {}
+
+    #[test]
+    fn from_cbor() {}
 }

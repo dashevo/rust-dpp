@@ -6,6 +6,7 @@ use crate::{
     state_repository::{MockStateRepositoryLike, StateRepositoryLike},
 };
 
+#[cfg(test)]
 pub fn setup_test<SR: StateRepositoryLike>(
     state_repository_mock: SR,
     amount_option: Option<u64>,
@@ -29,7 +30,7 @@ pub fn setup_test<SR: StateRepositoryLike>(
 mod validate_identity_credit_withdrawal_transition_state_factory {
     use crate::assert_consensus_errors;
     use crate::consensus::ConsensusError;
-    use crate::prelude::Identity;
+    use crate::prelude::{Identifier, Identity};
 
     use super::*;
 
@@ -39,6 +40,8 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
 
         state_repository
             .expect_fetch_identity::<Identity>()
+            .times(1)
+            .withf(|id| *id == Identifier::default())
             .returning(|_| anyhow::Ok(None));
 
         let (state_transition, validator) = setup_test(state_repository, None);
@@ -60,6 +63,8 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
 
         state_repository
             .expect_fetch_identity::<Identity>()
+            .times(1)
+            .withf(|id| *id == Identifier::default())
             .returning(|_| {
                 let mut identity = Identity::default();
 
@@ -87,6 +92,8 @@ mod validate_identity_credit_withdrawal_transition_state_factory {
 
         state_repository
             .expect_fetch_identity::<Identity>()
+            .times(1)
+            .withf(|id| *id == Identifier::default())
             .returning(|_| {
                 let mut identity = Identity::default();
 

@@ -4,6 +4,7 @@ use serde_json::Value;
 
 use crate::{identity::state_transition::identity_credit_withdrawal_transition::validation::basic::validate_identity_credit_withdrawal_transition_basic::IdentityCreditWithdrawalTransitionBasicValidator, tests::fixtures::identity_credit_withdrawal_transition_fixture_json, version::ProtocolVersionValidator};
 
+#[cfg(test)]
 pub fn setup_test() -> (Value, IdentityCreditWithdrawalTransitionBasicValidator) {
     let protocol_version_validator = ProtocolVersionValidator::default();
 

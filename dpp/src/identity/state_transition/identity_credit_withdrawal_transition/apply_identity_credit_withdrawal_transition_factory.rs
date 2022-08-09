@@ -1,6 +1,9 @@
 use anyhow::Result;
 
-use crate::{prelude::Identity, state_repository::StateRepositoryLike};
+use crate::{
+    prelude::Identity,
+    state_repository::{self, StateRepositoryLike},
+};
 
 use super::IdentityCreditWithdrawalTransition;
 
@@ -15,6 +18,10 @@ impl<SR> ApplyIdentityCreditWithdrawalTransition<SR>
 where
     SR: StateRepositoryLike,
 {
+    pub fn new(state_repository: SR) -> Self {
+        ApplyIdentityCreditWithdrawalTransition { state_repository }
+    }
+
     pub async fn apply_data_contract_create_transition(
         &self,
         state_transition: &IdentityCreditWithdrawalTransition,
