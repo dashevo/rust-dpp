@@ -62,7 +62,7 @@ pub fn validate_indices_are_backward_compatible<'a>(
         }
 
         let maybe_new_unique_index = get_new_unique_index(
-            existing_schema,
+            &existing_schema_indices,
             name_new_index_map.iter().map(|(_, index)| index),
         )?;
         if let Some(index) = maybe_new_unique_index {
@@ -158,20 +158,18 @@ fn get_all_possible_sequences_of_properties(
 }
 
 fn get_new_unique_index<'a>(
-    existing_schema: &JsonSchema,
+    existing_schema_indices: impl IntoIterator<Item = &'a Index>,
     new_schema_indices: impl IntoIterator<Item = &'a Index>,
 ) -> Result<Option<&'a Index>, ProtocolError> {
-    let existing_index_names: HashMap<String, ()> = existing_schema
-        .get_indices()
-        .unwrap_or_default()
+    let existing_index_names: HashSet<&String> = existing_schema_indices
         .into_iter()
-        .map(|i| (i.name, ()))
+        .map(|i| &i.name)
         .collect();
 
     // Gather only new defined indexes
     let maybe_new_unique_index = new_schema_indices
         .into_iter()
-        .filter(|i| !existing_index_names.contains_key(&i.name))
+        .filter(|i| !existing_index_names.contains(&i.name))
         .find(|i| i.unique);
 
     Ok(maybe_new_unique_index)
