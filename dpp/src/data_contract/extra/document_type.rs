@@ -1,7 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use ciborium::value::Value;
-use dashcore::util::amount::CheckedSum;
 use serde::{Deserialize, Serialize};
 
 use super::common::*;
