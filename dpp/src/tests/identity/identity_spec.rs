@@ -125,7 +125,7 @@ mod from_buffer {
     }
 }
 
-mod from_json {
+mod conversions {
     use std::convert::TryFrom;
 
     use crate::identity::{KeyType, Purpose, SecurityLevel};
