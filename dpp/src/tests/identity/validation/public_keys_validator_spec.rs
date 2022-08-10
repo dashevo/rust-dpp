@@ -9,7 +9,7 @@ use crate::tests::utils::serde_set_ref;
 
 fn setup_test() -> (Vec<Value>, PublicKeysValidator) {
     (
-        crate::tests::fixtures::identity_fixture_json()
+        crate::tests::fixtures::identity_fixture_raw_object()
             .as_object()
             .unwrap()
             .get("publicKeys")
