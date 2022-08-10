@@ -28,7 +28,7 @@ where
             .fetch(state_transition.get_asset_lock_proof())
             .await?;
 
-        let credits_amount = convert_satoshi_to_credits(output.value as i64) as u64;
+        let credits_amount = convert_satoshi_to_credits(output.value);
 
         let out_point = state_transition
             .get_asset_lock_proof()

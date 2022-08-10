@@ -30,7 +30,7 @@ where
             .fetch(state_transition.get_asset_lock_proof())
             .await?;
 
-        let credits_amount = convert_satoshi_to_credits(output.value as i64);
+        let credits_amount = convert_satoshi_to_credits(output.value);
 
         let identity = Identity {
             protocol_version: state_transition.get_protocol_version(),
