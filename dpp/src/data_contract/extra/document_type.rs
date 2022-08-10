@@ -1,13 +1,15 @@
-use super::common::*;
-use super::errors::ContractError;
+use std::collections::{BTreeMap, BTreeSet};
+
+use ciborium::value::Value;
+use dashcore::util::amount::CheckedSum;
+use serde::{Deserialize, Serialize};
+
 use super::{
     document_field::{DocumentField, DocumentFieldType},
     index::{Index, IndexProperty},
 };
-use ciborium::value::Value;
-use dashcore::util::amount::CheckedSum;
-use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
+use super::common::*;
+use super::errors::ContractError;
 
 pub const PROTOCOL_VERSION: u32 = 1;
 pub const CONTRACT_DOCUMENTS_PATH_HEIGHT: u16 = 4;

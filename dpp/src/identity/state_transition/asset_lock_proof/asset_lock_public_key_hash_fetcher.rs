@@ -1,9 +1,10 @@
+use std::sync::Arc;
+
+use crate::DPPError;
 use crate::identity::state_transition::asset_lock_proof::asset_lock_transaction_output_fetcher::AssetLockTransactionOutputFetcher;
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::state_repository::StateRepositoryLike;
 use crate::util::vec::vec_to_array;
-use crate::DPPError;
-use std::sync::Arc;
 
 pub struct AssetLockPublicKeyHashFetcher<SR>
 where
