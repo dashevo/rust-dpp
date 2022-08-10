@@ -1,14 +1,14 @@
-use anyhow::Context;
 use anyhow::{anyhow, bail};
+use anyhow::Context;
 use serde_json::{json, Value as JsonValue};
 
-use crate::document::Document;
-use crate::util::hash::hash;
-use crate::util::string_encoding::Encoding;
 use crate::{
     document::document_transition::DocumentTransition, get_from_transition, prelude::Identifier,
     state_repository::StateRepositoryLike, util::json_value::JsonValueExt,
 };
+use crate::document::Document;
+use crate::util::hash::hash;
+use crate::util::string_encoding::Encoding;
 
 use super::{create_error, DataTriggerExecutionContext, DataTriggerExecutionResult};
 

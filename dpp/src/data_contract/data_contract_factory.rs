@@ -14,9 +14,9 @@ use crate::{
 };
 
 use super::{
+    DataContract,
     state_transition::{DataContractCreateTransition, DataContractUpdateTransition},
     validation::data_contract_validator::DataContractValidator,
-    DataContract,
 };
 
 pub struct DataContractFactory {
@@ -141,10 +141,10 @@ mod test {
     use serde_json::Value as JsonValue;
 
     use crate::{
-        data_contract::{validation::data_contract_validator::DataContractValidator, DataContract},
+        data_contract::{DataContract, validation::data_contract_validator::DataContractValidator},
         state_transition::StateTransitionLike,
         tests::fixtures::get_data_contract_fixture,
-        version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
+        version::{COMPATIBILITY_MAP, LATEST_VERSION, ProtocolVersionValidator},
     };
 
     use super::DataContractFactory;

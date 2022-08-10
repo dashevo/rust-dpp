@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 use serde_json::Value;
 
-use crate::consensus::basic::identity::MissingMasterPublicKeyError;
-use crate::identity::validation::TPublicKeysValidator;
-use crate::identity::{IdentityPublicKey, Purpose, SecurityLevel};
-use crate::validation::ValidationResult;
 use crate::{DashPlatformProtocolInitError, NonConsensusError};
+use crate::consensus::basic::identity::MissingMasterPublicKeyError;
+use crate::identity::{IdentityPublicKey, Purpose, SecurityLevel};
+use crate::identity::validation::TPublicKeysValidator;
+use crate::validation::ValidationResult;
 
 #[derive(Eq, Hash, PartialEq)]
 struct PurposeKey {

@@ -1,12 +1,13 @@
-use dashcore::hashes::hex::ToHex;
-use dashcore::psbt::serialize::Deserialize;
-use dashcore::{OutPoint, Transaction, TxOut};
 use std::sync::Arc;
 
+use dashcore::{OutPoint, Transaction, TxOut};
+use dashcore::hashes::hex::ToHex;
+use dashcore::psbt::serialize::Deserialize;
+
+use crate::DPPError;
 use crate::identity::errors::{AssetLockOutputNotFoundError, AssetLockTransactionIsNotFoundError};
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::state_repository::StateRepositoryLike;
-use crate::DPPError;
 
 pub struct AssetLockTransactionOutputFetcher<SR: StateRepositoryLike> {
     state_repository: Arc<SR>,

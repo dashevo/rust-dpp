@@ -4,13 +4,13 @@ use bls_signatures::{PublicKey as BlsPublicKey, Serialize};
 use dashcore::PublicKey;
 use serde_json::Value;
 
+use crate::{DashPlatformProtocolInitError, NonConsensusError, PublicKeyValidationError};
 use crate::errors::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
     InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
 };
-use crate::identity::{IdentityPublicKey, KeyType, ALLOWED_SECURITY_LEVELS};
+use crate::identity::{ALLOWED_SECURITY_LEVELS, IdentityPublicKey, KeyType};
 use crate::validation::{JsonSchemaValidator, ValidationResult};
-use crate::{DashPlatformProtocolInitError, NonConsensusError, PublicKeyValidationError};
 
 pub trait TPublicKeysValidator {
     fn validate_keys(

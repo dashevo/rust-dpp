@@ -1,9 +1,11 @@
+use std::sync::Arc;
+
 use dashcore::consensus;
 use dashcore::InstantLock;
 use lazy_static::lazy_static;
 use serde_json::Value;
-use std::sync::Arc;
 
+use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 use crate::consensus::basic::identity::{
     IdentityAssetLockProofLockedTransactionMismatchError, InvalidInstantAssetLockProofError,
     InvalidInstantAssetLockProofSignatureError,
@@ -12,7 +14,6 @@ use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionVal
 use crate::state_repository::StateRepositoryLike;
 use crate::util::json_value::JsonValueExt;
 use crate::validation::{JsonSchemaValidator, ValidationResult};
-use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 
 lazy_static! {
     static ref INSTANT_ASSET_LOCK_PROOF_SCHEMA: Value = serde_json::from_str(include_str!(
@@ -54,11 +55,6 @@ where
         &self,
         raw_asset_lock_proof: &Value,
     ) -> Result<ValidationResult<PublicKeyHash>, NonConsensusError> {
-        // let result = jsonSchemaValidator.validate(
-        // instantAssetLockProofSchema,
-        // convertBuffersToArrays(raw_asset_lock_proof),
-        // );
-        //
         let mut result = ValidationResult::default();
 
         result.merge(self.json_schema_validator.validate(raw_asset_lock_proof)?);
@@ -67,9 +63,6 @@ where
             return Ok(result);
         }
 
-        // let asset_lock_proof: InstantAssetLockProof = serde_json::from_value(raw_asset_lock_proof.clone())?;
-
-        // Is lock should go there
         let raw_is_lock: Vec<u8> = raw_asset_lock_proof
             .as_object()
             .ok_or_else(|| SerdeParsingError::new("Expected raw asset lock proof to be an object"))?
@@ -107,39 +100,16 @@ where
             return Ok(result);
         }
 
-        // let instantLock;
-        // try {
-        // instantLock = InstantLock.fromBuffer(raw_asset_lock_proof.instantLock);
-        // } catch (e) {
-        // let error = new InvalidInstantAssetLockProofError(e.message);
-        //
-        // error.setValidationError(e);
-        //
-        // result.addError(error);
-        //
-        // return result;
-        // }
-
-        println!("Mda");
-
         let is_signature_verified = self
             .state_repository
             .verify_instant_lock(&instant_lock)
             .await
             .map_err(|err| NonConsensusError::StateRepositoryFetchError(err.to_string()))?;
 
-        println!("Mde");
-
         if !is_signature_verified {
             result.add_error(InvalidInstantAssetLockProofSignatureError::new());
             return Ok(result);
         }
-
-        // if (!await stateRepository.verifyInstantLock(instantLock)) {
-        // result.addError(new InvalidInstantAssetLockProofSignatureError());
-        //
-        // return result;
-        // }
 
         let tx_json_uint_array = raw_asset_lock_proof
             .get_bytes("transaction")
@@ -155,7 +125,6 @@ where
             .as_u64()
             .ok_or_else(|| SerdeParsingError::new("Expect outputIndex to be a number"))?;
 
-        // TODO: get transaction bytes and pass them as the first argument
         let validate_asset_lock_transaction_result = self
             .asset_lock_transaction_validator
             .validate(&tx_json_uint_array, output_index as usize)
@@ -172,26 +141,8 @@ where
             return Ok(result);
         }
 
-        // let validate_asset_lock_transaction_result = await validateAssetLockTransaction(
-        // raw_asset_lock_proof.transaction,
-        // raw_asset_lock_proof.outputIndex,
-        // );
-        //
-        // result.merge(validate_asset_lock_transaction_result);
-        //
-        // if (!result.isValid()) {
-        // return result;
-        // }
-
         let public_key_hash = validation_result_data.public_key_hash;
         let transaction = &validation_result_data.transaction;
-
-        // /**
-        //  * @typedef {Transaction} transaction
-        //  * @typedef {Buffer} publicKeyHash
-        //  */
-        // let { publicKeyHash, transaction } = validate_asset_lock_transaction_result.getData();
-        //
 
         if instant_lock.txid != transaction.txid() {
             result.add_error(IdentityAssetLockProofLockedTransactionMismatchError::new(
@@ -202,23 +153,8 @@ where
             return Ok(result);
         }
 
-        // if (instantLock.txid !== transaction.id) {
-        // result.addError(
-        // new IdentityAssetLockProofLockedTransactionMismatchError(
-        // Buffer.from(instantLock.txid, 'hex'),
-        // Buffer.from(transaction.id, 'hex'),
-        // ),
-        // );
-        //
-        // return result;
-        // }
-
         result.set_data(public_key_hash);
 
         Ok(result)
-
-        // result.setData(publicKeyHash);
-        //
-        // return result;
     }
 }

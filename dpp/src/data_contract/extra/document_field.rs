@@ -1,14 +1,14 @@
-use ciborium::value::{Integer, Value};
-use rand::distributions::{Alphanumeric, Standard};
+use std::collections::BTreeMap;
+use std::convert::{TryFrom, TryInto};
 use std::io::{BufReader, Read};
 
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use ciborium::value::{Integer, Value};
 use integer_encoding::{VarInt, VarIntReader};
-use rand::rngs::StdRng;
+use rand::distributions::{Alphanumeric, Standard};
 use rand::Rng;
+use rand::rngs::StdRng;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
-use std::convert::{TryFrom, TryInto};
 
 use super::array_field::ArrayFieldType;
 use super::common::*;

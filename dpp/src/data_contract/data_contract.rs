@@ -6,22 +6,21 @@ use ciborium::value::Value as CborValue;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
-use crate::data_contract::get_binary_properties_from_schema::get_binary_properties;
-use crate::util::cbor_value::{cbor_value_to_json_value, CborBTreeMapHelper, CborCanonicalMap};
-use crate::util::deserializer;
-use crate::util::json_value::{JsonValueExt, ReplaceWith};
-use crate::util::string_encoding::Encoding;
-use crate::Convertible;
 use crate::{
     errors::ProtocolError,
     identifier::Identifier,
     metadata::Metadata,
     util::{hash::hash, serializer},
 };
+use crate::Convertible;
+use crate::data_contract::get_binary_properties_from_schema::get_binary_properties;
+use crate::util::cbor_value::{cbor_value_to_json_value, CborBTreeMapHelper, CborCanonicalMap};
+use crate::util::deserializer;
+use crate::util::json_value::{JsonValueExt, ReplaceWith};
+use crate::util::string_encoding::Encoding;
 
 use super::errors::*;
-use super::extra::{get_definitions, get_document_types, get_mutability, ContractConfig};
-
+use super::extra::{ContractConfig, get_definitions, get_document_types, get_mutability};
 use super::extra::DocumentType;
 use super::properties::*;
 
@@ -405,11 +404,12 @@ impl TryFrom<&str> for DataContract {
 
 #[cfg(test)]
 mod test {
+    use anyhow::Result;
+
     use crate::{
         assert_error_contains,
         tests::{fixtures::get_data_contract_fixture, utils::*},
-    };
-    use anyhow::Result;
+        };
 
     use super::*;
 

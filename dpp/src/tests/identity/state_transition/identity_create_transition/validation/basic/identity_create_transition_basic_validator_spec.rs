@@ -23,11 +23,11 @@
 
 use std::sync::Arc;
 
+use serde_json::Value;
+
 use crate::identity::state_transition::asset_lock_proof::{
     AssetLockProofValidator, AssetLockTransactionValidator, InstantAssetLockProofStructureValidator,
 };
-use serde_json::Value;
-
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
 use crate::identity::validation::TPublicKeysValidator;
 use crate::state_repository::MockStateRepositoryLike;
@@ -81,7 +81,7 @@ mod validate_identity_create_transition_basic_factory {
 
     pub use super::setup_test;
 
-    // let validator.validate;
+// let validator.validate;
     // let rawStateTransition;
     // let stateTransition;
     // let validatePublicKeysMock;
@@ -140,14 +140,15 @@ mod validate_identity_create_transition_basic_factory {
 
         use jsonschema::error::ValidationErrorKind;
 
-        use super::setup_test;
+        use crate::{assert_consensus_errors, NonConsensusError};
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::state_repository::MockStateRepositoryLike;
         use crate::tests::utils::SerdeTestExtension;
-        use crate::{assert_consensus_errors, NonConsensusError};
+
+        use super::setup_test;
 
         #[tokio::test]
         pub async fn should_be_present() {
@@ -279,7 +280,6 @@ mod validate_identity_create_transition_basic_factory {
             assert_eq!(error.instance_path().to_string(), "/type");
             assert_eq!(error.keyword().unwrap(), "const");
 
-            println!("{:?}", error.kind());
             match error.kind() {
                 ValidationErrorKind::Constant { expected_value } => {
                     assert_eq!(expected_value.as_u64().unwrap(), 2u64);
@@ -290,14 +290,11 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod asset_lock_proof {
-        use futures::future::err;
         use std::sync::Arc;
 
         use jsonschema::error::ValidationErrorKind;
-        use jsonschema::paths::JSONPointer;
 
         use crate::assert_consensus_errors;
-        use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
@@ -371,8 +368,6 @@ mod validate_identity_create_transition_basic_factory {
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
             let error = errors.first().unwrap();
-
-            println!("{:?}", error);
 
             assert_eq!(error.instance_path().to_string(), "/transaction");
         }
@@ -655,7 +650,6 @@ mod validate_identity_create_transition_basic_factory {
 
             let error = errors.first().unwrap();
 
-            println!("{:?}", error);
             assert_eq!(error.instance_path().to_string(), "/signature");
             assert_eq!(error.keyword().unwrap(), "maxItems");
         }
@@ -680,8 +674,6 @@ mod validate_identity_create_transition_basic_factory {
             state_repository,
         );
         let result = validator.validate(&raw_state_transition).await.unwrap();
-
-        println!("{:?}", result.errors);
 
         assert!(result.is_valid());
         assert_eq!(

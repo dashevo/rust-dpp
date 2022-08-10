@@ -4,17 +4,17 @@ use serde_json::{json, Value as JsonValue};
 
 use crate::{
     document::{
-        document_transition::{Action, DocumentTransition, DocumentTransitionExt},
         Document,
+        document_transition::{Action, DocumentTransition, DocumentTransitionExt},
     },
     prelude::{DataContract, Identifier},
+    ProtocolError,
     state_repository::StateRepositoryLike,
+    StateError,
     util::{
         json_schema::{Index, JsonSchemaExt},
         string_encoding::Encoding,
-    },
-    validation::ValidationResult,
-    ProtocolError, StateError,
+    }, validation::ValidationResult,
 };
 
 struct QueryDefinition<'a> {

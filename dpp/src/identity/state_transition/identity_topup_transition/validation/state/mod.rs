@@ -1,6 +1,5 @@
 use crate::identity::state_transition::identity_topup_transition::IdentityTopUpTransition;
 use crate::NonConsensusError;
-use crate::prelude::Identity;
 use crate::state_repository::StateRepositoryLike;
 use crate::validation::ValidationResult;
 

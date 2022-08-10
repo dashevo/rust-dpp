@@ -7,13 +7,13 @@ use serde_json::Value as JsonValue;
 use crate::{
     consensus::basic::BasicError,
     data_contract::{
-        enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema,
-        enrich_data_contract_with_base_schema::PREFIX_BYTE_0, DataContract,
+        DataContract,
+        enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema, enrich_data_contract_with_base_schema::PREFIX_BYTE_0,
     },
+    ProtocolError,
     util::json_value::JsonValueExt,
     validation::{JsonSchemaValidator, ValidationResult},
     version::ProtocolVersionValidator,
-    ProtocolError,
 };
 
 const PROPERTY_PROTOCOL_VERSION: &str = "$protocolVersion";
@@ -108,7 +108,7 @@ mod test {
         tests::fixtures::{get_data_contract_fixture, get_documents_fixture},
         util::json_value::JsonValueExt,
         validation::ValidationResult,
-        version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
+        version::{COMPATIBILITY_MAP, LATEST_VERSION, ProtocolVersionValidator},
     };
 
     use super::DocumentValidator;

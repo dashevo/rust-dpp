@@ -1,6 +1,7 @@
-use super::errors::ContractError;
 use ciborium::value::Value as CborValue;
 use serde::{Deserialize, Serialize};
+
+use super::errors::ContractError;
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Index {

@@ -1,3 +1,25 @@
+use std::collections::BTreeMap;
+
+use ciborium::value::Value as CborValue;
+
+pub use {
+    array_field::ArrayFieldType,
+    document_field::{
+        DocumentField, DocumentFieldType, encode_float, encode_signed_integer,
+        encode_unsigned_integer,
+    },
+    document_type::DocumentType,
+    drive_api::{DriveContractExt, DriveEncoding},
+    errors::{ContractError, StructureError},
+    index::{Index, IndexProperty},
+    mutability::ContractConfig,
+    root_tree::RootTree,
+};
+use mutability::{
+    DEFAULT_CONTRACT_DOCUMENT_MUTABILITY, DEFAULT_CONTRACT_DOCUMENTS_KEEPS_HISTORY,
+    DEFAULT_CONTRACT_KEEPS_HISTORY, DEFAULT_CONTRACT_MUTABILITY,
+};
+
 pub mod common;
 
 mod array_field;
@@ -8,27 +30,6 @@ mod errors;
 mod index;
 mod mutability;
 mod root_tree;
-
-use mutability::{
-    DEFAULT_CONTRACT_DOCUMENTS_KEEPS_HISTORY, DEFAULT_CONTRACT_DOCUMENT_MUTABILITY,
-    DEFAULT_CONTRACT_KEEPS_HISTORY, DEFAULT_CONTRACT_MUTABILITY,
-};
-pub use {
-    array_field::ArrayFieldType,
-    document_field::{
-        encode_float, encode_signed_integer, encode_unsigned_integer, DocumentField,
-        DocumentFieldType,
-    },
-    document_type::DocumentType,
-    drive_api::{DriveContractExt, DriveEncoding},
-    errors::{ContractError, StructureError},
-    index::{Index, IndexProperty},
-    mutability::ContractConfig,
-    root_tree::RootTree,
-};
-
-use ciborium::value::Value as CborValue;
-use std::collections::BTreeMap;
 
 pub fn get_mutability(
     contract: &BTreeMap<String, CborValue>,

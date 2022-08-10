@@ -9,17 +9,17 @@ use serde_json::Value as JsonValue;
 use crate::{
     consensus::basic::{BasicError, IndexError},
     data_contract::{
+        DataContract,
         enrich_data_contract_with_base_schema::enrich_data_contract_with_base_schema,
-        enrich_data_contract_with_base_schema::PREFIX_BYTE_0,
-        get_property_definition_by_path::get_property_definition_by_path, DataContract,
+        enrich_data_contract_with_base_schema::PREFIX_BYTE_0, get_property_definition_by_path::get_property_definition_by_path,
     },
+    ProtocolError,
     util::{
         json_schema::{Index, JsonSchemaExt},
         json_value::JsonValueExt,
     },
     validation::{JsonSchemaValidator, ValidationResult},
     version::ProtocolVersionValidator,
-    ProtocolError,
 };
 
 use super::{

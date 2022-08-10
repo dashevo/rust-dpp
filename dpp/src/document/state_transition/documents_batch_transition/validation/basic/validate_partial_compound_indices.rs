@@ -5,12 +5,12 @@ use serde_json::Value as JsonValue;
 use crate::{
     consensus::basic::BasicError,
     data_contract::DataContract,
+    ProtocolError,
     util::{
         json_schema::{Index, JsonSchemaExt},
         json_value::JsonValueExt,
     },
     validation::ValidationResult,
-    ProtocolError,
 };
 
 pub fn validate_partial_compound_indices<'a>(

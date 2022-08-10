@@ -126,22 +126,23 @@ mod from_buffer {
 }
 
 mod conversions {
-    use std::convert::TryFrom;
-
-    use crate::identity::{KeyType, Purpose, SecurityLevel};
     use crate::prelude::Identity;
     use crate::tests::fixtures::{identity_fixture_json, identity_fixture_raw_object};
-    use crate::tests::identity::identity_spec::identity_cbor_hex;
     use crate::util::string_encoding;
     use crate::util::string_encoding::Encoding;
 
     #[test]
     fn from_json() {
-        let expected_identity_id = string_encoding::decode("3bufpwQjL5qsvuP4fmCKgXJrKG852DDMYfi9J6XKqPAT", Encoding::Base58).unwrap();
+        let expected_identity_id = string_encoding::decode(
+            "3bufpwQjL5qsvuP4fmCKgXJrKG852DDMYfi9J6XKqPAT",
+            Encoding::Base58,
+        )
+        .unwrap();
 
         let identity_fixture = identity_fixture_json();
 
-        let identity = Identity::from_json(identity_fixture).expect("Expected from_json to parse an Object");
+        let identity =
+            Identity::from_json(identity_fixture).expect("Expected from_json to parse an Object");
 
         assert_eq!(identity.id.to_buffer().to_vec(), expected_identity_id);
     }
@@ -150,8 +151,15 @@ mod conversions {
     fn from_raw_object() {
         let identity_fixture = identity_fixture_raw_object();
 
-        let identity = Identity::from_raw_object(identity_fixture).expect("Expected from_raw_object to parse an Object");
+        let identity = Identity::from_raw_object(identity_fixture)
+            .expect("Expected from_raw_object to parse an Object");
 
-        assert_eq!(identity.id.to_buffer(), [198, 23, 40, 120, 58, 93, 0, 165, 27, 49, 4, 117, 107, 204,  67, 46, 164, 216, 230, 135, 201, 92, 31, 155, 62, 131, 211, 177, 139, 175, 163, 237])
+        assert_eq!(
+            identity.id.to_buffer(),
+            [
+                198, 23, 40, 120, 58, 93, 0, 165, 27, 49, 4, 117, 107, 204, 67, 46, 164, 216, 230,
+                135, 201, 92, 31, 155, 62, 131, 211, 177, 139, 175, 163, 237
+            ]
+        )
     }
 }

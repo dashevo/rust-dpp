@@ -96,5 +96,9 @@ pub trait StateRepositoryLike: Send + Sync {
     where
         T: for<'de> serde::de::Deserialize<'de> + 'static;
 
+    /// Create an identity
     async fn create_identity(&self, identity: &Identity) -> AnyResult<()>;
+
+    /// Update an identity
+    async fn update_identity(&self, identity: &Identity) -> AnyResult<()>;
 }
