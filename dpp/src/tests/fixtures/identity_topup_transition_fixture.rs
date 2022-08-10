@@ -3,10 +3,8 @@ use std::str::FromStr;
 use dashcore::PrivateKey;
 use serde_json::{json, Value as JsonValue};
 
-use crate::identity::{KeyType, Purpose, SecurityLevel};
 use crate::state_transition::StateTransitionType;
 use crate::tests::fixtures::instant_asset_lock_proof_fixture;
-use crate::util::string_encoding::{decode, Encoding};
 use crate::version;
 
 //3bufpwQjL5qsvuP4fmCKgXJrKG852DDMYfi9J6XKqPAT

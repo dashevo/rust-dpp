@@ -12,7 +12,6 @@ use crate::identity::state_transition::identity_topup_transition::validation::ba
 use crate::NonConsensusError;
 use crate::state_repository::MockStateRepositoryLike;
 use crate::tests::utils::SerdeTestExtension;
-use crate::util::json_value::JsonValueExt;
 use crate::version::ProtocolVersionValidator;
 
 pub fn setup_test(
