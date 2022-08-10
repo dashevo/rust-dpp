@@ -133,7 +133,7 @@ mod validate_identity_topup_transition_basic {
         }
 
         #[tokio::test]
-        pub async fn should_be_equal_to_2() {
+        pub async fn should_be_equal_to_3() {
             let (mut raw_state_transition, validator) = setup_test(MockStateRepositoryLike::new());
             raw_state_transition.set_key_value("type", 666);
 
@@ -148,7 +148,7 @@ mod validate_identity_topup_transition_basic {
 
             match error.kind() {
                 ValidationErrorKind::Constant { expected_value } => {
-                    assert_eq!(expected_value.as_u64().unwrap(), 2u64);
+                    assert_eq!(expected_value.as_u64().unwrap(), 3u64);
                 }
                 _ => panic!("Expected to have a constant value"),
             }
