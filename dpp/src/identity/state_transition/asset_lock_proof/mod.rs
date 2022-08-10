@@ -36,7 +36,7 @@ impl Default for AssetLockProof {
 
 impl AsRef<AssetLockProof> for AssetLockProof {
     fn as_ref(&self) -> &AssetLockProof {
-        &self
+        self
     }
 }
 
@@ -67,11 +67,11 @@ impl<'de> Deserialize<'de> for AssetLockProof {
 
         match proof_type {
             AssetLockProofType::Instant => Ok(Self::Instant(
-                serde_json::from_value(value.clone())
+                serde_json::from_value(value)
                     .map_err(|e| D::Error::custom(e.to_string()))?,
             )),
             AssetLockProofType::Chain => Ok(Self::Chain(
-                serde_json::from_value(value.clone())
+                serde_json::from_value(value)
                     .map_err(|e| D::Error::custom(e.to_string()))?,
             )),
         }

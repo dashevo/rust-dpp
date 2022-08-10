@@ -43,7 +43,7 @@ impl TPublicKeysValidator for PublicKeysInIdentityCreateTransitionValidator {
             purpose: Purpose::AUTHENTICATION,
             security_level: SecurityLevel::MASTER,
         };
-        if let None = key_purposes_and_levels_count.get(&master_key) {
+        if key_purposes_and_levels_count.get(&master_key).is_none() {
             result.add_error(MissingMasterPublicKeyError {});
         }
 

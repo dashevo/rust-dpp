@@ -24,19 +24,10 @@ mod property_names {
     pub const IDENTITY_ID: &str = "identityId";
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct SerializationOptions {
     pub skip_signature: bool,
     pub skip_identifiers_conversion: bool,
-}
-
-impl Default for SerializationOptions {
-    fn default() -> Self {
-        Self {
-            skip_identifiers_conversion: false,
-            skip_signature: false,
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -97,11 +88,7 @@ impl<'de> Deserialize<'de> for IdentityCreateTransition {
 /// Main state transition functionality implementation
 impl IdentityCreateTransition {
     pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, SerdeParsingError> {
-        // TODO
-        //super(raw_state_transition);
-
         let mut state_transition = Self::default();
-        state_transition.transition_type = StateTransitionType::IdentityCreate;
 
         let transition_map = raw_state_transition.as_object().ok_or_else(|| {
             SerdeParsingError::new("Expected raw identity transition to be a map")

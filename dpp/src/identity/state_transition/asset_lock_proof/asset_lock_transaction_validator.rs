@@ -109,7 +109,7 @@ where
                     result.add_error(IdentityAssetLockTransactionOutputNotFoundError::new(
                         output_index,
                     ));
-                    return Ok(result);
+                    Ok(result)
                 }
             }
             Err(err) => {
@@ -117,7 +117,7 @@ where
                 error.set_validation_error(err);
 
                 result.add_error(error);
-                return Ok(result);
+                Ok(result)
             }
         }
     }

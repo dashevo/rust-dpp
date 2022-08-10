@@ -249,7 +249,7 @@ impl DocumentFieldType {
                 }
             }
             DocumentFieldType::Date | DocumentFieldType::Number => {
-                if required == false {
+                if !required {
                     let marker = buf.read_u8().map_err(|_| {
                         ContractError::CorruptedSerialization(
                             "error reading from serialized document",
@@ -265,7 +265,7 @@ impl DocumentFieldType {
                 Ok(Some(Value::Float(date)))
             }
             DocumentFieldType::Integer => {
-                if required == false {
+                if !required {
                     let marker = buf.read_u8().map_err(|_| {
                         ContractError::CorruptedSerialization(
                             "error reading from serialized document",

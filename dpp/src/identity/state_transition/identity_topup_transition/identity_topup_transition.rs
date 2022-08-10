@@ -80,7 +80,6 @@ impl<'de> Deserialize<'de> for IdentityTopUpTransition {
 impl IdentityTopUpTransition {
     pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, SerdeParsingError> {
         let mut state_transition = Self::default();
-        state_transition.transition_type = StateTransitionType::IdentityTopUp;
 
         let transition_map = raw_state_transition.as_object().ok_or_else(|| {
             SerdeParsingError::new("Expected raw identity transition to be a map")

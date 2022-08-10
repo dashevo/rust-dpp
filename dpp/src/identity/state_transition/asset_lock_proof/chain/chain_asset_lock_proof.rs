@@ -26,17 +26,17 @@ impl ChainAssetLockProof {
 
     /// Get proof type
     pub fn asset_lock_type() -> u8 {
-        return 1;
+        1
     }
 
     /// Get Asset Lock proof core height
     pub fn core_chain_locked_height(&self) -> u32 {
-        return self.core_chain_locked_height;
+        self.core_chain_locked_height
     }
 
     /// Get out_point
     pub fn out_point(&self) -> &[u8; 36] {
-        return &self.out_point;
+        &self.out_point
     }
 
     /// Create identifier

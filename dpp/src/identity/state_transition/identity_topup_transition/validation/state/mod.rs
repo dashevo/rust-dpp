@@ -14,5 +14,5 @@ pub async fn validate_identity_create_transition_state(
     _state_transition: IdentityTopUpTransition,
     _state_repository: impl StateRepositoryLike,
 ) -> Result<ValidationResult<()>, NonConsensusError> {
-    return Ok(ValidationResult::default());
+    Ok(ValidationResult::default())
 }

@@ -28,5 +28,5 @@ pub async fn validate_identity_create_transition_state(
         result.add_error(IdentityAlreadyExistsError::new(identity_id.to_buffer()));
     }
 
-    return Ok(result);
+    Ok(result)
 }
