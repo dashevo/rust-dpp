@@ -1,14 +1,13 @@
-use std::collections::{BTreeMap, BTreeSet};
-
-use ciborium::value::Value;
-use serde::{Deserialize, Serialize};
-
+use super::common::*;
+use super::errors::ContractError;
 use super::{
     document_field::{DocumentField, DocumentFieldType},
     index::{Index, IndexProperty},
 };
-use super::common::*;
-use super::errors::ContractError;
+use ciborium::value::Value;
+use dashcore::util::amount::CheckedSum;
+use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet};
 
 pub const PROTOCOL_VERSION: u32 = 1;
 pub const CONTRACT_DOCUMENTS_PATH_HEIGHT: u16 = 4;
@@ -215,8 +214,8 @@ impl DocumentType {
                         Some(inner_bool) => {
                             if inner_bool {
                                 DocumentFieldType::ByteArray(
-                                    btree_map_inner_size_value(&inner_properties, "minItems"),
-                                    btree_map_inner_size_value(&inner_properties, "maxItems"),
+                                    btree_map_inner_u16_value(&inner_properties, "minItems"),
+                                    btree_map_inner_u16_value(&inner_properties, "maxItems"),
                                 )
                             } else {
                                 return Err(ContractError::InvalidContractStructure(
@@ -256,8 +255,8 @@ impl DocumentType {
                 }
                 "string" => {
                     field_type = DocumentFieldType::String(
-                        btree_map_inner_size_value(&inner_properties, "minLength"),
-                        btree_map_inner_size_value(&inner_properties, "maxLength"),
+                        btree_map_inner_u16_value(&inner_properties, "minLength"),
+                        btree_map_inner_u16_value(&inner_properties, "maxLength"),
                     );
                     document_properties.insert(
                         prefixed_property_key,
@@ -325,13 +324,17 @@ impl DocumentType {
         })
     }
 
-    pub fn max_size(&self) -> usize {
-        self.properties
+    pub fn max_size(&self) -> u16 {
+        let mut iter = self
+            .properties
             .iter()
             .filter_map(|(_, document_field_type)| {
                 document_field_type.document_type.max_byte_size()
-            })
-            .sum()
+            });
+        let first = Some(iter.next().unwrap_or_default());
+
+        iter.fold(first, |acc, item| acc.and_then(|acc| acc.checked_add(item)))
+            .unwrap_or(u16::MAX)
     }
 
     pub fn top_level_indices(&self) -> Result<Vec<&IndexProperty>, ContractError> {
@@ -351,12 +354,12 @@ impl DocumentType {
     pub fn document_field_type_for_property(&self, property: &str) -> Option<DocumentFieldType> {
         match property {
             "$id" => Some(DocumentFieldType::ByteArray(
-                Some(DEFAULT_HASH_SIZE),
-                Some(DEFAULT_HASH_SIZE),
+                Some(DEFAULT_HASH_SIZE as u16),
+                Some(DEFAULT_HASH_SIZE as u16),
             )),
             "$ownerId" => Some(DocumentFieldType::ByteArray(
-                Some(DEFAULT_HASH_SIZE),
-                Some(DEFAULT_HASH_SIZE),
+                Some(DEFAULT_HASH_SIZE as u16),
+                Some(DEFAULT_HASH_SIZE as u16),
             )),
             "$createdAt" => Some(DocumentFieldType::Date),
             "$updatedAt" => Some(DocumentFieldType::Date),
