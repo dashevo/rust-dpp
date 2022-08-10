@@ -30,7 +30,7 @@ where
 {
     json_schema_validator: JsonSchemaValidator,
     state_repository: Arc<SR>,
-    asset_lock_transaction_validator: AssetLockTransactionValidator<SR>,
+    asset_lock_transaction_validator: Arc<AssetLockTransactionValidator<SR>>,
 }
 
 impl<SR> InstantAssetLockProofStructureValidator<SR>
@@ -39,7 +39,7 @@ where
 {
     pub fn new(
         state_repository: Arc<SR>,
-        asset_lock_transaction_validator: AssetLockTransactionValidator<SR>,
+        asset_lock_transaction_validator: Arc<AssetLockTransactionValidator<SR>>,
     ) -> Result<Self, DashPlatformProtocolInitError> {
         let json_schema_validator =
             JsonSchemaValidator::new(INSTANT_ASSET_LOCK_PROOF_SCHEMA.clone())?;

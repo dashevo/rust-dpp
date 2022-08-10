@@ -20,7 +20,7 @@ mod asset_lock_public_key_hash_fetcher;
 mod asset_lock_transaction_output_fetcher;
 mod asset_lock_transaction_validator;
 pub mod chain;
-mod instant;
+pub mod instant;
 
 #[derive(Clone, Debug)]
 pub enum AssetLockProof {

@@ -38,3 +38,9 @@ impl From<InvalidVectorSizeError> for SerdeParsingError {
         Self::new(err.to_string())
     }
 }
+
+impl From<String> for SerdeParsingError {
+    fn from(string: String) -> Self {
+        Self::new(string)
+    }
+}

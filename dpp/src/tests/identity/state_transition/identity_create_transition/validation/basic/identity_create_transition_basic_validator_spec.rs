@@ -26,7 +26,8 @@ use std::sync::Arc;
 use serde_json::Value;
 
 use crate::identity::state_transition::asset_lock_proof::{
-    AssetLockProofValidator, AssetLockTransactionValidator, InstantAssetLockProofStructureValidator,
+    AssetLockProofValidator, AssetLockTransactionValidator, ChainAssetLockProofStructureValidator,
+    InstantAssetLockProofStructureValidator,
 };
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
 use crate::identity::validation::TPublicKeysValidator;
@@ -47,14 +48,24 @@ pub fn setup_test(
 ) {
     let state_repository = Arc::new(state_repository_mock);
     let asset_lock_transaction_validator =
-        AssetLockTransactionValidator::new(state_repository.clone());
+        Arc::new(AssetLockTransactionValidator::new(state_repository.clone()));
+
     let instant_asset_lock_validator = InstantAssetLockProofStructureValidator::new(
+        state_repository.clone(),
+        asset_lock_transaction_validator.clone(),
+    )
+    .unwrap();
+
+    let chain_asset_lock_validator = ChainAssetLockProofStructureValidator::new(
         state_repository,
         asset_lock_transaction_validator,
     )
     .unwrap();
-    let asset_lock_proof_validator =
-        Arc::new(AssetLockProofValidator::new(instant_asset_lock_validator));
+
+    let asset_lock_proof_validator = Arc::new(AssetLockProofValidator::new(
+        instant_asset_lock_validator,
+        chain_asset_lock_validator,
+    ));
 
     let protocol_version_validator = ProtocolVersionValidator::default();
     (
