@@ -10,10 +10,10 @@ use wasm_bindgen::prelude::*;
 use dpp::data_contract::DataContract;
 use dpp::util::string_encoding::Encoding;
 
-use crate::{bail_js, with_js_error};
 use crate::errors::{from_dpp_err, RustConversionError};
 use crate::identifier::IdentifierWrapper;
 use crate::metadata::MetadataWasm;
+use crate::{bail_js, with_js_error};
 
 #[wasm_bindgen(js_name=DataContract)]
 #[derive(Debug, Clone)]

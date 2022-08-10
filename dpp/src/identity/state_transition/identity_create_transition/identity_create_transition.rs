@@ -1,19 +1,19 @@
 use std::convert::{TryFrom, TryInto};
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::de::Error as DeError;
 use serde::ser::Error as SerError;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value as JsonValue;
 
-use crate::{InvalidVectorSizeError, ProtocolError, SerdeParsingError};
-use crate::identity::IdentityPublicKey;
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
+use crate::identity::IdentityPublicKey;
 use crate::prelude::Identifier;
 use crate::state_transition::{
     StateTransition, StateTransitionConvert, StateTransitionLike, StateTransitionType,
 };
 use crate::util::json_value::JsonValueExt;
 use crate::util::string_encoding::Encoding;
+use crate::{InvalidVectorSizeError, ProtocolError, SerdeParsingError};
 
 mod property_names {
     pub const PUBLIC_KEYS: &str = "publicKeys";

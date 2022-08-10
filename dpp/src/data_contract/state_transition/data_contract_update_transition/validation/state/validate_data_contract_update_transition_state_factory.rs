@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::{
-    data_contract::{DataContract, state_transition::DataContractUpdateTransition},
+    data_contract::{state_transition::DataContractUpdateTransition, DataContract},
     errors::consensus::basic::BasicError,
     state_repository::StateRepositoryLike,
     validation::ValidationResult,

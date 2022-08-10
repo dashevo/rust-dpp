@@ -1,9 +1,9 @@
 use crate::consensus::state::identity::IdentityAlreadyExistsError;
 use crate::identity::state_transition::identity_create_transition::IdentityCreateTransition;
-use crate::NonConsensusError;
 use crate::prelude::Identity;
 use crate::state_repository::StateRepositoryLike;
 use crate::validation::ValidationResult;
+use crate::NonConsensusError;
 
 /// Validate that identity exists
 ///

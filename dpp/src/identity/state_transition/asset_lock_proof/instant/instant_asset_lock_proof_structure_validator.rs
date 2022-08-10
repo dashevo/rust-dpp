@@ -5,7 +5,6 @@ use dashcore::InstantLock;
 use lazy_static::lazy_static;
 use serde_json::Value;
 
-use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 use crate::consensus::basic::identity::{
     IdentityAssetLockProofLockedTransactionMismatchError, InvalidInstantAssetLockProofError,
     InvalidInstantAssetLockProofSignatureError,
@@ -14,6 +13,7 @@ use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionVal
 use crate::state_repository::StateRepositoryLike;
 use crate::util::json_value::JsonValueExt;
 use crate::validation::{JsonSchemaValidator, ValidationResult};
+use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 
 lazy_static! {
     static ref INSTANT_ASSET_LOCK_PROOF_SCHEMA: Value = serde_json::from_str(include_str!(

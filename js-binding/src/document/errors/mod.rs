@@ -10,8 +10,8 @@ pub use invalid_initial_revision_error::*;
 pub use mismatch_owners_ids_error::*;
 pub use no_documents_supplied_error::*;
 
-use crate::{DocumentWasm, utils::*};
 use crate::mocks;
+use crate::{utils::*, DocumentWasm};
 
 mod document_already_exists_error;
 mod document_not_provided_error;

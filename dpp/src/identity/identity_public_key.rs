@@ -1,7 +1,7 @@
 #![allow(clippy::from_over_into)]
 
-use std::{collections::HashMap, convert::TryFrom, hash::Hash};
 use std::convert::TryInto;
+use std::{collections::HashMap, convert::TryFrom, hash::Hash};
 
 use anyhow::{anyhow, bail};
 use ciborium::value::Value as CborValue;
@@ -12,10 +12,10 @@ use serde_json::Value as JsonValue;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::errors::{InvalidVectorSizeError, ProtocolError};
-use crate::SerdeParsingError;
 use crate::util::cbor_value::{CborCanonicalMap, CborMapExtension};
 use crate::util::json_value::{JsonValueExt, ReplaceWith};
 use crate::util::vec;
+use crate::SerdeParsingError;
 
 pub type KeyID = u64;
 

@@ -231,7 +231,7 @@ mod test {
     use mutability::ContractConfig;
 
     use crate::{
-        data_contract::DataContract, data_contract::extra::common::json_document_to_cbor,
+        data_contract::extra::common::json_document_to_cbor, data_contract::DataContract,
         util::json_schema::JsonSchemaExt,
     };
 

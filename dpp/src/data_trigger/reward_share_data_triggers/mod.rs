@@ -3,7 +3,7 @@ use serde_json::json;
 
 use crate::{
     data_trigger::create_error,
-    document::{Document, document_transition::DocumentTransition},
+    document::{document_transition::DocumentTransition, Document},
     get_from_transition,
     mocks::SMLStore,
     prelude::Identifier,

@@ -13,11 +13,11 @@ use crate::consensus::basic::identity::{
     MissingMasterPublicKeyError,
 };
 use crate::consensus::state::identity::IdentityAlreadyExistsError;
+#[cfg(test)]
+use crate::errors::consensus::basic::TestConsensusError;
 use crate::errors::consensus::basic::{
     BasicError, IncompatibleProtocolVersionError, JsonSchemaError, UnsupportedProtocolVersionError,
 };
-#[cfg(test)]
-use crate::errors::consensus::basic::TestConsensusError;
 use crate::errors::StateError;
 
 #[derive(Error, Debug)]

@@ -1,4 +1,4 @@
-use dashcore::hashes::{Hash, ripemd160, sha256};
+use dashcore::hashes::{ripemd160, sha256, Hash};
 use sha2::{Digest, Sha256};
 
 pub fn hash(payload: impl AsRef<[u8]>) -> Vec<u8> {

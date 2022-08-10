@@ -13,7 +13,7 @@ use crate::{
     prelude::*,
     tests::fixtures::get_data_contract_fixture,
     util::json_value::JsonValueExt,
-    version::{COMPATIBILITY_MAP, LATEST_VERSION, ProtocolVersionValidator},
+    version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
 };
 
 struct TestData {
@@ -2659,7 +2659,7 @@ fn should_return_invalid_result_if_indexed_string_property_missing_max_length_co
 mod indexed_array {
     use super::*;
 
-// This section is originally commented out
+    // This section is originally commented out
     // https://github.com/dashevo/platform/blob/ab6391f4b47a970c733e7b81115b44329fbdf993/packages/js-dpp/test/integration/dataContract/validation/validateDataContractFactory.spec.js#L2015
     //
     // it('should return invalid result if indexed array property missing maxItems constraint',

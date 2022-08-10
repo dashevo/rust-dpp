@@ -4,12 +4,12 @@ use ciborium::value::Value;
 use dashcore::util::amount::CheckedSum;
 use serde::{Deserialize, Serialize};
 
+use super::common::*;
+use super::errors::ContractError;
 use super::{
     document_field::{DocumentField, DocumentFieldType},
     index::{Index, IndexProperty},
 };
-use super::common::*;
-use super::errors::ContractError;
 
 pub const PROTOCOL_VERSION: u32 = 1;
 pub const CONTRACT_DOCUMENTS_PATH_HEIGHT: u16 = 4;

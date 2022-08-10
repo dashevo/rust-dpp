@@ -4,7 +4,7 @@ use futures::future::join_all;
 use serde_json::json;
 
 use crate::{
-    document::{Document, document_transition::DocumentTransition},
+    document::{document_transition::DocumentTransition, Document},
     get_from_transition,
     state_repository::StateRepositoryLike,
     util::string_encoding::Encoding,

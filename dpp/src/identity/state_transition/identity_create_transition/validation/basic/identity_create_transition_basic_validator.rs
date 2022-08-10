@@ -3,13 +3,13 @@ use std::sync::Arc;
 use lazy_static::lazy_static;
 use serde_json::Value;
 
-use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 use crate::identity::state_transition::asset_lock_proof::AssetLockProofValidator;
 use crate::identity::validation::TPublicKeysValidator;
 use crate::state_repository::StateRepositoryLike;
 use crate::util::protocol_data::{get_protocol_version, get_raw_public_keys};
 use crate::validation::{JsonSchemaValidator, ValidationResult};
 use crate::version::ProtocolVersionValidator;
+use crate::{DashPlatformProtocolInitError, NonConsensusError, SerdeParsingError};
 
 lazy_static! {
     static ref INDENTITY_CREATE_TRANSITION_SCHEMA: Value = serde_json::from_str(include_str!(

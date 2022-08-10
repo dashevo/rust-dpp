@@ -1,16 +1,16 @@
 use std::convert::{TryFrom, TryInto};
 
-use dashcore::{InstantLock, Transaction, TxOut};
 use dashcore::consensus::{Decodable, Encodable};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use dashcore::{InstantLock, Transaction, TxOut};
 use serde::de::Error as DeError;
 use serde::ser::Error as SerError;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::{InvalidVectorSizeError, ProtocolError};
 use crate::identifier::Identifier;
 use crate::util::cbor_value::CborCanonicalMap;
 use crate::util::hash::hash;
 use crate::util::vec::vec_to_array;
+use crate::{InvalidVectorSizeError, ProtocolError};
 
 #[derive(Clone, Debug)]
 pub struct InstantAssetLockProof {

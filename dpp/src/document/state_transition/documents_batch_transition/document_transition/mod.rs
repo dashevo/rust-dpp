@@ -7,7 +7,7 @@ pub use document_create_transition::*;
 pub use document_delete_transition::*;
 pub use document_replace_transition::*;
 
-use crate::{data_contract::DataContract, ProtocolError, util::json_value::JsonValueExt};
+use crate::{data_contract::DataContract, util::json_value::JsonValueExt, ProtocolError};
 
 mod document_base_transition;
 mod document_create_transition;

@@ -2,12 +2,12 @@ use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 
-use crate::identity::{convert_satoshi_to_credits, Identity};
 use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionOutputFetcher;
 use crate::identity::state_transition::identity_create_transition::IdentityCreateTransition;
-use crate::ProtocolError;
+use crate::identity::{convert_satoshi_to_credits, Identity};
 use crate::state_repository::StateRepositoryLike;
 use crate::state_transition::StateTransitionLike;
+use crate::ProtocolError;
 
 pub struct ApplyIdentityCreateTransition<SR>
 where

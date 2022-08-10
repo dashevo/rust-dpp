@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
+use crate::version::LATEST_VERSION;
 use crate::{
     document::{
-        Document,
         document_factory::DocumentFactory,
         document_transition::{Action, DocumentTransition},
+        Document,
     },
     mocks,
 };
-use crate::version::LATEST_VERSION;
 
 use super::{get_data_contract_fixture, get_document_validator_fixture, get_documents_fixture};
 

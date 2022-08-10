@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
 
-use crate::identity::{convert_satoshi_to_credits, Identity};
 use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionOutputFetcher;
 use crate::identity::state_transition::identity_topup_transition::IdentityTopUpTransition;
+use crate::identity::{convert_satoshi_to_credits, Identity};
 use crate::state_repository::StateRepositoryLike;
 
 pub struct ApplyIdentityTopUpTransition<SR>

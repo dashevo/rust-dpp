@@ -6,8 +6,8 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use ciborium::value::{Integer, Value};
 use integer_encoding::{VarInt, VarIntReader};
 use rand::distributions::{Alphanumeric, Standard};
-use rand::Rng;
 use rand::rngs::StdRng;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use super::array_field::ArrayFieldType;

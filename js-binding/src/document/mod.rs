@@ -5,10 +5,10 @@ use wasm_bindgen::prelude::*;
 
 use dpp::document::Document;
 
-use crate::{DataContractWasm, MetadataWasm};
 use crate::errors::{from_dpp_err, RustConversionError};
 use crate::identifier::IdentifierWrapper;
 use crate::with_js_error;
+use crate::{DataContractWasm, MetadataWasm};
 
 pub mod errors;
 

@@ -7,13 +7,13 @@ use crate::{
     data_contract::DataContract,
     data_trigger::DataTriggerExecutionContext,
     document::{
-        Document,
-        document_transition::{Action, DocumentTransition, DocumentTransitionExt}, DocumentsBatchTransition,
+        document_transition::{Action, DocumentTransition, DocumentTransitionExt},
+        Document, DocumentsBatchTransition,
     },
     prelude::Identifier,
-    ProtocolError,
     state_repository::StateRepositoryLike,
-    StateError, validation::ValidationResult,
+    validation::ValidationResult,
+    ProtocolError, StateError,
 };
 
 use super::{

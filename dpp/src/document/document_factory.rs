@@ -6,16 +6,16 @@ use crate::{
     data_contract::DataContract,
     mocks,
     prelude::Identifier,
-    ProtocolError,
-    util::{json_schema::JsonSchemaExt, json_value::JsonValueExt},
     util::entropy_generator,
+    util::{json_schema::JsonSchemaExt, json_value::JsonValueExt},
+    ProtocolError,
 };
 
 use super::{
-    Document,
     document_transition::{self, Action},
     document_validator::DocumentValidator,
-    DocumentsBatchTransition, generate_document_id::generate_document_id,
+    generate_document_id::generate_document_id,
+    Document, DocumentsBatchTransition,
 };
 
 const PROPERTY_DOCUMENT_PROTOCOL_VERSION: &str = "$protocolVersion";

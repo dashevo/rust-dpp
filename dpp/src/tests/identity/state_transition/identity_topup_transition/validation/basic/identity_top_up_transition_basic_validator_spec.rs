@@ -9,10 +9,10 @@ use crate::identity::state_transition::asset_lock_proof::{
     AssetLockProofValidator, AssetLockTransactionValidator, InstantAssetLockProofStructureValidator,
 };
 use crate::identity::state_transition::identity_topup_transition::validation::basic::IdentityTopUoTransitionBasicValidator;
-use crate::NonConsensusError;
 use crate::state_repository::MockStateRepositoryLike;
 use crate::tests::utils::SerdeTestExtension;
 use crate::version::ProtocolVersionValidator;
+use crate::NonConsensusError;
 
 pub fn setup_test(
     state_repository_mock: MockStateRepositoryLike,

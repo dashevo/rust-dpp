@@ -3,11 +3,11 @@ use std::sync::Arc;
 use js_sys::JsString;
 use wasm_bindgen::prelude::*;
 
-use dpp::identity::IdentityFacade;
 use dpp::identity::validation::PublicKeysValidator;
-use dpp::NonConsensusError;
+use dpp::identity::IdentityFacade;
 use dpp::validation::ValidationResult;
 use dpp::version::ProtocolVersionValidator;
+use dpp::NonConsensusError;
 
 #[wasm_bindgen(js_name=ValidationResult)]
 pub struct ValidationResultWasm(ValidationResult<()>);

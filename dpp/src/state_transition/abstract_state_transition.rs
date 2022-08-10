@@ -3,8 +3,8 @@ use std::fmt::Debug;
 
 use anyhow::anyhow;
 use bls_signatures::{
-    PrivateKey as BLSPrivateKey, PublicKey as BLSPublicKey, Serialize as BLSSerialize,
-    verify_messages,
+    verify_messages, PrivateKey as BLSPrivateKey, PublicKey as BLSPublicKey,
+    Serialize as BLSSerialize,
 };
 use dashcore::signer;
 use serde::Serialize;

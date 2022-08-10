@@ -5,17 +5,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
 pub use state_transition::documents_batch_transition::document_transition;
-pub use state_transition::documents_batch_transition::DocumentsBatchTransition;
 pub use state_transition::documents_batch_transition::validation;
+pub use state_transition::documents_batch_transition::DocumentsBatchTransition;
 
 use crate::data_contract::DataContract;
 use crate::errors::ProtocolError;
 use crate::identifier::Identifier;
 use crate::metadata::Metadata;
-use crate::util::{cbor_value, serializer};
 use crate::util::cbor_value::CborCanonicalMap;
 use crate::util::hash::hash;
 use crate::util::json_value::{JsonValueExt, ReplaceWith};
+use crate::util::{cbor_value, serializer};
 
 pub mod document_factory;
 pub mod document_validator;

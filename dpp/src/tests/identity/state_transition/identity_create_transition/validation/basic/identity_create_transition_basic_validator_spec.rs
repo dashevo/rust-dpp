@@ -81,7 +81,7 @@ mod validate_identity_create_transition_basic_factory {
 
     pub use super::setup_test;
 
-// let validator.validate;
+    // let validator.validate;
     // let rawStateTransition;
     // let stateTransition;
     // let validatePublicKeysMock;
@@ -140,13 +140,13 @@ mod validate_identity_create_transition_basic_factory {
 
         use jsonschema::error::ValidationErrorKind;
 
-        use crate::{assert_consensus_errors, NonConsensusError};
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
         };
         use crate::state_repository::MockStateRepositoryLike;
         use crate::tests::utils::SerdeTestExtension;
+        use crate::{assert_consensus_errors, NonConsensusError};
 
         use super::setup_test;
 

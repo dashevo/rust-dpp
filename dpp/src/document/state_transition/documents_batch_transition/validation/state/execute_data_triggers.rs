@@ -1,11 +1,11 @@
 use crate::{
     data_trigger::{
-        DataTrigger, DataTriggerExecutionContext, DataTriggerExecutionResult,
-        get_data_triggers_factory::get_data_triggers,
+        get_data_triggers_factory::get_data_triggers, DataTrigger, DataTriggerExecutionContext,
+        DataTriggerExecutionResult,
     },
     document::document_transition::DocumentTransition,
-    ProtocolError,
     state_repository::StateRepositoryLike,
+    ProtocolError,
 };
 
 pub async fn execute_data_triggers<'a, SR>(

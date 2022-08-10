@@ -1,17 +1,17 @@
 use std::sync::Arc;
 
-use dashcore::{OutPoint, Transaction};
 use dashcore::consensus;
+use dashcore::{OutPoint, Transaction};
 
 use crate::consensus::basic::identity::{
     IdentityAssetLockTransactionOutPointAlreadyExistsError,
     IdentityAssetLockTransactionOutputNotFoundError, InvalidAssetLockTransactionOutputReturnSize,
     InvalidIdentityAssetLockTransactionError, InvalidIdentityAssetLockTransactionOutputError,
 };
-use crate::NonConsensusError;
 use crate::state_repository::StateRepositoryLike;
 use crate::util::vec::vec_to_array;
 use crate::validation::ValidationResult;
+use crate::NonConsensusError;
 
 #[derive(Clone, Debug)]
 pub struct AssetLockTransactionResultData {

@@ -1,7 +1,7 @@
 use crate::identity::state_transition::identity_topup_transition::IdentityTopUpTransition;
-use crate::NonConsensusError;
 use crate::state_repository::StateRepositoryLike;
 use crate::validation::ValidationResult;
+use crate::NonConsensusError;
 
 /// Validate that identity exists
 ///
