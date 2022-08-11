@@ -140,16 +140,15 @@ where
                 .validate(&transaction_result.data, output_index as usize)
                 .await?;
 
-            // TODO: remove unwrap
-            let validation_result_data = validate_asset_lock_transaction_result
-                .data()
-                .unwrap()
-                .clone();
-            result.merge(validate_asset_lock_transaction_result);
-
-            if !result.is_valid() {
+            let validation_result_data = if validate_asset_lock_transaction_result.is_valid() {
+                validate_asset_lock_transaction_result
+                    .data()
+                    .expect("This can not happen due to the logic above")
+                    .clone()
+            } else {
+                result.merge(validate_asset_lock_transaction_result);
                 return Ok(result);
-            }
+            };
 
             let public_key_hash = validation_result_data.public_key_hash;
 

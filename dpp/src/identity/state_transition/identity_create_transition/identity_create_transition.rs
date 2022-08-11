@@ -13,7 +13,7 @@ use crate::state_transition::{
 };
 use crate::util::json_value::JsonValueExt;
 use crate::util::string_encoding::Encoding;
-use crate::{InvalidVectorSizeError, ProtocolError, SerdeParsingError};
+use crate::{InvalidVectorSizeError, NonConsensusError, ProtocolError, SerdeParsingError};
 
 mod property_names {
     pub const PUBLIC_KEYS: &str = "publicKeys";
@@ -87,7 +87,7 @@ impl<'de> Deserialize<'de> for IdentityCreateTransition {
 
 /// Main state transition functionality implementation
 impl IdentityCreateTransition {
-    pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, SerdeParsingError> {
+    pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, NonConsensusError> {
         let mut state_transition = Self::default();
 
         let transition_map = raw_state_transition.as_object().ok_or_else(|| {
@@ -120,7 +120,7 @@ impl IdentityCreateTransition {
     pub fn set_asset_lock_proof(
         &mut self,
         asset_lock_proof: AssetLockProof,
-    ) -> Result<(), InvalidVectorSizeError> {
+    ) -> Result<(), NonConsensusError> {
         self.identity_id = asset_lock_proof.create_identifier()?;
 
         self.asset_lock_proof = asset_lock_proof;

@@ -73,8 +73,13 @@ where
             .as_array()
             .ok_or_else(|| SerdeParsingError::new("Expected 'instantLock' to be an array"))?
             .iter()
-            // TODO: remove unwrap
-            .map(|val| val.as_u64().unwrap() as u8)
+            .map(|val| {
+                val.as_u64()
+                    .ok_or_else(|| SerdeParsingError::new("Expected 'instantLock' to be an array"))
+            })
+            .collect::<Result<Vec<u64>, SerdeParsingError>>()?
+            .into_iter()
+            .map(|n| n as u8)
             .collect();
 
         let instant_lock = match consensus::deserialize::<InstantLock>(&raw_is_lock) {

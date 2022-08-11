@@ -14,7 +14,7 @@ pub use instant::*;
 use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
 use crate::prelude::Identifier;
 use crate::util::json_value::JsonValueExt;
-use crate::{InvalidVectorSizeError, SerdeParsingError};
+use crate::{InvalidVectorSizeError, NonConsensusError, SerdeParsingError};
 
 mod asset_lock_proof_validator;
 mod asset_lock_public_key_hash_fetcher;
@@ -110,7 +110,7 @@ impl AssetLockProof {
         }
     }
 
-    pub fn create_identifier(&self) -> Result<Identifier, InvalidVectorSizeError> {
+    pub fn create_identifier(&self) -> Result<Identifier, NonConsensusError> {
         match self {
             AssetLockProof::Instant(instant_proof) => instant_proof.create_identifier(),
             AssetLockProof::Chain(chain_proof) => {
