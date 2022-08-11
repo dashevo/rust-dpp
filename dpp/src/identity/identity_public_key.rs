@@ -167,10 +167,6 @@ pub struct IdentityPublicKey {
     pub security_level: SecurityLevel,
     #[serde(rename = "type")]
     pub key_type: KeyType,
-    // #[serde(
-    //     serialize_with = "se_vec_to_base64",
-    //     deserialize_with = "de_base64_to_vec"
-    // )]
     pub data: Vec<u8>,
     pub read_only: bool,
 }

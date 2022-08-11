@@ -96,6 +96,7 @@ pub fn get_data_from_file(file_path: &str) -> Result<String> {
     Ok(d)
 }
 
+#[cfg(test)]
 pub trait SerdeTestExtension {
     fn remove_key(&mut self, key: impl Into<String>);
     fn set_key_value<T, S>(&mut self, key: T, value: S)
@@ -107,6 +108,7 @@ pub trait SerdeTestExtension {
     fn get_value_mut(&mut self, key: impl Into<String>) -> &mut Value;
 }
 
+#[cfg(test)]
 impl SerdeTestExtension for serde_json::Value {
     fn remove_key(&mut self, key: impl Into<String>) {
         self.as_object_mut()

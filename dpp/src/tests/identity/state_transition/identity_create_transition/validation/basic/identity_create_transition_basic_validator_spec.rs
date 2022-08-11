@@ -1,26 +1,3 @@
-// let { getRE2Class } = require("@dashevo/wasm-re2");
-//
-// let createAjv = require("../../../../../../../lib/ajv/createAjv");
-//
-// let JsonSchemaValidator = require("../../../../../../../lib/validation/JsonSchemaValidator");
-//
-// let getIdentityCreateTransitionFixture = require("../../../../../../../lib/test/fixtures/getIdentityCreateTransitionFixture");
-//
-// let validator.validateFactory = require(
-//     "../../../../../../../lib/identity/stateTransition/IdentityCreateTransition/validation/basic/validator.validateFactory",
-// );
-//
-// let {
-// expectJsonSchemaError,
-// expectValidationError,
-// } = require("../../../../../../../lib/test/expect/expectError");
-//
-// let ValidationResult = require("../../../../../../../lib/validation/ValidationResult");
-// let InstantAssetLockProof = require("../../../../../../../lib/identity/stateTransition/assetLockProof/instant/InstantAssetLockProof");
-// let ChainAssetLockProof = require("../../../../../../../lib/identity/stateTransition/assetLockProof/chain/ChainAssetLockProof");
-// let TestConsensusError = require("../../../../../../../lib/test/mocks/TestConsensusError");
-// let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
-
 use std::sync::Arc;
 
 use serde_json::Value;
@@ -69,7 +46,6 @@ pub fn setup_test(
 
     let protocol_version_validator = ProtocolVersionValidator::default();
     (
-        // TODO: should it really be None?
         crate::tests::fixtures::identity_create_transition_fixture_json(None),
         IdentityCreateTransitionBasicValidator::new(
             Arc::new(protocol_version_validator),
@@ -91,60 +67,6 @@ mod validate_identity_create_transition_basic_factory {
     use crate::validation::ValidationResult;
 
     pub use super::setup_test;
-
-    // let validator.validate;
-    // let rawStateTransition;
-    // let stateTransition;
-    // let validatePublicKeysMock;
-    // let validatePublicKeysInIdentityCreateTransition;
-    // let assetLockPublicKeyHash;
-    // let proofValidationFunctionsByTypeMock;
-    // let validateProtocolVersionMock;
-
-    // beforeEach(async function beforeEach() {
-    // validatePublicKeysMock = this.sinonSandbox.stub()
-    // .returns(new ValidationResult());
-    //
-    // validatePublicKeysInIdentityCreateTransition = this.sinonSandbox.stub()
-    // .returns(new ValidationResult());
-    //
-    // assetLockPublicKeyHash = vec![20, 1);
-    //
-    // let assetLockValidationResult = new ValidationResult();
-    //
-    // assetLockValidationResult.setData(assetLockPublicKeyHash);
-    //
-    // let RE2 =  getRE2Class();
-    // let ajv = createAjv(RE2);
-    //
-    // let jsonSchemaValidator = new JsonSchemaValidator(ajv);
-    //
-    // let proofValidationResult = new ValidationResult();
-    // proofValidationResult.setData(assetLockPublicKeyHash);
-    //
-    // proofValidationFunctionsByTypeMock = {
-    // [InstantAssetLockProof.type]: this.sinonSandbox.stub().resolves(proofValidationResult),
-    // [ChainAssetLockProof.type]: this.sinonSandbox.stub().resolves(proofValidationResult),
-    // };
-    //
-    // validateProtocolVersionMock = this.sinonSandbox.stub().returns(new ValidationResult());
-    //
-    // validator.validate = validator.validateFactory(
-    // jsonSchemaValidator,
-    // validatePublicKeysMock,
-    // validatePublicKeysInIdentityCreateTransition,
-    // proofValidationFunctionsByTypeMock,
-    // validateProtocolVersionMock,
-    // );
-    //
-    // stateTransition = getIdentityCreateTransitionFixture();
-    //
-    // let privateKey = "9b67f852093bc61cea0eeca38599dbfba0de28574d2ed9b99d10d33dc1bde7b2";
-    //
-    //  stateTransition.signByPrivateKey(privateKey, IdentityPublicKey.TYPES.ECDSA_SECP256K1);
-    //
-    // rawStateTransition = stateTransition.toObject();
-    // });
 
     mod protocol_version {
         use std::sync::Arc;

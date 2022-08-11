@@ -76,30 +76,6 @@ impl<'de> Deserialize<'de> for AssetLockProof {
     }
 }
 
-// impl Serialize for IdentityCreateTransition {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//         where
-//             S: Serializer,
-//     {
-//         let raw = self
-//             .to_json_object(Default::default())
-//             .map_err(|e| S::Error::custom(e.to_string()))?;
-//
-//         raw.serialize(serializer)
-//     }
-// }
-//
-// impl<'de> Deserialize<'de> for IdentityCreateTransition {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//         where
-//             D: Deserializer<'de>,
-//     {
-//         let value = serde_json::Value::deserialize(deserializer)?;
-//
-//         Self::new(value).map_err(|e| D::Error::custom(e.to_string()))
-//     }
-// }
-
 pub enum AssetLockProofType {
     Instant = 0,
     Chain = 1,
@@ -155,7 +131,6 @@ impl TryFrom<&JsonValue> for AssetLockProof {
     type Error = SerdeParsingError;
 
     fn try_from(value: &JsonValue) -> Result<Self, Self::Error> {
-        // let proof_map = value.as_object().ok_or_else(|| SerdeParsingError::new("Expected asset lock proof to be an object"))?;
         let proof_type_int = value
             .get_u64("type")
             .map_err(|e| SerdeParsingError::new(e.to_string()))?;
