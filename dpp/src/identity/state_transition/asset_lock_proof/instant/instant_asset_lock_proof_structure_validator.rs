@@ -77,28 +77,14 @@ where
             .map(|val| val.as_u64().unwrap() as u8)
             .collect();
 
-        let instant_lock_validation_result =
-            match consensus::deserialize::<InstantLock>(&raw_is_lock) {
-                Ok(instant_lock) => {
-                    let mut res = ValidationResult::default();
-                    res.set_data(instant_lock);
-                    res
-                }
-                Err(error) => {
-                    let mut res = ValidationResult::default();
-                    let err = InvalidInstantAssetLockProofError::new(error.to_string());
-                    res.add_error(err);
-                    res
-                }
-            };
-
-        let instant_lock = instant_lock_validation_result.data().unwrap().clone();
-
-        result.merge(instant_lock_validation_result);
-
-        if !result.is_valid() {
-            return Ok(result);
-        }
+        let instant_lock = match consensus::deserialize::<InstantLock>(&raw_is_lock) {
+            Ok(instant_lock) => instant_lock,
+            Err(error) => {
+                let err = InvalidInstantAssetLockProofError::new(error.to_string());
+                result.add_error(err);
+                return Ok(result);
+            }
+        };
 
         let is_signature_verified = self
             .state_repository
@@ -130,16 +116,15 @@ where
             .validate(&tx_json_uint_array, output_index as usize)
             .await?;
 
-        // TODO: remove unwrap
-        let validation_result_data = validate_asset_lock_transaction_result
-            .data()
-            .unwrap()
-            .clone();
-        result.merge(validate_asset_lock_transaction_result);
-
-        if !result.is_valid() {
+        let validation_result_data = if validate_asset_lock_transaction_result.is_valid() {
+            validate_asset_lock_transaction_result
+                .data()
+                .expect("This can not happen due to the logic above")
+                .clone()
+        } else {
+            result.merge(validate_asset_lock_transaction_result);
             return Ok(result);
-        }
+        };
 
         let public_key_hash = validation_result_data.public_key_hash;
         let transaction = &validation_result_data.transaction;

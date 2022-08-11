@@ -100,7 +100,7 @@ where
                     }
 
                     result.set_data(AssetLockTransactionResultData {
-                        public_key_hash: vec_to_array(&output.script_pubkey.as_bytes()[1..21])?,
+                        public_key_hash: vec_to_array(&output.script_pubkey.as_bytes()[2..22])?,
                         transaction,
                     });
 

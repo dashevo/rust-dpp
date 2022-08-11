@@ -1,8 +1,9 @@
 use std::convert::TryFrom;
 
+use dashcore::Transaction;
 use serde::de::Error as DeError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value as JsonValue;
+use serde_json::{Error, Value as JsonValue};
 
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_output_fetcher::*;
@@ -124,6 +125,17 @@ impl AssetLockProof {
             AssetLockProof::Instant(proof) => proof.out_point(),
             AssetLockProof::Chain(proof) => Some(*proof.out_point()),
         }
+    }
+
+    pub fn transaction(&self) -> Option<&Transaction> {
+        match self {
+            AssetLockProof::Instant(is_lock) => Some(is_lock.transaction()),
+            AssetLockProof::Chain(_chain_lock) => None,
+        }
+    }
+
+    pub fn to_raw_object(&self) -> Result<JsonValue, Error> {
+        serde_json::to_value(&self)
     }
 }
 
