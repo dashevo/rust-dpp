@@ -1,9 +1,6 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
-use crate::{
-    prelude::Identity,
-    state_repository::{self, StateRepositoryLike},
-};
+use crate::{prelude::Identity, state_repository::StateRepositoryLike};
 
 use super::IdentityCreditWithdrawalTransition;
 
@@ -31,7 +28,8 @@ where
             .fetch_identity(&state_transition.identity_id)
             .await?;
 
-        let mut existing_identity = maybe_existing_identity.unwrap();
+        let mut existing_identity =
+            maybe_existing_identity.ok_or_else(|| anyhow!("Identity not found"))?;
 
         existing_identity = existing_identity.reduce_balance(state_transition.amount);
 
