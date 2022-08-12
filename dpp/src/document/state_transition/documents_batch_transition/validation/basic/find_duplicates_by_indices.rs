@@ -90,10 +90,10 @@ fn is_duplicate_by_indices(
     for index in type_indices {
         for property in index.properties.iter() {
             let original = original_transition
-                .get(property.name)
+                .get(&property.name)
                 .unwrap_or(&JsonValue::Null);
             let to_check = transition_to_check
-                .get(property.name)
+                .get(&property.name)
                 .unwrap_or(&JsonValue::Null);
 
             if original != to_check {

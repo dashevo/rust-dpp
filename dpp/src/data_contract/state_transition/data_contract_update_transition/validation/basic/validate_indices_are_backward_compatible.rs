@@ -21,7 +21,7 @@ type JsonSchema = serde_json::Value;
 pub fn validate_indices_are_backward_compatible<'a>(
     existing_documents: impl IntoIterator<Item = (&'a DocumentType, &'a JsonSchema)>,
     new_documents: impl IntoIterator<Item = (&'a DocumentType, &'a JsonSchema)>,
-) -> Result<ValidationResult, ProtocolError> {
+) -> Result<ValidationResult<()>, ProtocolError> {
     let mut result = ValidationResult::default();
     let new_documents_by_type: HashMap<&DocumentType, &JsonSchema> =
         new_documents.into_iter().collect();

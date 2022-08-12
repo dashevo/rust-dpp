@@ -62,7 +62,7 @@ fn setup_test() -> TestData {
     }
 }
 
-fn get_basic_error(result: &ValidationResult, error_number: usize) -> &BasicError {
+fn get_basic_error(result: &ValidationResult<()>, error_number: usize) -> &BasicError {
     match result
         .errors
         .get(error_number)
