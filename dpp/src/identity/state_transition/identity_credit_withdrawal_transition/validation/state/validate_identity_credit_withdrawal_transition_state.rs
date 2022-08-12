@@ -49,7 +49,7 @@ where
             Some(identity) => identity,
         };
 
-        if existing_identity.get_balance() < state_transition.amount as i64 {
+        if existing_identity.get_balance() < state_transition.amount {
             let err = IdentityInsufficientBalanceError {
                 identity_id: state_transition.identity_id.clone(),
                 balance: existing_identity.balance,

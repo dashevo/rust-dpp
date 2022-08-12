@@ -22,7 +22,7 @@ where
         ApplyIdentityCreditWithdrawalTransition { state_repository }
     }
 
-    pub async fn apply_data_contract_create_transition(
+    pub async fn apply_identity_credit_withdrawal_transition(
         &self,
         state_transition: &IdentityCreditWithdrawalTransition,
     ) -> Result<()> {
@@ -36,7 +36,7 @@ where
         existing_identity = existing_identity.reduce_balance(state_transition.amount);
 
         self.state_repository
-            .update_identity(existing_identity)
+            .update_identity(&existing_identity)
             .await
     }
 }

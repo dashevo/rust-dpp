@@ -6,11 +6,11 @@ use crate::prelude::Identifier;
 #[error("Insufficient identity ${identity_id} balance ${balance}")]
 pub struct IdentityInsufficientBalanceError {
     pub identity_id: Identifier,
-    pub balance: i64,
+    pub balance: u64,
 }
 
 impl IdentityInsufficientBalanceError {
-    pub fn new(identity_id: Identifier, balance: i64) -> Self {
+    pub fn new(identity_id: Identifier, balance: u64) -> Self {
         Self {
             identity_id,
             balance,
@@ -21,7 +21,7 @@ impl IdentityInsufficientBalanceError {
         &self.identity_id
     }
 
-    pub fn balance(&self) -> i64 {
+    pub fn balance(&self) -> u64 {
         self.balance
     }
 }
