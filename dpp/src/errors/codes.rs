@@ -27,11 +27,28 @@ impl ErrorWithCode for ConsensusError {
             // Identity
             Self::DuplicatedIdentityPublicKeyError(_) => 1029,
             Self::DuplicatedIdentityPublicKeyIdError(_) => 1030,
+            Self::IdentityAssetLockProofLockedTransactionMismatchError(_) => 1031,
+            Self::IdentityAssetLockTransactionIsNotFoundError(_) => 1032,
+            Self::IdentityAssetLockTransactionOutPointAlreadyExistsError(_) => 1033,
+            Self::IdentityAssetLockTransactionOutputNotFoundError(_) => 1034,
+            Self::InvalidAssetLockProofCoreChainHeightError(_) => 1035,
+            Self::InvalidAssetLockProofTransactionHeightError(_) => 1036,
+            Self::InvalidAssetLockTransactionOutputReturnSize(_) => 1037,
+            Self::InvalidIdentityAssetLockTransactionError(_) => 1038,
+            Self::InvalidIdentityAssetLockTransactionOutputError(_) => 1039,
             Self::InvalidIdentityPublicKeyDataError(_) => 1040,
+            Self::InvalidInstantAssetLockProofError(_) => 1041,
+            Self::InvalidInstantAssetLockProofSignatureError(_) => 1042,
+            Self::MissingMasterPublicKeyError(_) => 1046,
             Self::InvalidIdentityPublicKeySecurityLevelError(_) => 1047,
 
             Self::StateError(e) => e.get_code(),
             Self::BasicError(e) => e.get_code(),
+
+            Self::IdentityAlreadyExistsError(_) => 4011,
+
+            #[cfg(test)]
+            ConsensusError::TestConsensusError(_) => 1000,
         }
     }
 }
@@ -69,9 +86,17 @@ impl ErrorWithCode for BasicError {
     fn get_code(&self) -> u32 {
         match *self {
             // Document
-            Self::DataContractContPresent { .. } => 1018,
+            Self::DataContractNotPresent { .. } => 1018,
             Self::InvalidDocumentTypeError { .. } => 1024,
-            Self::MissingDocumentTypeError { .. } => 1028,
+            Self::MissingDocumentTypeError { .. } => 1027,
+            Self::MissingDocumentTransitionActionError { .. } => 1026,
+            Self::InvalidDocumentTransitionIdError { .. } => 1023,
+            Self::InvalidDocumentTransitionActionError { .. } => 1022,
+
+            Self::DuplicateDocumentTransitionsWithIdsError { .. } => 1019,
+            Self::MissingDataContractIdError => 1025,
+            Self::InvalidIdentifierError { .. } => 1006,
+
             // Data contract
             Self::JsonSchemaCompilationError { .. } => 1004,
             Self::InvalidDataContractVersionError { .. } => 4013,

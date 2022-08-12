@@ -1,16 +1,11 @@
 use std::collections::HashMap;
 use std::convert::TryInto;
 
-use crate::data_contract::DataContract;
-use crate::prelude::{DocumentTransition, Identifier};
-use crate::util::json_value::{JsonValueExt, ReplaceWith};
-use crate::version::LATEST_VERSION;
-use crate::ProtocolError;
-
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 
+use crate::data_contract::DataContract;
 use crate::{
     identity::{KeyID, SecurityLevel},
     state_transition::{
@@ -20,6 +15,10 @@ use crate::{
 };
 // TODO simplify imports
 use crate::document::document_transition::DocumentTransitionObjectLike;
+use crate::prelude::{DocumentTransition, Identifier};
+use crate::util::json_value::{JsonValueExt, ReplaceWith};
+use crate::version::LATEST_VERSION;
+use crate::ProtocolError;
 
 pub mod document_transition;
 pub mod validation;
@@ -191,6 +190,9 @@ impl StateTransitionConvert for DocumentsBatchTransition {
 
     fn to_object(&self, skip_signature: bool) -> Result<JsonValue, ProtocolError> {
         let mut json_object: JsonValue = serde_json::to_value(self)?;
+        json_object
+            .replace_identifier_paths(Self::identifiers_property_paths(), ReplaceWith::Bytes)?;
+
         if skip_signature {
             if let JsonValue::Object(ref mut o) = json_object {
                 for path in Self::signature_property_paths() {

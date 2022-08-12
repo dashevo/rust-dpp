@@ -1,3 +1,10 @@
+use std::sync::Arc;
+
+use jsonschema::error::ValidationErrorKind;
+use log::trace;
+use serde_json::{json, Value as JsonValue};
+use test_case::test_case;
+
 use crate::{
     codes::ErrorWithCode,
     consensus::{basic::JsonSchemaError, ConsensusError},
@@ -7,13 +14,7 @@ use crate::{
     tests::fixtures::get_data_contract_fixture,
     util::json_value::JsonValueExt,
     version::{ProtocolVersionValidator, COMPATIBILITY_MAP, LATEST_VERSION},
-    Convertible,
 };
-use jsonschema::error::ValidationErrorKind;
-use log::trace;
-use serde_json::{json, Value as JsonValue};
-use std::sync::Arc;
-use test_case::test_case;
 
 struct TestData {
     data_contract_validator: DataContractValidator,
@@ -45,7 +46,7 @@ fn init() {
         .try_init();
 }
 
-fn get_schema_error(result: &ValidationResult, number: usize) -> &JsonSchemaError {
+fn get_schema_error(result: &ValidationResult<()>, number: usize) -> &JsonSchemaError {
     result
         .errors
         .get(number)
@@ -71,7 +72,7 @@ fn get_index_error(consensus_error: &ConsensusError) -> &IndexError {
     }
 }
 
-fn print_json_schema_errors(result: &ValidationResult) {
+fn print_json_schema_errors(result: &ValidationResult<()>) {
     for (i, e) in result.errors.iter().enumerate() {
         let schema_error = e.json_schema_error().unwrap();
         println!(
@@ -175,6 +176,7 @@ fn defs_should_be_object() {
 
 mod defs {
     use super::*;
+
     #[test]
     fn defs_should_not_be_empty() {
         let TestData {
@@ -233,6 +235,17 @@ mod defs {
             "abcdefghigklmnopqrstuvwxyz01234567890abcdefghigklmnopqrstuvwxyz",
             "abc_gbf_gdb",
             "abc-gbf-gdb",
+            "-validname",
+            "_validname",
+            "validname-",
+            "validname_",
+            "a",
+            "ab",
+            "1",
+            "123",
+            "123_",
+            "-123",
+            "_123",
         ];
 
         for property_name in valid_names {
@@ -300,6 +313,7 @@ mod defs {
 
 mod schema {
     use super::*;
+
     #[test]
     fn schema_should_be_string() {
         let TestData {
@@ -421,6 +435,7 @@ fn owner_id_should_be_no_longer_32_bytes(property_name: &str) {
 
 mod documents {
     use super::*;
+
     #[test]
     fn documents_should_be_object() {
         let TestData {
@@ -747,16 +762,7 @@ mod documents {
             ..
         } = setup_test();
 
-        let invalid_names = [
-            "-invalidname",
-            "_invalidname",
-            "invalidname-",
-            "invalidname_",
-            "*(*&^",
-            "$test",
-            "123abci",
-            "ab",
-        ];
+        let invalid_names = ["*(*&^", "$test", ".", ".a"];
         for property_name in invalid_names {
             raw_data_contract["documents"]["niceDocument"]["properties"][property_name] = json!({})
         }
@@ -781,16 +787,7 @@ mod documents {
             ..
         } = setup_test();
 
-        let invalid_names = [
-            "-invalidname",
-            "_invalidname",
-            "invalidname-",
-            "invalidname_",
-            "*(*&^",
-            "$test",
-            "123abci",
-            "ab",
-        ];
+        let invalid_names = ["*(*&^", "$test", ".", ".a"];
 
         raw_data_contract["documents"]["niceDocument"]["properties"]["something"] = json!({
             "properties" :   json!({}),
@@ -1361,6 +1358,7 @@ mod documents {
 
 mod byte_array {
     use super::*;
+
     #[test]
     fn byte_array_should_be_boolean() {
         let TestData {
@@ -1452,6 +1450,7 @@ mod byte_array {
 
 mod identifier {
     use super::*;
+
     #[test]
     fn content_media_type_identifier_should_be_used_with_byte_array_only() {
         let TestData {
@@ -1524,7 +1523,12 @@ mod identifier {
 }
 
 mod indices {
+    use std::os::raw;
+
+    use crate::tests::utils::get_basic_error_from_result;
+
     use super::*;
+
     #[test]
     fn indices_should_be_array() {
         let TestData {
@@ -2370,10 +2374,105 @@ mod indices {
             })
         );
     }
+
+    #[test]
+    fn should_have_valid_property_names() {
+        let TestData {
+            raw_data_contract,
+            data_contract_validator,
+            ..
+        } = setup_test();
+        let valid_names = [
+            "validName",
+            "valid_name",
+            "valid-name",
+            "abc",
+            "a123123bc",
+            "ab123c",
+            "ValidName",
+            "validName",
+            "abcdefghigklmnopqrstuvwxyz01234567890abcdefghigklmnopqrstuvwxyz",
+            "abc_gbf_gdb",
+            "abc-gbf-gdb",
+        ];
+
+        for property_name in valid_names {
+            let mut cloned_data_contract = raw_data_contract.clone();
+            cloned_data_contract["documents"]["indexedDocument"]["properties"][property_name] =
+                json!({"type" : "string", "maxLength" : 63});
+
+            cloned_data_contract["documents"]["indexedDocument"]["indices"][0]["properties"]
+                .push(json!({ property_name : "asc"}))
+                .unwrap();
+
+            cloned_data_contract["documents"]["indexedDocument"]["required"]
+                .push(JsonValue::String(property_name.to_string()))
+                .unwrap();
+
+            let result = data_contract_validator
+                .validate(&cloned_data_contract)
+                .expect("validation result");
+            assert!(result.is_valid());
+        }
+    }
+
+    #[test]
+    fn should_return_invalid_result_if_property_has_invalid_format() {
+        let TestData {
+            mut raw_data_contract,
+            data_contract_validator,
+            ..
+        } = setup_test();
+        let invalid_names = ["a.", ".a"];
+
+        raw_data_contract["documents"]["indexedDocument"] = json!({
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "object",
+                "properties": {
+                  "property": {
+                    "type": "string",
+                    "maxLength": 63,
+                  },
+                },
+                "additionalProperties": false,
+              },
+            },
+            "indices": [
+              {
+                "name": "index1",
+                "properties": [],
+                "unique": true,
+              },
+            ],
+            "additionalProperties": false,
+        });
+
+        for invalid_name in invalid_names {
+            let mut cloned_data_contract = raw_data_contract.clone();
+            cloned_data_contract["documents"]["indexedDocument"]["indices"][0]["properties"]
+                .push(json!({ invalid_name : "asc"}))
+                .unwrap();
+            let result = data_contract_validator
+                .validate(&cloned_data_contract)
+                .expect("should return validation result");
+
+            let index_error = get_index_error(&result.errors()[0]);
+            assert_eq!(1016, index_error.get_code());
+            assert!(
+                matches!(index_error, IndexError::UndefinedIndexPropertyError { property_name, ..}
+                if  {
+                    property_name == invalid_name
+                })
+            );
+        }
+    }
 }
 
 mod signature_level {
     use super::*;
+
     #[test]
     fn signature_level_requirement_should_be_number() {
         let TestData {
@@ -2650,6 +2749,7 @@ fn should_return_invalid_result_if_indexed_string_property_missing_max_length_co
 
 mod indexed_array {
     use super::*;
+
     // This section is originally commented out
     // https://github.com/dashevo/platform/blob/ab6391f4b47a970c733e7b81115b44329fbdf993/packages/js-dpp/test/integration/dataContract/validation/validateDataContractFactory.spec.js#L2015
     //

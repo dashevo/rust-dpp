@@ -20,9 +20,8 @@ use crate::{
 };
 
 use super::errors::*;
-use super::extra::{get_definitions, get_document_types, get_mutability, ContractConfig};
-
 use super::extra::DocumentType;
+use super::extra::{get_definitions, get_document_types, get_mutability, ContractConfig};
 use super::properties::*;
 
 pub type JsonSchema = JsonValue;
@@ -299,6 +298,10 @@ impl DataContract {
         self.version
     }
 
+    pub fn definitions(&self) -> &BTreeMap<String, JsonValue> {
+        &self.defs
+    }
+
     // Returns hash from Data Contract
     pub fn hash(&self) -> Result<Vec<u8>, ProtocolError> {
         Ok(hash(self.to_buffer()?))
@@ -328,7 +331,6 @@ impl DataContract {
                     doc_type: doc_type.to_owned(),
                     data_contract: self.clone(),
                 })?;
-
         Ok(document)
     }
 
@@ -406,11 +408,12 @@ impl TryFrom<&str> for DataContract {
 
 #[cfg(test)]
 mod test {
+    use anyhow::Result;
+
     use crate::{
         assert_error_contains,
         tests::{fixtures::get_data_contract_fixture, utils::*},
     };
-    use anyhow::Result;
 
     use super::*;
 
