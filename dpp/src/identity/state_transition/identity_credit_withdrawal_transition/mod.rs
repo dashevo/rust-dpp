@@ -21,8 +21,6 @@ use super::properties::{
 pub mod apply_identity_credit_withdrawal_transition_factory;
 pub mod validation;
 
-pub const IDENTIFIER_FIELDS: [&str; 2] = [PROPERTY_IDENTITY_ID, PROPERTY_OWNER_ID];
-
 #[repr(u8)]
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Pooling {
@@ -69,14 +67,25 @@ impl std::default::Default for IdentityCreditWithdrawalTransition {
 }
 
 impl IdentityCreditWithdrawalTransition {
+    pub fn from_value(value: JsonValue) -> Result<Self, ProtocolError> {
+        let transition: IdentityCreditWithdrawalTransition = serde_json::from_value(value)?;
+
+        Ok(transition)
+    }
+
+    pub fn from_json(mut value: JsonValue) -> Result<Self, ProtocolError> {
+        value.replace_binary_paths(Self::binary_property_paths(), ReplaceWith::Bytes)?;
+
+        Self::from_value(value)
+    }
+
     pub fn from_raw_object(
         mut raw_object: JsonValue,
     ) -> Result<IdentityCreditWithdrawalTransition, ProtocolError> {
-        raw_object.replace_identifier_paths(IDENTIFIER_FIELDS, ReplaceWith::Base58)?;
+        raw_object
+            .replace_identifier_paths(Self::identifiers_property_paths(), ReplaceWith::Base58)?;
 
-        let transition: IdentityCreditWithdrawalTransition = serde_json::from_value(raw_object)?;
-
-        Ok(transition)
+        Self::from_value(raw_object)
     }
 
     /// Get owner ID
@@ -136,5 +145,30 @@ impl StateTransitionConvert for IdentityCreditWithdrawalTransition {
 
     fn binary_property_paths() -> Vec<&'static str> {
         vec![PROPERTY_SIGNATURE, PROPERTY_OUTPUT]
+    }
+
+    fn to_object(&self, skip_signature: bool) -> Result<JsonValue, ProtocolError> {
+        let mut json_value: JsonValue = serde_json::to_value(self)?;
+
+        json_value
+            .replace_identifier_paths(Self::identifiers_property_paths(), ReplaceWith::Bytes)?;
+
+        if skip_signature {
+            if let JsonValue::Object(ref mut o) = json_value {
+                for path in Self::signature_property_paths() {
+                    o.remove(path);
+                }
+            }
+        }
+
+        Ok(json_value)
+    }
+
+    fn to_json(&self) -> Result<JsonValue, ProtocolError> {
+        let mut json_value: JsonValue = serde_json::to_value(self)?;
+
+        json_value.replace_binary_paths(Self::binary_property_paths(), ReplaceWith::Base64)?;
+
+        Ok(json_value)
     }
 }

@@ -43,7 +43,7 @@ mod apply_identity_credit_withdrawal_transition_factory {
         state_transition.amount = 10;
 
         match applier
-            .apply_data_contract_create_transition(&state_transition)
+            .apply_identity_credit_withdrawal_transition(&state_transition)
             .await
         {
             Ok(_) => {}
