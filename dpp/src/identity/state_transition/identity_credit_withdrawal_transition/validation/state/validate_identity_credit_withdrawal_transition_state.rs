@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 
 use crate::{
@@ -13,14 +15,14 @@ pub struct IdentityCreditWithdrawalTransitionValidator<SR>
 where
     SR: StateRepositoryLike,
 {
-    state_repository: SR,
+    state_repository: Arc<SR>,
 }
 
 impl<SR> IdentityCreditWithdrawalTransitionValidator<SR>
 where
     SR: StateRepositoryLike,
 {
-    pub fn new(state_repository: SR) -> Self {
+    pub fn new(state_repository: Arc<SR>) -> Self {
         IdentityCreditWithdrawalTransitionValidator { state_repository }
     }
 

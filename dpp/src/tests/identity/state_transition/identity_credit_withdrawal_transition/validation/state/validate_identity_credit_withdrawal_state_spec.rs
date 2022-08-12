@@ -6,6 +6,8 @@ use crate::{
     state_repository::{MockStateRepositoryLike, StateRepositoryLike},
 };
 
+use std::sync::Arc;
+
 #[cfg(test)]
 pub fn setup_test<SR: StateRepositoryLike>(
     state_repository_mock: SR,
@@ -22,7 +24,7 @@ pub fn setup_test<SR: StateRepositoryLike>(
 
     (
         state_transition,
-        IdentityCreditWithdrawalTransitionValidator::new(state_repository_mock),
+        IdentityCreditWithdrawalTransitionValidator::new(Arc::new(state_repository_mock)),
     )
 }
 
