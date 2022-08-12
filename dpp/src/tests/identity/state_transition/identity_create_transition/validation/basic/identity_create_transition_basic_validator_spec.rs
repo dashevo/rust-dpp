@@ -1,33 +1,11 @@
-// let { getRE2Class } = require("@dashevo/wasm-re2");
-//
-// let createAjv = require("../../../../../../../lib/ajv/createAjv");
-//
-// let JsonSchemaValidator = require("../../../../../../../lib/validation/JsonSchemaValidator");
-//
-// let getIdentityCreateTransitionFixture = require("../../../../../../../lib/test/fixtures/getIdentityCreateTransitionFixture");
-//
-// let validator.validateFactory = require(
-//     "../../../../../../../lib/identity/stateTransition/IdentityCreateTransition/validation/basic/validator.validateFactory",
-// );
-//
-// let {
-// expectJsonSchemaError,
-// expectValidationError,
-// } = require("../../../../../../../lib/test/expect/expectError");
-//
-// let ValidationResult = require("../../../../../../../lib/validation/ValidationResult");
-// let InstantAssetLockProof = require("../../../../../../../lib/identity/stateTransition/assetLockProof/instant/InstantAssetLockProof");
-// let ChainAssetLockProof = require("../../../../../../../lib/identity/stateTransition/assetLockProof/chain/ChainAssetLockProof");
-// let TestConsensusError = require("../../../../../../../lib/test/mocks/TestConsensusError");
-// let IdentityPublicKey = require("../../../../../../../lib/identity/IdentityPublicKey");
-
 use std::sync::Arc;
 
-use crate::identity::state_transition::asset_lock_proof::{
-    AssetLockProofValidator, AssetLockTransactionValidator, InstantAssetLockProofStructureValidator,
-};
 use serde_json::Value;
 
+use crate::identity::state_transition::asset_lock_proof::{
+    AssetLockProofValidator, AssetLockTransactionValidator, ChainAssetLockProofStructureValidator,
+    InstantAssetLockProofStructureValidator,
+};
 use crate::identity::state_transition::identity_create_transition::validation::basic::IdentityCreateTransitionBasicValidator;
 use crate::identity::validation::TPublicKeysValidator;
 use crate::state_repository::MockStateRepositoryLike;
@@ -47,18 +25,27 @@ pub fn setup_test(
 ) {
     let state_repository = Arc::new(state_repository_mock);
     let asset_lock_transaction_validator =
-        AssetLockTransactionValidator::new(state_repository.clone());
+        Arc::new(AssetLockTransactionValidator::new(state_repository.clone()));
+
     let instant_asset_lock_validator = InstantAssetLockProofStructureValidator::new(
+        state_repository.clone(),
+        asset_lock_transaction_validator.clone(),
+    )
+    .unwrap();
+
+    let chain_asset_lock_validator = ChainAssetLockProofStructureValidator::new(
         state_repository,
         asset_lock_transaction_validator,
     )
     .unwrap();
-    let asset_lock_proof_validator =
-        Arc::new(AssetLockProofValidator::new(instant_asset_lock_validator));
+
+    let asset_lock_proof_validator = Arc::new(AssetLockProofValidator::new(
+        instant_asset_lock_validator,
+        chain_asset_lock_validator,
+    ));
 
     let protocol_version_validator = ProtocolVersionValidator::default();
     (
-        // TODO: should it really be None?
         crate::tests::fixtures::identity_create_transition_fixture_json(None),
         IdentityCreateTransitionBasicValidator::new(
             Arc::new(protocol_version_validator),
@@ -81,66 +68,11 @@ mod validate_identity_create_transition_basic_factory {
 
     pub use super::setup_test;
 
-    // let validator.validate;
-    // let rawStateTransition;
-    // let stateTransition;
-    // let validatePublicKeysMock;
-    // let validatePublicKeysInIdentityCreateTransition;
-    // let assetLockPublicKeyHash;
-    // let proofValidationFunctionsByTypeMock;
-    // let validateProtocolVersionMock;
-
-    // beforeEach(async function beforeEach() {
-    // validatePublicKeysMock = this.sinonSandbox.stub()
-    // .returns(new ValidationResult());
-    //
-    // validatePublicKeysInIdentityCreateTransition = this.sinonSandbox.stub()
-    // .returns(new ValidationResult());
-    //
-    // assetLockPublicKeyHash = vec![20, 1);
-    //
-    // let assetLockValidationResult = new ValidationResult();
-    //
-    // assetLockValidationResult.setData(assetLockPublicKeyHash);
-    //
-    // let RE2 =  getRE2Class();
-    // let ajv = createAjv(RE2);
-    //
-    // let jsonSchemaValidator = new JsonSchemaValidator(ajv);
-    //
-    // let proofValidationResult = new ValidationResult();
-    // proofValidationResult.setData(assetLockPublicKeyHash);
-    //
-    // proofValidationFunctionsByTypeMock = {
-    // [InstantAssetLockProof.type]: this.sinonSandbox.stub().resolves(proofValidationResult),
-    // [ChainAssetLockProof.type]: this.sinonSandbox.stub().resolves(proofValidationResult),
-    // };
-    //
-    // validateProtocolVersionMock = this.sinonSandbox.stub().returns(new ValidationResult());
-    //
-    // validator.validate = validator.validateFactory(
-    // jsonSchemaValidator,
-    // validatePublicKeysMock,
-    // validatePublicKeysInIdentityCreateTransition,
-    // proofValidationFunctionsByTypeMock,
-    // validateProtocolVersionMock,
-    // );
-    //
-    // stateTransition = getIdentityCreateTransitionFixture();
-    //
-    // let privateKey = "9b67f852093bc61cea0eeca38599dbfba0de28574d2ed9b99d10d33dc1bde7b2";
-    //
-    //  stateTransition.signByPrivateKey(privateKey, IdentityPublicKey.TYPES.ECDSA_SECP256K1);
-    //
-    // rawStateTransition = stateTransition.toObject();
-    // });
-
     mod protocol_version {
         use std::sync::Arc;
 
         use jsonschema::error::ValidationErrorKind;
 
-        use super::setup_test;
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
@@ -148,6 +80,8 @@ mod validate_identity_create_transition_basic_factory {
         use crate::state_repository::MockStateRepositoryLike;
         use crate::tests::utils::SerdeTestExtension;
         use crate::{assert_consensus_errors, NonConsensusError};
+
+        use super::setup_test;
 
         #[tokio::test]
         pub async fn should_be_present() {
@@ -279,7 +213,6 @@ mod validate_identity_create_transition_basic_factory {
             assert_eq!(error.instance_path().to_string(), "/type");
             assert_eq!(error.keyword().unwrap(), "const");
 
-            println!("{:?}", error.kind());
             match error.kind() {
                 ValidationErrorKind::Constant { expected_value } => {
                     assert_eq!(expected_value.as_u64().unwrap(), 2u64);
@@ -290,14 +223,11 @@ mod validate_identity_create_transition_basic_factory {
     }
 
     mod asset_lock_proof {
-        use futures::future::err;
         use std::sync::Arc;
 
         use jsonschema::error::ValidationErrorKind;
-        use jsonschema::paths::JSONPointer;
 
         use crate::assert_consensus_errors;
-        use crate::consensus::basic::TestConsensusError;
         use crate::consensus::ConsensusError;
         use crate::identity::validation::{
             PublicKeysInIdentityCreateTransitionValidator, PublicKeysValidator,
@@ -371,8 +301,6 @@ mod validate_identity_create_transition_basic_factory {
             let errors = assert_consensus_errors!(result, ConsensusError::JsonSchemaError, 1);
 
             let error = errors.first().unwrap();
-
-            println!("{:?}", error);
 
             assert_eq!(error.instance_path().to_string(), "/transaction");
         }
@@ -655,7 +583,6 @@ mod validate_identity_create_transition_basic_factory {
 
             let error = errors.first().unwrap();
 
-            println!("{:?}", error);
             assert_eq!(error.instance_path().to_string(), "/signature");
             assert_eq!(error.keyword().unwrap(), "maxItems");
         }
@@ -680,8 +607,6 @@ mod validate_identity_create_transition_basic_factory {
             state_repository,
         );
         let result = validator.validate(&raw_state_transition).await.unwrap();
-
-        println!("{:?}", result.errors);
 
         assert!(result.is_valid());
         assert_eq!(

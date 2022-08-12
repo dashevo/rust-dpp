@@ -5,13 +5,16 @@ use crate::codes::ErrorWithCode;
 use crate::consensus::basic::identity::{
     DuplicatedIdentityPublicKeyError, DuplicatedIdentityPublicKeyIdError,
     IdentityAssetLockProofLockedTransactionMismatchError,
+    IdentityAssetLockTransactionIsNotFoundError,
     IdentityAssetLockTransactionOutPointAlreadyExistsError,
-    IdentityAssetLockTransactionOutputNotFoundError, InvalidAssetLockTransactionOutputReturnSize,
+    IdentityAssetLockTransactionOutputNotFoundError, InvalidAssetLockProofCoreChainHeightError,
+    InvalidAssetLockProofTransactionHeightError, InvalidAssetLockTransactionOutputReturnSize,
     InvalidIdentityAssetLockTransactionError, InvalidIdentityAssetLockTransactionOutputError,
     InvalidIdentityPublicKeyDataError, InvalidIdentityPublicKeySecurityLevelError,
     InvalidInstantAssetLockProofError, InvalidInstantAssetLockProofSignatureError,
     MissingMasterPublicKeyError,
 };
+use crate::consensus::state::identity::IdentityAlreadyExistsError;
 #[cfg(test)]
 use crate::errors::consensus::basic::TestConsensusError;
 use crate::errors::consensus::basic::{
@@ -62,6 +65,12 @@ pub enum ConsensusError {
     IdentityAssetLockProofLockedTransactionMismatchError(
         IdentityAssetLockProofLockedTransactionMismatchError,
     ),
+    #[error(transparent)]
+    IdentityAssetLockTransactionIsNotFoundError(IdentityAssetLockTransactionIsNotFoundError),
+    #[error(transparent)]
+    InvalidAssetLockProofCoreChainHeightError(InvalidAssetLockProofCoreChainHeightError),
+    #[error(transparent)]
+    InvalidAssetLockProofTransactionHeightError(InvalidAssetLockProofTransactionHeightError),
 
     #[error(transparent)]
     StateError(Box<StateError>),
@@ -84,6 +93,9 @@ pub enum ConsensusError {
 
     #[error("{0}")]
     IdentityInsufficientBalanceError(IdentityInsufficientBalanceError),
+
+    #[error(transparent)]
+    IdentityAlreadyExistsError(IdentityAlreadyExistsError),
 
     #[cfg(test)]
     #[cfg_attr(test, error("{0}"))]
@@ -114,8 +126,11 @@ impl ConsensusError {
             ConsensusError::DuplicatedIdentityPublicKeyError(_) => 1029,
             ConsensusError::DuplicatedIdentityPublicKeyIdError(_) => 1030,
             ConsensusError::IdentityAssetLockProofLockedTransactionMismatchError(_) => 1031,
+            ConsensusError::IdentityAssetLockTransactionIsNotFoundError(_) => 1032,
             ConsensusError::IdentityAssetLockTransactionOutPointAlreadyExistsError(_) => 1033,
             ConsensusError::IdentityAssetLockTransactionOutputNotFoundError(_) => 1034,
+            ConsensusError::InvalidAssetLockProofCoreChainHeightError(_) => 1035,
+            ConsensusError::InvalidAssetLockProofTransactionHeightError(_) => 1036,
             ConsensusError::InvalidAssetLockTransactionOutputReturnSize(_) => 1037,
             ConsensusError::InvalidIdentityAssetLockTransactionError(_) => 1038,
             ConsensusError::InvalidIdentityAssetLockTransactionOutputError(_) => 1039,
@@ -128,6 +143,8 @@ impl ConsensusError {
 
             ConsensusError::StateError(e) => e.get_code(),
             ConsensusError::BasicError(e) => e.get_code(),
+
+            ConsensusError::IdentityAlreadyExistsError(_) => 4011,
 
             // Custom error for tests
             #[cfg(test)]
@@ -254,6 +271,12 @@ impl From<InvalidInstantAssetLockProofSignatureError> for ConsensusError {
 impl From<IdentityAssetLockProofLockedTransactionMismatchError> for ConsensusError {
     fn from(err: IdentityAssetLockProofLockedTransactionMismatchError) -> Self {
         Self::IdentityAssetLockProofLockedTransactionMismatchError(err)
+    }
+}
+
+impl From<IdentityAlreadyExistsError> for ConsensusError {
+    fn from(err: IdentityAlreadyExistsError) -> Self {
+        Self::IdentityAlreadyExistsError(err)
     }
 }
 

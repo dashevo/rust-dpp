@@ -1,21 +1,21 @@
+use std::convert::{TryFrom, TryInto};
+
+use serde::de::Error as DeError;
+use serde::ser::Error as SerError;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Value as JsonValue;
+
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::identity::state_transition::identity_create_transition::SerializationOptions;
-use crate::identity::IdentityPublicKey;
 use crate::prelude::Identifier;
 use crate::state_transition::{
     StateTransition, StateTransitionConvert, StateTransitionLike, StateTransitionType,
 };
 use crate::util::json_value::JsonValueExt;
 use crate::util::string_encoding::Encoding;
-use crate::{InvalidVectorSizeError, ProtocolError, SerdeParsingError};
-use serde::de::Error as DeError;
-use serde::ser::Error as SerError;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value as JsonValue;
-use std::convert::{TryFrom, TryInto};
+use crate::{InvalidVectorSizeError, NonConsensusError, ProtocolError, SerdeParsingError};
 
 mod property_names {
-    pub const PUBLIC_KEYS: &str = "publicKeys";
     pub const ASSET_LOCK_PROOF: &str = "assetLockProof";
     pub const SIGNATURE: &str = "signature";
     pub const PROTOCOL_VERSION: &str = "protocolVersion";
@@ -26,7 +26,6 @@ mod property_names {
 #[derive(Debug, Clone)]
 pub struct IdentityTopUpTransition {
     // Own ST fields
-    pub public_keys: Vec<IdentityPublicKey>,
     pub asset_lock_proof: AssetLockProof,
     pub identity_id: Identifier,
     // Generic identity ST fields
@@ -39,7 +38,6 @@ impl Default for IdentityTopUpTransition {
     fn default() -> Self {
         Self {
             transition_type: StateTransitionType::IdentityTopUp,
-            public_keys: Default::default(),
             asset_lock_proof: Default::default(),
             identity_id: Default::default(),
             protocol_version: Default::default(),
@@ -80,26 +78,12 @@ impl<'de> Deserialize<'de> for IdentityTopUpTransition {
 
 /// Main state transition functionality implementation
 impl IdentityTopUpTransition {
-    pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, SerdeParsingError> {
-        // TODO
-        //super(raw_state_transition);
-
+    pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, NonConsensusError> {
         let mut state_transition = Self::default();
-        state_transition.transition_type = StateTransitionType::IdentityTopUp;
 
         let transition_map = raw_state_transition.as_object().ok_or_else(|| {
             SerdeParsingError::new("Expected raw identity transition to be a map")
         })?;
-        if let Some(keys_value) = transition_map.get(property_names::PUBLIC_KEYS) {
-            let keys_value_arr = keys_value
-                .as_array()
-                .ok_or_else(|| SerdeParsingError::new("Expected public keys to be an array"))?;
-            let keys = keys_value_arr
-                .iter()
-                .map(|val| serde_json::from_value(val.clone()))
-                .collect::<Result<Vec<IdentityPublicKey>, serde_json::Error>>()?;
-            state_transition = state_transition.set_public_keys(keys);
-        }
 
         if let Some(proof) = transition_map.get(property_names::ASSET_LOCK_PROOF) {
             state_transition.set_asset_lock_proof(AssetLockProof::try_from(proof)?)?;
@@ -117,7 +101,7 @@ impl IdentityTopUpTransition {
     pub fn set_asset_lock_proof(
         &mut self,
         asset_lock_proof: AssetLockProof,
-    ) -> Result<(), InvalidVectorSizeError> {
+    ) -> Result<(), NonConsensusError> {
         self.identity_id = asset_lock_proof.create_identifier()?;
 
         self.asset_lock_proof = asset_lock_proof;
@@ -128,25 +112,6 @@ impl IdentityTopUpTransition {
     /// Get asset lock proof
     pub fn get_asset_lock_proof(&self) -> &AssetLockProof {
         &self.asset_lock_proof
-    }
-
-    /// Get identity public keys
-    pub fn get_public_keys(&self) -> &[IdentityPublicKey] {
-        &self.public_keys
-    }
-
-    /// Replaces existing set of public keys with a new one
-    pub fn set_public_keys(mut self, public_keys: Vec<IdentityPublicKey>) -> Self {
-        self.public_keys = public_keys;
-
-        self
-    }
-
-    /// Adds public keys to the existing public keys array
-    pub fn add_public_keys(mut self, public_keys: &mut Vec<IdentityPublicKey>) -> Self {
-        self.public_keys.append(public_keys);
-
-        self
     }
 
     /// Returns identity id
@@ -186,17 +151,6 @@ impl IdentityTopUpTransition {
                 JsonValue::String(self.identity_id.to_string(Encoding::Base58)),
             )?;
         }
-
-        let pk_values = self
-            .public_keys
-            .iter()
-            .map(|pk| pk.to_raw_json_object())
-            .collect::<Result<Vec<JsonValue>, SerdeParsingError>>()?;
-
-        json_map.insert(
-            property_names::PUBLIC_KEYS.to_string(),
-            JsonValue::Array(pk_values),
-        )?;
 
         json_map.insert(
             property_names::ASSET_LOCK_PROOF.to_string(),
@@ -239,38 +193,27 @@ impl StateTransitionConvert for IdentityTopUpTransition {
             self.asset_lock_proof.as_ref().try_into()?,
         )?;
 
-        let public_keys = self
-            .public_keys
-            .iter()
-            .map(|pk| pk.to_json())
-            .collect::<Result<Vec<JsonValue>, SerdeParsingError>>()?;
-
-        json.insert(
-            property_names::PUBLIC_KEYS.to_string(),
-            serde_json::Value::Array(public_keys),
-        )?;
-
         Ok(json)
     }
 }
 
 impl StateTransitionLike for IdentityTopUpTransition {
     fn get_protocol_version(&self) -> u32 {
-        unimplemented!()
+        self.protocol_version
     }
     /// returns the type of State Transition
     fn get_type(&self) -> StateTransitionType {
-        unimplemented!()
+        StateTransitionType::IdentityTopUp
     }
     /// returns the signature as a byte-array
     fn get_signature(&self) -> &Vec<u8> {
-        unimplemented!()
+        &self.signature
     }
     /// set a new signature
-    fn set_signature(&mut self, _signature: Vec<u8>) {
-        unimplemented!()
+    fn set_signature(&mut self, signature: Vec<u8>) {
+        self.signature = signature
     }
     fn calculate_fee(&self) -> Result<u64, ProtocolError> {
-        unimplemented!()
+        todo!()
     }
 }

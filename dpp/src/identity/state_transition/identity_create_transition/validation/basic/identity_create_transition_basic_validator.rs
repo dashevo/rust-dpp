@@ -76,7 +76,6 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
             return Ok(result);
         }
 
-        println!("2");
         let public_keys = get_raw_public_keys(identity_transition_map)?;
 
         result.merge(self.public_keys_validator.validate_keys(public_keys)?);
@@ -90,7 +89,6 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
             return Ok(result);
         }
 
-        println!("3");
         result.merge(
             self.asset_lock_proof_validator
                 .validate_structure(
@@ -104,8 +102,6 @@ impl<T: TPublicKeysValidator, S: TPublicKeysValidator, SR: StateRepositoryLike>
                 )
                 .await?,
         );
-
-        println!("4");
 
         Ok(result)
     }

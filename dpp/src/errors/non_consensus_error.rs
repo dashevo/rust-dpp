@@ -16,6 +16,8 @@ pub enum NonConsensusError {
     InvalidVectorSizeError(InvalidVectorSizeError),
     #[error("{0}")]
     StateRepositoryFetchError(String),
+    #[error("{0}")]
+    IdentifierCreateError(String),
 }
 
 impl From<SerdeParsingError> for NonConsensusError {

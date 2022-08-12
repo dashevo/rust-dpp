@@ -1,12 +1,11 @@
+use std::sync::Arc;
+
+use anyhow::{anyhow, Result};
+
 use crate::identity::state_transition::asset_lock_proof::AssetLockTransactionOutputFetcher;
 use crate::identity::state_transition::identity_topup_transition::IdentityTopUpTransition;
 use crate::identity::{convert_satoshi_to_credits, Identity};
-use crate::ProtocolError;
-use anyhow::{anyhow, Result};
-use std::sync::Arc;
-
 use crate::state_repository::StateRepositoryLike;
-use crate::state_transition::StateTransitionLike;
 
 pub struct ApplyIdentityTopUpTransition<SR>
 where
@@ -29,39 +28,31 @@ where
             .fetch(state_transition.get_asset_lock_proof())
             .await?;
 
-        let credits_amount = convert_satoshi_to_credits(output.value as i64);
-
-        let identity = Identity {
-            protocol_version: state_transition.get_protocol_version(),
-            id: state_transition.get_identity_id().clone(),
-            public_keys: state_transition.get_public_keys().to_vec(),
-            balance: credits_amount,
-            revision: 0,
-            asset_lock_proof: None,
-            metadata: None,
-        };
-
-        self.state_repository.create_identity(&identity).await?;
-
-        let public_key_hashes = identity
-            .get_public_keys()
-            .iter()
-            .map(|public_key| public_key.hash())
-            .collect::<Result<Vec<Vec<u8>>, ProtocolError>>()?;
-
-        self.state_repository
-            .store_identity_public_key_hashes(identity.get_id(), public_key_hashes)
-            .await?;
+        let credits_amount = convert_satoshi_to_credits(output.value);
 
         let out_point = state_transition
             .get_asset_lock_proof()
             .out_point()
             .ok_or_else(|| anyhow!("Out point is missing from asset lock proof"))?;
+        let identity_id = state_transition.get_identity_id();
 
-        self.state_repository
-            .mark_asset_lock_transaction_out_point_as_used(&out_point)
+        let maybe_identity = self
+            .state_repository
+            .fetch_identity::<Identity>(identity_id)
             .await?;
 
-        Ok(())
+        if let Some(identity) = maybe_identity {
+            let identity = identity.increase_balance(credits_amount);
+
+            self.state_repository.update_identity(&identity).await?;
+
+            self.state_repository
+                .mark_asset_lock_transaction_out_point_as_used(&out_point)
+                .await?;
+
+            Ok(())
+        } else {
+            Err(anyhow!("Identity not found"))
+        }
     }
 }

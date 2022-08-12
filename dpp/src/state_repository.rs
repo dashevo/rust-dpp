@@ -60,9 +60,6 @@ pub trait StateRepositoryLike: Send + Sync {
         public_key_hashes: Vec<Vec<u8>>,
     ) -> AnyResult<()>;
 
-    /// Update Identity
-    async fn update_identity(&self, identity: Identity) -> AnyResult<()>;
-
     /// Fetch Identity Ids by Public Key hashes
     /// By default, the method should return data as bytes (`Vec<u8>`), but the deserialization to [`Identity`] should be also possible
     async fn fetch_identity_by_public_key_hashes<T>(
@@ -99,5 +96,9 @@ pub trait StateRepositoryLike: Send + Sync {
     where
         T: for<'de> serde::de::Deserialize<'de> + 'static;
 
+    /// Create an identity
     async fn create_identity(&self, identity: &Identity) -> AnyResult<()>;
+
+    /// Update an identity
+    async fn update_identity(&self, identity: &Identity) -> AnyResult<()>;
 }

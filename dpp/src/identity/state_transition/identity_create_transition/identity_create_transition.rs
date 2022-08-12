@@ -1,3 +1,10 @@
+use std::convert::{TryFrom, TryInto};
+
+use serde::de::Error as DeError;
+use serde::ser::Error as SerError;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Value as JsonValue;
+
 use crate::identity::state_transition::asset_lock_proof::AssetLockProof;
 use crate::identity::IdentityPublicKey;
 use crate::prelude::Identifier;
@@ -6,12 +13,7 @@ use crate::state_transition::{
 };
 use crate::util::json_value::JsonValueExt;
 use crate::util::string_encoding::Encoding;
-use crate::{InvalidVectorSizeError, ProtocolError, SerdeParsingError};
-use serde::de::Error as DeError;
-use serde::ser::Error as SerError;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value as JsonValue;
-use std::convert::{TryFrom, TryInto};
+use crate::{InvalidVectorSizeError, NonConsensusError, ProtocolError, SerdeParsingError};
 
 mod property_names {
     pub const PUBLIC_KEYS: &str = "publicKeys";
@@ -22,19 +24,10 @@ mod property_names {
     pub const IDENTITY_ID: &str = "identityId";
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct SerializationOptions {
     pub skip_signature: bool,
     pub skip_identifiers_conversion: bool,
-}
-
-impl Default for SerializationOptions {
-    fn default() -> Self {
-        Self {
-            skip_identifiers_conversion: false,
-            skip_signature: false,
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -94,12 +87,8 @@ impl<'de> Deserialize<'de> for IdentityCreateTransition {
 
 /// Main state transition functionality implementation
 impl IdentityCreateTransition {
-    pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, SerdeParsingError> {
-        // TODO
-        //super(raw_state_transition);
-
+    pub fn new(raw_state_transition: serde_json::Value) -> Result<Self, NonConsensusError> {
         let mut state_transition = Self::default();
-        state_transition.transition_type = StateTransitionType::IdentityCreate;
 
         let transition_map = raw_state_transition.as_object().ok_or_else(|| {
             SerdeParsingError::new("Expected raw identity transition to be a map")
@@ -131,7 +120,7 @@ impl IdentityCreateTransition {
     pub fn set_asset_lock_proof(
         &mut self,
         asset_lock_proof: AssetLockProof,
-    ) -> Result<(), InvalidVectorSizeError> {
+    ) -> Result<(), NonConsensusError> {
         self.identity_id = asset_lock_proof.create_identifier()?;
 
         self.asset_lock_proof = asset_lock_proof;
@@ -270,22 +259,22 @@ impl StateTransitionConvert for IdentityCreateTransition {
 
 impl StateTransitionLike for IdentityCreateTransition {
     fn get_protocol_version(&self) -> u32 {
-        unimplemented!()
+        self.protocol_version
     }
     /// returns the type of State Transition
     fn get_type(&self) -> StateTransitionType {
-        unimplemented!()
+        StateTransitionType::IdentityTopUp
     }
     /// returns the signature as a byte-array
     fn get_signature(&self) -> &Vec<u8> {
-        unimplemented!()
+        &self.signature
     }
     /// set a new signature
-    fn set_signature(&mut self, _signature: Vec<u8>) {
-        unimplemented!()
+    fn set_signature(&mut self, signature: Vec<u8>) {
+        self.signature = signature
     }
     fn calculate_fee(&self) -> Result<u64, ProtocolError> {
-        unimplemented!()
+        todo!()
     }
 }
 

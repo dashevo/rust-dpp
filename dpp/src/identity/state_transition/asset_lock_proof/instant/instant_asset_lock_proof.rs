@@ -10,7 +10,7 @@ use crate::identifier::Identifier;
 use crate::util::cbor_value::CborCanonicalMap;
 use crate::util::hash::hash;
 use crate::util::vec::vec_to_array;
-use crate::{InvalidVectorSizeError, ProtocolError};
+use crate::{InvalidVectorSizeError, NonConsensusError, ProtocolError};
 
 #[derive(Clone, Debug)]
 pub struct InstantAssetLockProof {
@@ -108,12 +108,15 @@ impl InstantAssetLockProof {
         self.transaction.output.get(self.output_index())
     }
 
-    pub fn create_identifier(&self) -> Result<Identifier, InvalidVectorSizeError> {
-        // TODO: remove unwrap
+    pub fn create_identifier(&self) -> Result<Identifier, NonConsensusError> {
         let buffer = hash(
             self.transaction()
                 .out_point_buffer(self.output_index())
-                .unwrap(),
+                .ok_or_else(|| {
+                    NonConsensusError::IdentifierCreateError(String::from(
+                        "No output at a given index",
+                    ))
+                })?,
         );
         Ok(Identifier::new(vec_to_array(&buffer)?))
     }

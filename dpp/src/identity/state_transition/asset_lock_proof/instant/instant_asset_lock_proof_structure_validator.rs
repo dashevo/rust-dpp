@@ -1,8 +1,9 @@
+use std::sync::Arc;
+
 use dashcore::consensus;
 use dashcore::InstantLock;
 use lazy_static::lazy_static;
 use serde_json::Value;
-use std::sync::Arc;
 
 use crate::consensus::basic::identity::{
     IdentityAssetLockProofLockedTransactionMismatchError, InvalidInstantAssetLockProofError,
@@ -29,7 +30,7 @@ where
 {
     json_schema_validator: JsonSchemaValidator,
     state_repository: Arc<SR>,
-    asset_lock_transaction_validator: AssetLockTransactionValidator<SR>,
+    asset_lock_transaction_validator: Arc<AssetLockTransactionValidator<SR>>,
 }
 
 impl<SR> InstantAssetLockProofStructureValidator<SR>
@@ -38,7 +39,7 @@ where
 {
     pub fn new(
         state_repository: Arc<SR>,
-        asset_lock_transaction_validator: AssetLockTransactionValidator<SR>,
+        asset_lock_transaction_validator: Arc<AssetLockTransactionValidator<SR>>,
     ) -> Result<Self, DashPlatformProtocolInitError> {
         let json_schema_validator =
             JsonSchemaValidator::new(INSTANT_ASSET_LOCK_PROOF_SCHEMA.clone())?;
@@ -54,11 +55,6 @@ where
         &self,
         raw_asset_lock_proof: &Value,
     ) -> Result<ValidationResult<PublicKeyHash>, NonConsensusError> {
-        // let result = jsonSchemaValidator.validate(
-        // instantAssetLockProofSchema,
-        // convertBuffersToArrays(raw_asset_lock_proof),
-        // );
-        //
         let mut result = ValidationResult::default();
 
         result.merge(self.json_schema_validator.validate(raw_asset_lock_proof)?);
@@ -67,9 +63,6 @@ where
             return Ok(result);
         }
 
-        // let asset_lock_proof: InstantAssetLockProof = serde_json::from_value(raw_asset_lock_proof.clone())?;
-
-        // Is lock should go there
         let raw_is_lock: Vec<u8> = raw_asset_lock_proof
             .as_object()
             .ok_or_else(|| SerdeParsingError::new("Expected raw asset lock proof to be an object"))?
@@ -80,47 +73,23 @@ where
             .as_array()
             .ok_or_else(|| SerdeParsingError::new("Expected 'instantLock' to be an array"))?
             .iter()
-            // TODO: remove unwrap
-            .map(|val| val.as_u64().unwrap() as u8)
+            .map(|val| {
+                val.as_u64()
+                    .ok_or_else(|| SerdeParsingError::new("Expected 'instantLock' to be an array"))
+            })
+            .collect::<Result<Vec<u64>, SerdeParsingError>>()?
+            .into_iter()
+            .map(|n| n as u8)
             .collect();
 
-        let instant_lock_validation_result =
-            match consensus::deserialize::<InstantLock>(&raw_is_lock) {
-                Ok(instant_lock) => {
-                    let mut res = ValidationResult::default();
-                    res.set_data(instant_lock);
-                    res
-                }
-                Err(error) => {
-                    let mut res = ValidationResult::default();
-                    let err = InvalidInstantAssetLockProofError::new(error.to_string());
-                    res.add_error(err);
-                    res
-                }
-            };
-
-        let instant_lock = instant_lock_validation_result.data().unwrap().clone();
-
-        result.merge(instant_lock_validation_result);
-
-        if !result.is_valid() {
-            return Ok(result);
-        }
-
-        // let instantLock;
-        // try {
-        // instantLock = InstantLock.fromBuffer(raw_asset_lock_proof.instantLock);
-        // } catch (e) {
-        // let error = new InvalidInstantAssetLockProofError(e.message);
-        //
-        // error.setValidationError(e);
-        //
-        // result.addError(error);
-        //
-        // return result;
-        // }
-
-        println!("Mda");
+        let instant_lock = match consensus::deserialize::<InstantLock>(&raw_is_lock) {
+            Ok(instant_lock) => instant_lock,
+            Err(error) => {
+                let err = InvalidInstantAssetLockProofError::new(error.to_string());
+                result.add_error(err);
+                return Ok(result);
+            }
+        };
 
         let is_signature_verified = self
             .state_repository
@@ -128,18 +97,10 @@ where
             .await
             .map_err(|err| NonConsensusError::StateRepositoryFetchError(err.to_string()))?;
 
-        println!("Mde");
-
         if !is_signature_verified {
             result.add_error(InvalidInstantAssetLockProofSignatureError::new());
             return Ok(result);
         }
-
-        // if (!await stateRepository.verifyInstantLock(instantLock)) {
-        // result.addError(new InvalidInstantAssetLockProofSignatureError());
-        //
-        // return result;
-        // }
 
         let tx_json_uint_array = raw_asset_lock_proof
             .get_bytes("transaction")
@@ -155,43 +116,23 @@ where
             .as_u64()
             .ok_or_else(|| SerdeParsingError::new("Expect outputIndex to be a number"))?;
 
-        // TODO: get transaction bytes and pass them as the first argument
         let validate_asset_lock_transaction_result = self
             .asset_lock_transaction_validator
             .validate(&tx_json_uint_array, output_index as usize)
             .await?;
 
-        // TODO: remove unwrap
-        let validation_result_data = validate_asset_lock_transaction_result
-            .data()
-            .unwrap()
-            .clone();
-        result.merge(validate_asset_lock_transaction_result);
-
-        if !result.is_valid() {
+        let validation_result_data = if validate_asset_lock_transaction_result.is_valid() {
+            validate_asset_lock_transaction_result
+                .data()
+                .expect("This can not happen due to the logic above")
+                .clone()
+        } else {
+            result.merge(validate_asset_lock_transaction_result);
             return Ok(result);
-        }
-
-        // let validate_asset_lock_transaction_result = await validateAssetLockTransaction(
-        // raw_asset_lock_proof.transaction,
-        // raw_asset_lock_proof.outputIndex,
-        // );
-        //
-        // result.merge(validate_asset_lock_transaction_result);
-        //
-        // if (!result.isValid()) {
-        // return result;
-        // }
+        };
 
         let public_key_hash = validation_result_data.public_key_hash;
         let transaction = &validation_result_data.transaction;
-
-        // /**
-        //  * @typedef {Transaction} transaction
-        //  * @typedef {Buffer} publicKeyHash
-        //  */
-        // let { publicKeyHash, transaction } = validate_asset_lock_transaction_result.getData();
-        //
 
         if instant_lock.txid != transaction.txid() {
             result.add_error(IdentityAssetLockProofLockedTransactionMismatchError::new(
@@ -202,23 +143,8 @@ where
             return Ok(result);
         }
 
-        // if (instantLock.txid !== transaction.id) {
-        // result.addError(
-        // new IdentityAssetLockProofLockedTransactionMismatchError(
-        // Buffer.from(instantLock.txid, 'hex'),
-        // Buffer.from(transaction.id, 'hex'),
-        // ),
-        // );
-        //
-        // return result;
-        // }
-
         result.set_data(public_key_hash);
 
         Ok(result)
-
-        // result.setData(publicKeyHash);
-        //
-        // return result;
     }
 }

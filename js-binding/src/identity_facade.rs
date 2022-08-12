@@ -1,5 +1,6 @@
-use js_sys::JsString;
 use std::sync::Arc;
+
+use js_sys::JsString;
 use wasm_bindgen::prelude::*;
 
 use dpp::identity::validation::PublicKeysValidator;

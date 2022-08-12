@@ -1,7 +1,9 @@
+use std::convert::TryFrom;
+
+use dashcore::Transaction;
 use serde::de::Error as DeError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value as JsonValue;
-use std::convert::TryFrom;
+use serde_json::{Error, Value as JsonValue};
 
 pub use asset_lock_proof_validator::*;
 pub use asset_lock_transaction_output_fetcher::*;
@@ -12,14 +14,14 @@ pub use instant::*;
 use crate::identity::state_transition::asset_lock_proof::chain::ChainAssetLockProof;
 use crate::prelude::Identifier;
 use crate::util::json_value::JsonValueExt;
-use crate::{InvalidVectorSizeError, SerdeParsingError};
+use crate::{InvalidVectorSizeError, NonConsensusError, SerdeParsingError};
 
 mod asset_lock_proof_validator;
 mod asset_lock_public_key_hash_fetcher;
 mod asset_lock_transaction_output_fetcher;
 mod asset_lock_transaction_validator;
 pub mod chain;
-mod instant;
+pub mod instant;
 
 #[derive(Clone, Debug)]
 pub enum AssetLockProof {
@@ -35,7 +37,7 @@ impl Default for AssetLockProof {
 
 impl AsRef<AssetLockProof> for AssetLockProof {
     fn as_ref(&self) -> &AssetLockProof {
-        &self
+        self
     }
 }
 
@@ -66,40 +68,14 @@ impl<'de> Deserialize<'de> for AssetLockProof {
 
         match proof_type {
             AssetLockProofType::Instant => Ok(Self::Instant(
-                serde_json::from_value(value.clone())
-                    .map_err(|e| D::Error::custom(e.to_string()))?,
+                serde_json::from_value(value).map_err(|e| D::Error::custom(e.to_string()))?,
             )),
             AssetLockProofType::Chain => Ok(Self::Chain(
-                serde_json::from_value(value.clone())
-                    .map_err(|e| D::Error::custom(e.to_string()))?,
+                serde_json::from_value(value).map_err(|e| D::Error::custom(e.to_string()))?,
             )),
         }
     }
 }
-
-// impl Serialize for IdentityCreateTransition {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//         where
-//             S: Serializer,
-//     {
-//         let raw = self
-//             .to_json_object(Default::default())
-//             .map_err(|e| S::Error::custom(e.to_string()))?;
-//
-//         raw.serialize(serializer)
-//     }
-// }
-//
-// impl<'de> Deserialize<'de> for IdentityCreateTransition {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//         where
-//             D: Deserializer<'de>,
-//     {
-//         let value = serde_json::Value::deserialize(deserializer)?;
-//
-//         Self::new(value).map_err(|e| D::Error::custom(e.to_string()))
-//     }
-// }
 
 pub enum AssetLockProofType {
     Instant = 0,
@@ -134,7 +110,7 @@ impl AssetLockProof {
         }
     }
 
-    pub fn create_identifier(&self) -> Result<Identifier, InvalidVectorSizeError> {
+    pub fn create_identifier(&self) -> Result<Identifier, NonConsensusError> {
         match self {
             AssetLockProof::Instant(instant_proof) => instant_proof.create_identifier(),
             AssetLockProof::Chain(chain_proof) => {
@@ -150,13 +126,23 @@ impl AssetLockProof {
             AssetLockProof::Chain(proof) => Some(*proof.out_point()),
         }
     }
+
+    pub fn transaction(&self) -> Option<&Transaction> {
+        match self {
+            AssetLockProof::Instant(is_lock) => Some(is_lock.transaction()),
+            AssetLockProof::Chain(_chain_lock) => None,
+        }
+    }
+
+    pub fn to_raw_object(&self) -> Result<JsonValue, Error> {
+        serde_json::to_value(&self)
+    }
 }
 
 impl TryFrom<&JsonValue> for AssetLockProof {
     type Error = SerdeParsingError;
 
     fn try_from(value: &JsonValue) -> Result<Self, Self::Error> {
-        // let proof_map = value.as_object().ok_or_else(|| SerdeParsingError::new("Expected asset lock proof to be an object"))?;
         let proof_type_int = value
             .get_u64("type")
             .map_err(|e| SerdeParsingError::new(e.to_string()))?;

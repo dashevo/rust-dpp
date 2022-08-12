@@ -1,6 +1,7 @@
+use std::sync::Arc;
+
 use dashcore::consensus;
 use dashcore::{OutPoint, Transaction};
-use std::sync::Arc;
 
 use crate::consensus::basic::identity::{
     IdentityAssetLockTransactionOutPointAlreadyExistsError,
@@ -99,7 +100,7 @@ where
                     }
 
                     result.set_data(AssetLockTransactionResultData {
-                        public_key_hash: vec_to_array(&output.script_pubkey.as_bytes()[1..21])?,
+                        public_key_hash: vec_to_array(&output.script_pubkey.as_bytes()[2..22])?,
                         transaction,
                     });
 
@@ -108,7 +109,7 @@ where
                     result.add_error(IdentityAssetLockTransactionOutputNotFoundError::new(
                         output_index,
                     ));
-                    return Ok(result);
+                    Ok(result)
                 }
             }
             Err(err) => {
@@ -116,7 +117,7 @@ where
                 error.set_validation_error(err);
 
                 result.add_error(error);
-                return Ok(result);
+                Ok(result)
             }
         }
     }
