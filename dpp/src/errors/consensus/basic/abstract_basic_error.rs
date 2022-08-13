@@ -94,6 +94,9 @@ pub enum BasicError {
         document_type: String,
         index_name: String,
     },
+
+    #[error("Identity {identity_id} not found")]
+    IdentityNotFoundError { identity_id: Identifier },
 }
 
 impl From<IndexError> for BasicError {
